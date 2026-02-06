@@ -180,12 +180,25 @@
       background: radial-gradient(circle at top, rgba(255, 201, 74, 0.18), rgba(7, 8, 20, 0.95));
     }
 
+    .pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--cyan);
+      box-shadow: 0 0 10px rgba(55, 242, 255, 0.9);
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 16px;
+    }
+
     @media (max-width: 880px) {
       main {
         grid-template-columns: minmax(0, 1fr);
       }
-
-      .app {
+.app {
         padding: 16px 12px 22px;
         border-radius: 22px;
       }
@@ -716,7 +729,7 @@ textarea {
 
   <script>
     function clearInput() {
-      document.getElementById("messageInput").value = "";
+document.getElementById("messageInput").value = "";
       // Reset panels
       setRisk("SAFE", "Waiting for input. 請貼上訊息後按「分析」。");
       document.getElementById("actionList").innerHTML =
@@ -779,7 +792,8 @@ textarea {
         moneyTransfer: /(匯款|轉帳|匯入|remit|wire|指定帳戶|安全帳戶)/i.test(text),
         reward: /(中獎|回饋|折扣|贈品|返現|reward|bonus)/i.test(text)
       };
-const scoreDanger = Object.values(patterns).filter(Boolean).length -
+
+      const scoreDanger = Object.values(patterns).filter(Boolean).length -
         (patterns.reward ? 1 : 0);
 
       let risk = "SAFE";
@@ -925,18 +939,3 @@ document.getElementById("scbkrStatus").textContent =
   </script>
 </body>
 </html>
-
-    .pill-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 999px;
-      background: var(--cyan);
-      box-shadow: 0 0 10px rgba(55, 242, 255, 0.9);
-    }
-
-    main {
-      display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-      gap: 16px;
-    }
-
