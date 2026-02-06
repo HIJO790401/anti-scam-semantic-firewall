@@ -2,940 +2,957 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>AI Semantic Governance Engine｜反詐騙語意防火牆 Demo</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Semantic Governance Engine – Anti-Scam Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     :root {
-      --bg: #050712;
-      --bg-alt: #0b0f1c;
-      --card: #0f1424;
-      --card-soft: #131a2b;
-      --border: #222a40;
-      --accent: #ffc94a;
-      --accent-soft: rgba(255, 201, 74, 0.18);
-      --cyan: #37f2ff;
-      --cyan-soft: rgba(55, 242, 255, 0.18);
-      --danger: #ff4b81;
-      --danger-soft: rgba(255, 75, 129, 0.18);
-      --text-main: #f7f7ff;
-      --text-sub: #a7b0d5;
-      --radius-xl: 22px;
-      --radius-lg: 18px;
-      --shadow-soft: 0 24px 60px rgba(0, 0, 0, 0.8);
-      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
+      --bg: #050814;
+      --panel: #0b1020;
+      --panel-soft: #101628;
+      --accent: #f6c453;
+      --accent-soft: #1f2333;
+      --text-main: #f5f5ff;
+      --text-sub: #9fa8c6;
+      --danger: #ff4b6a;
+      --warn: #ffb347;
+      --safe: #39d98a;
+      --border: #232a3d;
+      --glow-soft: 0 0 40px rgba(255, 215, 128, 0.3);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-pill: 999px;
     }
 
     * {
       box-sizing: border-box;
+    }
+
+    body {
       margin: 0;
-      padding: 0;
-    }
-
-    html,
-    body {
-      height: 100%;
-      background: radial-gradient(circle at top, #192040 0, #050712 55%);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Noto Sans TC",
+        "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #1c2040 0, #050814 45%, #02030a 100%);
       color: var(--text-main);
-      font-family: var(--font-sans);
-      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
     }
 
-    body {
-      display: flex;
-      justify-content: center;
-      padding: 16px;
+    .page {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 32px 16px 64px;
     }
 
-    .app {
-      width: 100%;
-      max-width: 1160px;
-      background: radial-gradient(circle at top left, #252b52 0, #050712 60%);
-      border-radius: 28px;
-      border: 1px solid rgba(123, 146, 255, 0.4);
-      box-shadow: var(--shadow-soft);
-      padding: 20px 18px 28px;
+    @media (min-width: 768px) {
+      .page {
+        padding: 40px 24px 80px;
+      }
+    }
+
+    .hero {
+      border-radius: var(--radius-xl);
+      padding: 24px 20px 24px;
+      background:
+        radial-gradient(circle at top left, rgba(246, 196, 83, 0.16), transparent 60%),
+        radial-gradient(circle at bottom right, rgba(64, 160, 255, 0.16), transparent 65%),
+        linear-gradient(135deg, rgba(10, 15, 40, 0.98), rgba(6, 10, 30, 0.98));
+      border: 1px solid rgba(143, 167, 255, 0.24);
+      box-shadow: var(--glow-soft);
       position: relative;
       overflow: hidden;
     }
 
-    .app::before {
+    .hero::before {
       content: "";
       position: absolute;
-      inset: -120px;
-      background:
-        radial-gradient(circle at 10% -10%, rgba(255, 201, 74, 0.08) 0, transparent 55%),
-        radial-gradient(circle at 120% 0, rgba(55, 242, 255, 0.12) 0, transparent 60%);
+      inset: -1px;
+      border-radius: inherit;
+      border: 1px solid rgba(246, 196, 83, 0.16);
+      opacity: 0.8;
       pointer-events: none;
-      opacity: 0.9;
     }
 
-    .app-inner {
-      position: relative;
-      z-index: 1;
-    }
-
-    header {
-      border-radius: 24px;
-      padding: 18px 18px 14px;
-      background: linear-gradient(145deg, #151a2c, #090c16);
-      border: 1px solid rgba(175, 194, 255, 0.35);
-      box-shadow: 0 16px 45px rgba(3, 6, 20, 0.95);
-      margin-bottom: 18px;
-    }
-.badge-row {
+    .hero-top-row {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
     }
 
-    .badge {
+    .pill {
+      padding: 4px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: 1px solid rgba(255, 255, 255, 0.12);
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 11px;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      background: radial-gradient(circle at top left, #ffc94a 0, #b26b00 60%, #3e2600 100%);
-      color: #120b03;
-      font-weight: 650;
-      box-shadow: 0 0 24px rgba(255, 201, 74, 0.48);
+      gap: 6px;
+      background: rgba(11, 16, 40, 0.85);
+      color: var(--text-sub);
       white-space: nowrap;
     }
 
-    .badge span {
-      opacity: 0.9;
+    .pill-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 15px rgba(246, 196, 83, 0.7);
     }
 
-    .badge.badge-outline {
-      background: transparent;
+    .pill-secondary {
+      border-color: rgba(102, 153, 255, 0.4);
+      color: #c3d5ff;
+      background: radial-gradient(circle at top left, rgba(102, 153, 255, 0.25), rgba(11, 16, 40, 0.9));
+    }
+
+    .hero-title {
+      font-size: 28px;
+      line-height: 1.18;
+      margin: 0 0 8px;
+    }
+
+    @media (min-width: 768px) {
+      .hero-title {
+        font-size: 32px;
+      }
+    }
+
+    .hero-sub {
+      font-size: 21px;
+      font-weight: 600;
+      margin: 0 0 14px;
+    }
+
+    .hero-desc {
+      font-size: 14px;
       color: var(--text-sub);
-      border: 1px solid rgba(187, 200, 255, 0.52);
-      box-shadow: none;
+      max-width: 640px;
+      line-height: 1.6;
     }
 
-    .title-main {
-      font-size: 24px;
-      font-weight: 750;
-      letter-spacing: 0.04em;
-      margin-bottom: 4px;
-      color: #ffecc0;
-    }
-
-    .title-sub {
-      font-size: 19px;
-      font-weight: 650;
-      margin-bottom: 8px;
-    }
-
-    .subline {
-      font-size: 13px;
-      color: var(--text-sub);
-      line-height: 1.5;
-      margin-bottom: 12px;
-    }
-
-    .meta-row {
+    .hero-meta {
       display: flex;
       flex-wrap: wrap;
-      gap: 14px;
-      align-items: center;
-      font-size: 12px;
-    }
-
-    .meta-row span {
+      gap: 10px 20px;
+      margin-top: 18px;
+      font-size: 13px;
       color: var(--text-sub);
     }
 
-    .meta-row strong {
-      color: #ffffff;
+    .hero-meta strong {
+      color: var(--text-main);
       font-weight: 600;
     }
 
-    .pill-row {
-      margin-top: 12px;
+    .hero-actions {
+      margin-top: 18px;
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
     }
 
-    .pill-btn {
-      border-radius: 999px;
-      padding: 7px 14px;
-      border: 1px solid rgba(153, 178, 255, 0.65);
-      background: radial-gradient(circle at top, rgba(55, 242, 255, 0.12), rgba(6, 10, 32, 0.96));
-      font-size: 12px;
-      color: var(--text-main);
+    .btn-chip {
+      border-radius: var(--radius-pill);
+      padding: 8px 16px;
+      font-size: 13px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
       display: inline-flex;
-      gap: 8px;
       align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      background: rgba(7, 10, 28, 0.9);
+      color: var(--text-main);
+      text-decoration: none;
     }
 
-    .pill-btn.secondary {
-      border-color: rgba(255, 201, 74, 0.85);
-      background: radial-gradient(circle at top, rgba(255, 201, 74, 0.18), rgba(7, 8, 20, 0.95));
+    .btn-chip-primary {
+      border-color: rgba(87, 207, 255, 0.7);
+      background: radial-gradient(circle at top left, rgba(87, 207, 255, 0.35), rgba(7, 10, 28, 0.98));
+      box-shadow: 0 0 18px rgba(87, 207, 255, 0.45);
     }
 
-    .pill-dot {
-      width: 7px;
-      height: 7px;
+    .btn-dot {
+      width: 6px;
+      height: 6px;
       border-radius: 999px;
-      background: var(--cyan);
-      box-shadow: 0 0 10px rgba(55, 242, 255, 0.9);
+      background: #57cfff;
     }
 
-    main {
+    .btn-text-small {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: rgba(255, 255, 255, 0.72);
+    }
+
+    .btn-label {
+      font-weight: 600;
+    }
+
+    .btn-chip span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .layout-main {
+      margin-top: 26px;
       display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-      gap: 16px;
+      gap: 18px;
     }
 
-    @media (max-width: 880px) {
-      main {
-        grid-template-columns: minmax(0, 1fr);
-      }
-.app {
-        padding: 16px 12px 22px;
-        border-radius: 22px;
-      }
-
-      header {
-        padding: 14px 14px 12px;
-        border-radius: 18px;
+    @media (min-width: 960px) {
+      .layout-main {
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+        align-items: flex-start;
       }
     }
 
     .panel {
-      background: radial-gradient(circle at top left, #1a203b 0, #080a15 58%);
+      background: linear-gradient(145deg, rgba(5, 8, 20, 0.97), rgba(9, 13, 30, 0.98));
       border-radius: var(--radius-xl);
-      border: 1px solid rgba(119, 141, 219, 0.65);
-      padding: 14px 15px 15px;
-      margin-bottom: 12px;
-      box-shadow: 0 12px 45px rgba(0, 0, 0, 0.9);
-      position: relative;
-      overflow: hidden;
+      border: 1px solid rgba(113, 136, 210, 0.35);
+      padding: 18px 16px 20px;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.75);
     }
 
-    .panel::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at top right, rgba(55, 242, 255, 0.12), transparent 65%);
-      mix-blend-mode: screen;
-      opacity: 0.55;
-      pointer-events: none;
+    @media (min-width: 768px) {
+      .panel {
+        padding: 20px 20px 22px;
+      }
     }
 
     .panel-header {
-      position: relative;
-      z-index: 1;
       display: flex;
-      justify-content: space-between;
       align-items: baseline;
-      gap: 8px;
-      margin-bottom: 10px;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
     }
 
     .panel-title {
-      font-size: 14px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: #a2b7ff;
-      font-weight: 650;
-    }
-
-    .panel-title span {
-      color: #ffd36b;
+      font-size: 17px;
+      font-weight: 700;
     }
 
     .panel-subtitle {
       font-size: 13px;
       color: var(--text-sub);
+      margin-top: 4px;
     }
 
-    .panel-badge {
+    .panel-tag {
       font-size: 11px;
-      padding: 2px 9px;
-      border-radius: 999px;
-      border: 1px solid rgba(187, 200, 255, 0.6);
-      color: var(--text-sub);
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(160, 190, 255, 0.6);
+      color: #d0e0ff;
+      background: rgba(12, 18, 40, 0.9);
       white-space: nowrap;
     }
 
+    .panel-body {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
     .input-area {
-      position: relative;
-      z-index: 1;
-    }
-textarea {
-      width: 100%;
-      min-height: 170px;
-      resize: vertical;
-      border-radius: 18px;
-      border: 1px solid rgba(153, 182, 255, 0.6);
-      background: radial-gradient(circle at top left, #151a2c 0, #050814 56%);
-      color: var(--text-main);
-      padding: 12px 13px;
-      font-size: 14px;
-      line-height: 1.55;
-      outline: none;
-      box-shadow: inset 0 0 0 1px rgba(9, 16, 40, 0.9);
+      background: radial-gradient(circle at top, rgba(255, 255, 255, 0.03), transparent 60%),
+        linear-gradient(145deg, rgba(12, 18, 40, 0.97), rgba(8, 12, 30, 0.97));
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(129, 150, 220, 0.4);
+      padding: 14px;
     }
 
-    textarea::placeholder {
-      color: rgba(144, 158, 210, 0.82);
+    @media (min-width: 768px) {
+      .input-area {
+        padding: 16px 18px;
+      }
     }
 
-    .input-footer {
-      margin-top: 9px;
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: center;
-      font-size: 11px;
-      color: var(--text-sub);
-    }
-
-    .input-warning {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .input-warning span {
-      color: #ffd36b;
-      font-size: 13px;
-    }
-
-    .btn-row {
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-    }
-
-    .btn {
-      padding: 7px 15px;
-      border-radius: 999px;
-      border: 1px solid rgba(170, 187, 255, 0.78);
-      background: radial-gradient(circle at top, rgba(55, 242, 255, 0.18), rgba(6, 10, 32, 0.98));
-      font-size: 13px;
-      color: var(--text-main);
-      cursor: pointer;
-      display: inline-flex;
-      gap: 6px;
-      align-items: center;
-      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.08s ease;
-    }
-
-    .btn span {
-      font-size: 12px;
-      color: rgba(195, 205, 255, 0.9);
-    }
-
-    .btn-primary {
-      border-color: rgba(255, 201, 74, 0.95);
-      background: radial-gradient(circle at top, #ffd36b, #ff9b2a);
-      color: #1b1203;
-      font-weight: 650;
-      box-shadow: 0 0 22px rgba(255, 201, 74, 0.8);
-    }
-
-    .btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.75);
-    }
-
-    .btn-primary:hover {
-      box-shadow: 0 0 30px rgba(255, 201, 74, 0.95);
-    }
-
-    .risk-chip {
-      padding: 2px 9px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 650;
-      min-width: 70px;
-      text-align: center;
-    }
-
-    .risk-safe {
-      background: rgba(65, 214, 145, 0.14);
-      border: 1px solid rgba(73, 232, 161, 0.9);
-      color: #a5ffcf;
-      box-shadow: 0 0 12px rgba(73, 232, 161, 0.7);
-    }
-
-    .risk-risk {
-      background: rgba(255, 166, 74, 0.2);
-      border: 1px solid rgba(255, 196, 112, 0.9);
-      color: #ffd9a3;
-      box-shadow: 0 0 12px rgba(255, 184, 92, 0.8);
-    }
-
-    .risk-fatal {
-      background: rgba(255, 75, 129, 0.2);
-      border: 1px solid rgba(255, 124, 170, 0.9);
-      color: #ffbed9;
-      box-shadow: 0 0 14px rgba(255, 75, 129, 0.85);
-    }
-
-    .risk-nonclosable {
-      background: radial-gradient(circle at top left, rgba(211, 166, 255, 0.35), rgba(122, 81, 255, 0.4));
-      border: 1px solid rgba(228, 198, 255, 0.95);
-      color: #fff3ff;
-      box-shadow: 0 0 18px rgba(197, 166, 255, 0.9);
-    }
-
-    .risk-body {
-      position: relative;
-      z-index: 1;
+    .help-text {
+      margin: 0 0 10px;
       font-size: 13px;
       color: var(--text-sub);
       line-height: 1.6;
     }
 
-    .risk-body strong {
-      color: #ffffff;
+    textarea {
+      width: 100%;
+      min-height: 170px;
+      resize: vertical;
+      background: rgba(4, 7, 18, 0.95);
+      border-radius: 14px;
+      border: 1px solid rgba(60, 80, 150, 0.7);
+      padding: 10px 11px;
+      color: var(--text-main);
+      font-size: 14px;
+      line-height: 1.5;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(246, 196, 83, 0.3), 0 0 25px rgba(246, 196, 83, 0.35);
+    }
+
+    .example-label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-sub);
+      margin-bottom: 6px;
+    }
+
+    .input-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    .input-footer-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .warning {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #ffb347;
+    }
+
+    .warning-icon {
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 179, 71, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      border-radius: var(--radius-pill);
+      padding: 8px 18px;
+      font-size: 14px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-secondary {
+      background: rgba(9, 14, 35, 0.95);
+      color: var(--text-main);
+      border: 1px solid rgba(146, 168, 230, 0.6);
+    }
+
+    .btn-primary {
+      background: radial-gradient(circle at top, #ffd56a, #f6b739);
+      color: #2b1905;
+      box-shadow: 0 0 22px rgba(246, 196, 83, 0.6);
+    }
+
+    .btn-primary::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: #fffae5;
+      box-shadow: 0 0 18px rgba(255, 255, 255, 0.75);
+    }
+
+    .chips-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      font-size: 11px;
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(8, 11, 26, 0.9);
+      color: var(--text-sub);
+      white-space: nowrap;
+    }
+
+    .chip.badge-safe {
+      border-color: rgba(57, 217, 138, 0.6);
+      color: #a8ffd2;
+      background: rgba(15, 45, 35, 0.95);
+    }
+
+    .chip.badge-risk {
+      border-color: rgba(255, 179, 71, 0.7);
+      color: #ffe6b8;
+      background: rgba(60, 35, 15, 0.95);
+    }
+
+    .chip.badge-fatal {
+      border-color: rgba(255, 75, 106, 0.9);
+      color: #ffd6df;
+      background: rgba(60, 12, 25, 0.96);
+    }
+
+    .chip.badge-idle {
+      border-color: rgba(143, 167, 255, 0.6);
+      color: #ccd4ff;
+      background: rgba(9, 15, 40, 0.96);
+    }
+
+    .risk-panel {
+      margin-top: 16px;
+      border-radius: var(--radius-xl);
+      background: radial-gradient(circle at top, rgba(255, 255, 255, 0.02), transparent 55%),
+        linear-gradient(150deg, rgba(9, 12, 30, 0.98), rgba(6, 8, 22, 0.98));
+      border: 1px solid rgba(122, 145, 215, 0.65);
+      padding: 16px 14px 16px;
+    }
+
+    .risk-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .risk-title {
+      font-size: 15px;
       font-weight: 600;
     }
 
-    .scbkr-grid {
-      position: relative;
-      z-index: 1;
+    .risk-badge {
+      font-size: 12px;
+      padding: 4px 11px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(60, 80, 150, 0.8);
+      color: #a8ffd2;
+      background: rgba(10, 40, 26, 0.95);
+    }
+
+    .risk-body {
+      font-size: 13px;
+      color: var(--text-sub);
+      line-height: 1.6;
+    }
+
+    .grid-2 {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      grid-template-columns: minmax(0, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    @media (min-width: 768px) {
+      .grid-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .mini-panel {
+      border-radius: var(--radius-lg);
+      padding: 10px 11px 11px;
+      background: rgba(9, 13, 32, 0.98);
+      border: 1px solid rgba(71, 96, 175, 0.8);
+    }
+
+    .mini-title {
+      font-size: 13px;
+      margin-bottom: 6px;
+      color: #dbe3ff;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
       gap: 8px;
-      margin-top: 4px;
     }
 
-    .scbkr-card {
-      border-radius: 15px;
-      padding: 7px 9px 8px;
-      background: linear-gradient(145deg, #161b2c, #080910);
-      border: 1px solid rgba(138, 160, 238, 0.8);
-      font-size: 11px;
-      line-height: 1.45;
-    }
-
-    .scbkr-label {
-      font-weight: 650;
-      letter-spacing: 0.09em;
-      font-size: 11px;
-      text-transform: uppercase;
-      color: #c5d3ff;
-      margin-bottom: 2px;
-    }
-
-    .scbkr-label span {
-      color: #7fe5ff;
-    }
-
-    .scbkr-status {
-      font-size: 11px;
-      color: var(--text-sub);
-    }
-
-    .scbkr-status strong {
-      color: #ffffff;
-    }
-
-    .chip-small {
-      display: inline-flex;
-      padding: 1px 6px;
-      border-radius: 999px;
-      font-size: 10px;
-      border: 1px solid rgba(179, 197, 255, 0.7);
-      color: #d3ddff;
-      margin-left: 6px;
-    }
-
-    .chip-small.danger {
-      border-color: rgba(255, 134, 178, 0.95);
-      color: #ffc0dd;
-      background: rgba(255, 75, 129, 0.22);
-    }
-
-    .list {
-      position: relative;
-      z-index: 1;
-      padding-left: 16px;
-      font-size: 13px;
+    .mini-body {
+      font-size: 12px;
       color: var(--text-sub);
       line-height: 1.55;
     }
 
-    .list li + li {
-      margin-top: 4px;
-    }
-
-    .list strong {
-      color: #ffffff;
-    }
-
-    .role-status {
-      position: relative;
-      z-index: 1;
-      font-size: 13px;
-      color: var(--text-sub);
-      line-height: 1.55;
-    }
-
-    .role-status strong {
-      color: #ffffff;
-    }
-
-    .hint-link {
-      display: inline-block;
-      margin-top: 4px;
+    .status-pill {
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
       font-size: 11px;
-      color: #7fe5ff;
-      text-decoration: underline dotted;
-      text-underline-offset: 3px;
+      border: 1px solid rgba(143, 167, 255, 0.7);
+      color: #c2d2ff;
+    }
+
+    .status-idle {
+      background: rgba(8, 12, 35, 0.96);
+    }
+
+    .status-risk {
+      background: rgba(60, 35, 15, 0.96);
+      border-color: rgba(255, 179, 71, 0.75);
+      color: #ffe0b8;
+    }
+
+    .status-fatal {
+      background: rgba(60, 12, 25, 0.96);
+      border-color: rgba(255, 75, 106, 0.95);
+      color: #ffd6df;
+    }
+
+    .status-safe {
+      background: rgba(15, 45, 35, 0.96);
+      border-color: rgba(57, 217, 138, 0.8);
+      color: #a1ffd0;
+    }
+
+    .role-panel {
+      margin-top: 14px;
+      border-radius: var(--radius-lg);
+      padding: 11px 12px 12px;
+      background: rgba(6, 10, 26, 0.98);
+      border: 1px solid rgba(122, 145, 215, 0.7);
+    }
+
+    .role-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .role-title {
+      font-size: 13px;
+      color: #dbe3ff;
+    }
+
+    .toggle-link {
+      font-size: 12px;
+      color: #8fb0ff;
+      text-decoration: underline;
       cursor: pointer;
     }
 
-    .hint-link:hover {
-      color: #b6f3ff;
-    }
-
-    footer {
-      margin-top: 10px;
-      font-size: 11px;
+    .role-body {
+      font-size: 12px;
       color: var(--text-sub);
-      text-align: right;
+      line-height: 1.6;
+      display: none;
+      margin-top: 4px;
     }
 
-    footer a {
-      color: #7fe5ff;
-      text-decoration: none;
+    .role-body.show {
+      display: block;
     }
 
-    footer a:hover {
-      text-decoration: underline;
+    .action-list {
+      margin: 4px 0 0;
+      padding-left: 18px;
+    }
+
+    .action-list li {
+      margin: 3px 0;
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .note {
+      font-size: 12px;
+      color: var(--text-sub);
+      line-height: 1.6;
+    }
+
+    .note strong {
+      color: var(--text-main);
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <div class="app-inner">
-      <header>
-        <div class="badge-row">
-          <div class="badge">
-            <span>HACKATHON DEMO</span>
-          </div>
-          <div class="badge badge-outline">
-            Anti-Scam Semantic Firewall · 2026
-          </div>
+  <div class="page">
+    <header class="hero">
+      <div class="hero-top-row">
+        <div class="pill">
+          <span class="pill-dot"></span>
+          HACKATHON DEMO
         </div>
-        <div class="title-main">AI Semantic Governance Engine</div>
-        <div class="title-sub">語意治理與詐騙偵測 Demo</div>
-        <p class="subline">
-          Paste any suspicious message. The engine will analyze risk, responsibility chain
-          (SCBKR), and suggest safe actions.<br />
-          貼上可能為詐騙或高風險的訊息，系統將標記風險、拆解責任鏈並給出行動建議。
-        </p>
-        <div class="meta-row">
-          <span>Author 作者：<strong>沈耀 888π / Wen-Yao Hsu（Taichung, Taiwan）</strong></span>
-          <span>Focus：<strong>Semantic Firewall · SCBKR · Ex(y)=π 角色治理</strong></span>
+        <div class="pill pill-secondary">
+          ANTI-SCAM SEMANTIC FIREWALL
         </div>
-        <div class="pill-row">
-          <button type="button" class="pill-btn">
-            <span class="pill-dot"></span>
-            Demo for Anti-Scam Track｜反詐騙組 Demo
-          </button>
-          <button type="button" class="pill-btn secondary">
-            <span class="pill-dot"></span>
-            View on GitHub（Placeholder）
-          </button>
-        </div>
-      </header>
+      </div>
 
-      <main>
-        <!-- LEFT COLUMN -->
+      <h1 class="hero-title">AI Semantic Governance Engine</h1>
+      <h2 class="hero-sub">語意治理與詐騙偵測 Demo</h2>
+
+      <p class="hero-desc">
+        Paste any suspicious message. The engine will analyze risk,
+        responsibility chain (SCBKR), and suggest safe actions.
+        貼上可疑訊息，系統將標記風險、拆解責任鏈並給出行動建議。
+      </p>
+
+      <div class="hero-meta">
         <div>
-          <!-- INPUT PANEL (唯一的一個) -->
-          <section class="panel">
-            <div class="panel-header">
-              <div>
-                <div class="panel-title">
-                  INPUT <span>| 可疑訊息輸入</span>
-                </div>
-                <div class="panel-subtitle">
-                  Paste SMS / Line / Email / Web text that may be a scam.<br />
-                  貼上簡訊、Line、電子郵件或網頁內容。
-                </div>
-              </div>
-              <div class="panel-badge">LLM-AGNOSTIC FRONT LAYER</div>
-            </div>
-
-            <div class="input-area">
-              <textarea id="messageInput" placeholder="例如：【國泰世華銀行通知】您帳戶因風險監管暫時凍結，需於 30 分鐘內完成身份驗證並匯款至指定安全帳戶，逾期將永久停用。請立即點擊以下連結或加入 LINE 客服 ID 進行處理。"></textarea>
-              <div class="input-footer">
-                <div class="input-warning">
-                  <span>⚠</span>請勿貼入真實密碼或完整身分證號。
-                </div>
-                <div class="btn-row">
-                  <button type="button" class="btn" onclick="clearInput()">
-                    CLEAR <span>清除</span>
-                  </button>
-                  <button type="button" class="btn btn-primary" onclick="analyzeMessage()">
-                    ◎ ANALYZE <span>分析</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- RISK PANEL -->
-          <section class="panel">
-            <div class="panel-header">
-              <div>
-                <div class="panel-title">
-                  RISK LEVEL <span>| 風險等級</span>
-                </div>
-                <div class="panel-subtitle">
-                  Overall semantic risk assessment. 整體語意風險評估。
-                </div>
-              </div>
-              <div id="riskBadge" class="risk-chip risk-safe">SAFE｜安全的</div>
-            </div>
-            <div id="riskText" class="risk-body">
-              Waiting for input. 請貼上訊息後按「分析」。
-            </div>
-          </section>
-
-          <!-- ACTION PANEL -->
-          <section class="panel">
-            <div class="panel-header">
-              <div>
-                <div class="panel-title">
-                  ACTION GUIDANCE <span>| 行動建議</span>
-                </div>
-                <div class="panel-subtitle">
-                  Next steps you should / should not take. 接下來你應該／不應該做什麼。
-                </div>
-              </div>
-            </div>
-            <ul id="actionList" class="list">
-              <li>尚未分析。分析訊息後會產生具體建議。</li>
-            </ul>
-          </section>
+          <strong>Author 作者：</strong>沈耀 888π / Wen-Yao Hsu（Taichung, Taiwan）
         </div>
-
-        <!-- RIGHT COLUMN -->
         <div>
-          <!-- SCBKR PANEL -->
-          <section class="panel">
-            <div class="panel-header">
-              <div>
-                <div class="panel-title">
-                  SCBKR RESPONSIBILITY CHAIN <span>| 責任鏈拆解</span>
-                </div>
-                <div class="panel-subtitle">
-                  Subject · Cause · Boundary · Cost · Responsibility.
-                  若某些欄位缺失，代表此訊息在責任鏈上存在「追溯空白」，風險更高。
-                </div>
-              </div>
-              <div class="panel-badge" id="scbkrStatus">Status：Idle 待分析</div>
-            </div>
-
-            <div class="scbkr-grid">
-              <div class="scbkr-card">
-                <div class="scbkr-label">S｜<span>SUBJECT 主體</span></div>
-                <div id="sText" class="scbkr-status">
-                  尚未分析。
-                </div>
-              </div>
-              <div class="scbkr-card">
-                <div class="scbkr-label">C｜<span>CAUSE 原因</span></div>
-                <div id="cText" class="scbkr-status">
-                  尚未分析。
-                </div>
-              </div>
-              <div class="scbkr-card">
-                <div class="scbkr-label">B｜<span>BOUNDARY 邊界</span></div>
-                <div id="bText" class="scbkr-status">
-                  尚未分析。
-                </div>
-              </div>
-              <div class="scbkr-card">
-                <div class="scbkr-label">K｜<span>COST 成本</span></div>
-                <div id="kText" class="scbkr-status">
-                  尚未分析。
-                </div>
-              </div>
-              <div class="scbkr-card">
-                <div class="scbkr-label">R｜<span>RESP. 責任</span></div>
-                <div id="rText" class="scbkr-status">
-                  尚未分析。
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- EVIDENCE PANEL -->
-          <section class="panel">
-            <div class="panel-header">
-              <div>
-                <div class="panel-title">
-                  EVIDENCE PATTERNS <span>| 語意特徵與線索</span>
-                </div>
-                <div class="panel-subtitle">
-                  Key phrases / patterns used in scams. 詐騙常用語意模式。
-                </div>
-              </div>
-              <div class="panel-badge" id="evidenceCount">偵測到 0 個特徵</div>
-            </div>
-
-            <ul id="evidenceList" class="list">
-              <li>尚未分析。分析後會列出關鍵字、威脅／獎勵模式與可疑語氣。</li>
-            </ul>
-          </section>
-
-          <!-- ROLE / Ex(y)=π PANEL -->
-          <section class="panel">
-            <div class="panel-header">
-              <div>
-                <div class="panel-title">
-                  ROLE INTEGRITY <span>| EX(Y)=π 治理層</span>
-                </div>
-                <div class="panel-subtitle">
-                  Checks if the message pretends to be bank / gov / platform.<br />
-                  檢查訊息是否偽裝成銀行、政府或官方平台。
-                </div>
-              </div>
-            </div>
-
-            <div id="roleText" class="role-status">
-              模型角色 = Tool Only 工具層；尚未對此訊息進行角色檢查。
-            </div>
-            <div class="hint-link">
-              Ex(y)=π：發話者角色只能是「工具／通知」，不得偷渡成決策者。
-            </div>
-          </section>
+          <strong>Focus：</strong>Semantic Firewall・SCBKR・Ex(y)=π 角色治理
         </div>
-      </main>
+      </div>
 
-      <footer>
-        Hackathon Demo｜Anti-Scam Semantic Firewall V3 · Built by Shen-Yao 888π.<br />
-        Demo link｜<a href="https://hijo790401.github.io/anti-scam-semantic-firewall/" target="_blank"
-          rel="noopener noreferrer">https://hijo790401.github.io/anti-scam-semantic-firewall/</a>
-      </footer>
-    </div>
+      <div class="hero-actions">
+        <a class="btn-chip btn-chip-primary" href="#input">
+          <span class="btn-dot"></span>
+          <span>
+            <span class="btn-text-small">LIVE</span>
+            <span class="btn-label">Demo for Anti-Scam Track ｜ 反詐騙組 Demo</span>
+          </span>
+        </a>
+        <a class="btn-chip" href="https://github.com/HIJO790401/anti-scam-semantic-firewall" target="_blank">
+          <span class="btn-text-small">VIEW</span>
+          <span class="btn-label">Source on GitHub（Placeholder）</span>
+        </a>
+      </div>
+    </header>
+
+    <main class="layout-main">
+      <!-- LEFT: INPUT + ANALYSIS -->
+      <section class="panel" id="input">
+        <header class="panel-header">
+          <div>
+            <div class="panel-title">INPUT ｜ 可疑訊息輸入</div>
+            <div class="panel-subtitle">
+              Paste SMS / Line / Email / Web text that may be a scam.
+              貼上簡訊、Line、Email 或網頁內容。
+            </div>
+          </div>
+          <div class="panel-tag">LLM-AGNOSTIC FRONT LAYER</div>
+        </header>
+
+        <div class="panel-body">
+          <div class="input-area">
+            <label class="example-label">例如：</label>
+            <textarea id="messageInput" placeholder="貼上疑似詐騙訊息／簡訊／來電話術…"></textarea>
+          </div>
+
+          <div class="input-footer">
+            <div class="input-footer-top">
+              <div class="warning">
+                <span class="warning-icon">!</span>
+                <span>請勿貼入真實密碼或完整身分證號。</span>
+              </div>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn btn-secondary" id="clearBtn">CLEAR 清除</button>
+              <button class="btn btn-primary" id="analyzeBtn">ANALYZE 分析</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RISK + SCBKR -->
+        <section class="risk-panel">
+          <header class="risk-header">
+            <div class="risk-title">RISK LEVEL ｜ 風險等級</div>
+            <div class="risk-badge" id="riskBadge">SAFE</div>
+          </header>
+          <p class="risk-body" id="riskSummary">
+            Waiting for input. 請貼上訊息後按「分析」。
+          </p>
+
+          <div class="grid-2">
+            <div class="mini-panel">
+              <div class="mini-title">
+                <span>SCBKR RESPONSIBILITY CHAIN ｜ 責任鏈拆解</span>
+                <span class="status-pill status-idle" id="scbkrStatus">Status：Idle 待分析</span>
+              </div>
+              <div class="mini-body" id="scbkrBody">
+                Subject・Cause・Boundary・Cost・Responsibility<br />
+                若某些欄位缺失，代表此訊息在責任鏈上存在「追溯空白」，風險更高。
+              </div>
+            </div>
+
+            <div class="mini-panel">
+              <div class="mini-title">
+                <span>EVIDENCE PATTERNS ｜ 語意特徵與線索</span>
+                <span class="status-pill status-idle" id="patternStatus">Detected：0 個特徵</span>
+              </div>
+              <div class="mini-body" id="patternBody">
+                表明詐騙行為的關鍵字詞／模式，例如「急迫期限」、「威脅凍結」、「要求私下轉帳」等。
+              </div>
+            </div>
+          </div>
+
+          <div class="mini-panel" style="margin-top: 10px;">
+            <div class="mini-title">
+              <span>ACTION GUIDANCE ｜ 行動建議</span>
+              <span class="status-pill status-idle" id="actionStatus">Awaiting input 等待輸入</span>
+            </div>
+            <div class="mini-body">
+              <ul class="action-list" id="actionList">
+                <li>暫停所有回覆與點擊，先確認訊息來源。</li>
+                <li>透過官方網站、客服電話或實體分行自行查證，不要使用訊息中提供的聯絡資訊。</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="role-panel">
+            <div class="role-header">
+              <div class="role-title">ROLE INTEGRITY ｜ EX(Y)=π 治理層</div>
+              <div class="panel-tag" style="border-color: rgba(246,196,83,0.7); color:#ffe9b8;">
+                Model Role = Tool Only 工具層，不是決策者
+              </div>
+            </div>
+            <p class="mini-body">
+              Checks if the message pretends to be bank / gov / platform.
+              檢查訊息是否偽裝成銀行／政府／平台。
+              <span class="toggle-link" id="roleToggle">顯示詳細語意角色檢查</span>
+            </p>
+            <div class="role-body" id="roleDetail">
+              <p>
+                此層使用 Ex(y)=π 角色治理模型，確保：
+              </p>
+              <ul class="action-list">
+                <li>AI 與審查工具永遠是「工具層」，不會被當成真正決策者。</li>
+                <li>訊息若偽裝成「銀行／政府／官方平台」，會被標記為高風險。</li>
+                <li>最終決策與責任必須回到「人」與「正式機構」。</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <!-- RIGHT: EXPLANATION / NOTES -->
+      <aside class="sidebar">
+        <section class="panel">
+          <header class="panel-header">
+            <div>
+              <div class="panel-title">ENGINE NOTES ｜ 引擎說明</div>
+              <div class="panel-subtitle">
+                基於 SCBKR 責任鏈、語意風險分級與 Ex(y)=π 角色治理。
+              </div>
+            </div>
+          </header>
+          <div class="panel-body">
+            <p class="note">
+              <strong>SCBKR 責任鏈：</strong>
+              S 主體、C 原因、B 邊界、K 成本、R 責任。缺 S/C/B 視為邏輯殘缺，缺 K/R
+              則標記為「不可結案」，必須有真人或正式機構介入。
+            </p>
+            <p class="note">
+              <strong>Semantic Firewall V3：</strong>
+              將輸出分為 SAFE、RISK、FATAL、NON-CLOSABLE，並保留可審計的語意紀錄，方便後續追溯。
+            </p>
+            <p class="note">
+              <strong>Ex(y)=π 角色治理：</strong>
+              確保 AI 與工具永遠只是「輔助證據」，不會被視為真正的決策主體或合約持有人。
+            </p>
+            <p class="note">
+              本 Demo 僅為前端語意治理展示，不會儲存貼上的內容。實際專案可串接後端記錄、審計與報表。
+            </p>
+          </div>
+        </section>
+      </aside>
+    </main>
   </div>
 
-  <script>
-    function clearInput() {
-document.getElementById("messageInput").value = "";
-      // Reset panels
-      setRisk("SAFE", "Waiting for input. 請貼上訊息後按「分析」。");
-      document.getElementById("actionList").innerHTML =
-        "<li>尚未分析。分析訊息後會產生具體建議。</li>";
-      document.getElementById("scbkrStatus").textContent = "Status：Idle 待分析";
-      document.getElementById("sText").textContent = "尚未分析。";
-      document.getElementById("cText").textContent = "尚未分析。";
-      document.getElementById("bText").textContent = "尚未分析。";
-      document.getElementById("kText").textContent = "尚未分析。";
-      document.getElementById("rText").textContent = "尚未分析。";
-      document.getElementById("evidenceList").innerHTML =
-        "<li>尚未分析。分析後會列出關鍵字、威脅／獎勵模式與可疑語氣。</li>";
-      document.getElementById("evidenceCount").textContent = "偵測到 0 個特徵";
-      document.getElementById("roleText").textContent =
-        "模型角色 = Tool Only 工具層；尚未對此訊息進行角色檢查。";
-    }
+ <script>
+    const textarea = document.getElementById("messageInput");
+    const riskBadge = document.getElementById("riskBadge");
+    const riskSummary = document.getElementById("riskSummary");
+    const scbkrStatus = document.getElementById("scbkrStatus");
+    const scbkrBody = document.getElementById("scbkrBody");
+    const patternStatus = document.getElementById("patternStatus");
+    const patternBody = document.getElementById("patternBody");
+    const actionStatus = document.getElementById("actionStatus");
+    const actionList = document.getElementById("actionList");
+    const clearBtn = document.getElementById("clearBtn");
+    const analyzeBtn = document.getElementById("analyzeBtn");
+    const roleToggle = document.getElementById("roleToggle");
+    const roleDetail = document.getElementById("roleDetail");
 
     function setRisk(level, text) {
-      const badge = document.getElementById("riskBadge");
-      badge.className = "risk-chip";
-      let label;
-      switch (level) {
-        case "SAFE":
-          badge.classList.add("risk-safe");
-          label = "SAFE｜安全的";
-          break;
-        case "RISK":
-          badge.classList.add("risk-risk");
-          label = "RISK｜有風險";
-          break;
-        case "FATAL":
-          badge.classList.add("risk-fatal");
-          label = "FATAL｜高度危險";
-          break;
-        case "NON-CLOSABLE":
-          badge.classList.add("risk-nonclosable");
-          label = "NON-CLOSABLE｜不可結案";
-          break;
+      riskBadge.textContent = level;
+      riskSummary.textContent = text;
+      riskBadge.className = "risk-badge";
+      if (level === "SAFE") {
+        riskBadge.classList.add("status-safe");
+      } else if (level === "RISK") {
+        riskBadge.classList.add("status-risk");
+      } else if (level === "FATAL") {
+        riskBadge.classList.add("status-fatal");
       }
-      badge.textContent = label;
-      document.getElementById("riskText").innerHTML = text;
     }
 
     function analyzeMessage() {
-      const raw = document.getElementById("messageInput").value.trim();
-      if (!raw) {
-        alert("請先貼上要分析的訊息。");
+      const text = (textarea.value || "").trim();
+      if (!text) {
+        setRisk("SAFE", "Waiting for input. 請貼上訊息後按「分析」。");
+        scbkrStatus.textContent = "Status：Idle 待分析";
+        scbkrStatus.className = "status-pill status-idle";
+        scbkrBody.textContent =
+          "Subject・Cause・Boundary・Cost・Responsibility\n若某些欄位缺失，代表此訊息在責任鏈上存在「追溯空白」，風險更高。";
+        patternStatus.textContent = "Detected：0 個特徵";
+        patternStatus.className = "status-pill status-idle";
+        patternBody.textContent =
+          "表明詐騙行為的關鍵字詞／模式，例如「急迫期限」、「威脅凍結」、「要求私下轉帳」等。";
+        actionStatus.textContent = "Awaiting input 等待輸入";
+        actionStatus.className = "status-pill status-idle";
+        actionList.innerHTML =
+          "<li>暫停所有回覆與點擊，先確認訊息來源。</li>" +
+          "<li>透過官方網站、客服電話或實體分行自行查證。</li>";
         return;
       }
 
-      const text = raw;
-      const lower = text.toLowerCase();
-
-      const patterns = {
-        isBank: /(銀行|bank|atm|帳戶|帳號)/i.test(text),
-        hasLink: /(http|https|www\.|連結|網址|url)/i.test(lower),
-        timePressure: /(30 ?分鐘|三十分鐘|立即|立刻|馬上|限時|today only|within 30 minutes)/i.test(text),
-        askPersonal: /(身分證|身份證|id|密碼|驗證碼|驗證|卡號|信用卡|安全碼)/i.test(text),
-        threat: /(凍結|停用|停權|法院|檢察|警察|罰款|扣押|違規|鎖定)/i.test(text),
-        moneyTransfer: /(匯款|轉帳|匯入|remit|wire|指定帳戶|安全帳戶)/i.test(text),
-        reward: /(中獎|回饋|折扣|贈品|返現|reward|bonus)/i.test(text)
-      };
-
-      const scoreDanger = Object.values(patterns).filter(Boolean).length -
-        (patterns.reward ? 1 : 0);
-
+      const lowered = text.toLowerCase();
       let risk = "SAFE";
-      if (scoreDanger >= 1) risk = "RISK";
-      if (scoreDanger >= 3) risk = "FATAL";
-      if (scoreDanger >= 4 && (patterns.askPersonal || patterns.moneyTransfer) && (patterns.hasLink || patterns.threat)) {
-        risk = "NON-CLOSABLE";
+      let riskText = "訊息未出現明顯高風險特徵，仍建議保持警覺並再次確認來源。";
+
+      let fatalHits = 0;
+      let riskHits = 0;
+      const fatalKeywords = ["匯款", "轉帳", "帳號", "銀行", "otp", "一次性密碼", "投資", "虛擬貨幣"];
+      const riskKeywords = ["限時", "30 分鐘", "立即", "凍結", "停用", "清查", "客服", "專員", "帳戶異常"];
+
+      fatalKeywords.forEach((kw) => {
+        if (text.includes(kw)) fatalHits++;
+      });
+      riskKeywords.forEach((kw) => {
+        if (text.includes(kw)) riskHits++;
+      });
+
+      const looksOfficial =
+        /銀行|信用卡|警察局|檢察署|法院|政府|內政部|國稅局|海關|電信公司|官方|專員/.test(text);
+
+      let missingSCBKR = [];
+
+      if (!/我|本公司|本行|本局|本單位|客服專員|某某銀行/.test(text)) {
+        missingSCBKR.push("S 主體不明");
+      }
+      if (!/因.*(風險|異常|欠費|逾期|違規)/.test(text)) {
+        missingSCBKR.push("C 原因不清");
+      }
+      if (!/透過.*(官網|客服電話|臨櫃)|請撥打.*客服|請至最近分行/.test(text)) {
+        missingSCBKR.push("B 邊界流程不明");
+      }
+      if (!/可能.*損失|風險|影響/.test(text)) {
+        missingSCBKR.push("K 成本未清楚說明");
+      }
+      if (!/本行將負責|本公司負責|依約處理/.test(text)) {
+        missingSCBKR.push("R 責任未承諾");
       }
 
-      // Risk text
-      let riskText = "";
-      if (risk === "SAFE") {
+      if (fatalHits >= 2 || (fatalHits >= 1 && riskHits >= 1 && looksOfficial)) {
+        risk = "FATAL";
         riskText =
-          "目前未偵測到明顯詐騙語意特徵，但仍請留意官方通知管道，避免直接點擊不熟悉連結。";
-      } else if (risk === "RISK") {
+          "訊息高度疑似詐騙，包含金錢轉移與假冒官方單位等特徵。請勿點擊任何連結或提供資料，直接透過官方管道查證。";
+      } else if (riskHits >= 1 || looksOfficial) {
+        risk = "RISK";
         riskText =
-          "<strong>此訊息包含多項風險特徵。</strong> 建議暫停回覆與點擊，改由官方客服或原機構官網自行查證。";
-      } else if (risk === "FATAL") {
-        riskText =
-          "<strong>此訊息高度可疑，具備威脅語氣、時間壓力與個資或款項要求。</strong> 高度疑似詐騙，請勿依照內容進行任何匯款或提供資料。";
-      } else {
-        riskText =
-          "<strong>此訊息在風險與責任鏈上均不完整，屬「不可結案 NON-CLOSABLE」級別。</strong> 在沒有官方機構書面與獨立驗證前，不應採信或執行任何指示。";
+          "訊息具有多項風險特徵，建議不要直接依照指示操作，請改用官方客服或官網自行查證。";
       }
+
       setRisk(risk, riskText);
 
-      // SCBKR
-      const subjectPresent = /(本行|我們|客服|專員|公司|bank|官方)/i.test(text);
-      const causeThreat = patterns.threat || patterns.timePressure;
-      const boundaryClear = /(官方網站|官網|客服電話|分行|櫃檯)/i.test(text);
-      const costExplicit = patterns.askPersonal || patterns.moneyTransfer;
-      const respMention = /(負責|申訴|客服專線|條款|合約)/i.test(text);
-document.getElementById("scbkrStatus").textContent =
-        "Status：已分析（核心缺失 " +
-        [
-          subjectPresent ? 0 : 1,
-          boundaryClear ? 0 : 1,
-          costExplicit ? 0 : 1,
-          respMention ? 0 : 1
-        ].reduce((a, b) => a + b, 0) +
-        " 項）";
-
-      document.getElementById("sText").innerHTML = subjectPresent
-        ? "訊息中出現了自稱主體，如「本行／客服／某公司」。<br><strong>需進一步確認是否真為該機構。</strong>"
-        : "<strong>缺失：</strong> 未清楚說明發話者身分，僅提及「您的帳戶／您的資料」，提高風險。";
-
-      document.getElementById("cText").innerHTML = causeThreat
-        ? "以「凍結帳戶、停權、罰款」等風險作為理由，屬於典型威脅式誘導。"
-        : "理由相對一般或中性，未明確以恐嚇或緊急威脅作為主軸。";
-
-      document.getElementById("bText").innerHTML = boundaryClear
-        ? "有提供部分處理管道（如官網或客服電話），但仍需自行查證是否為真實官方資訊。"
-        : "<strong>缺失：</strong> 未清楚說明合法處理流程與邊界，只強調「立即處理／點擊連結」，屬高風險模式。";
-
-      document.getElementById("kText").innerHTML = costExplicit
-        ? "訊息內容涉及<strong>金流或個資成本</strong>（如匯款、提供帳號密碼、驗證碼等），一旦採信可能造成實質損失。"
-        : "目前並未直接要求金錢或個資，但若搭配其他風險特徵，仍需謹慎看待。";
-
-      document.getElementById("rText").innerHTML = respMention
-        ? "有提及條款或申訴等片段，<strong>但在詐騙情境中通常為偽裝用字</strong>，不可單憑字面信任。"
-        : "<strong>缺失：</strong> 未說明若發生錯誤或爭議時由誰負責，呈現「只要你照做，出事你自己負責」的單向要求。";
-
-      // Evidence patterns
-      const evidences = [];
-      if (patterns.isBank)
-        evidences.push("提及「銀行／帳戶」相關用語，常見於金融類詐騙。");
-      if (patterns.hasLink)
-        evidences.push("包含連結或網址，可能導向釣魚網站或假登入頁面。");
-      if (patterns.timePressure)
-        evidences.push("出現「30 分鐘內、立即、立刻」等時間壓力字眼。");
-      if (patterns.askPersonal)
-        evidences.push("要求提供密碼、驗證碼、身分證或卡號等敏感個資。");
-      if (patterns.threat)
-        evidences.push("使用「凍結、停權、罰款、扣押」等威脅語氣。");
-      if (patterns.moneyTransfer)
-        evidences.push("要求匯款或轉帳至「指定／安全」帳戶。");
-      if (patterns.reward)
-        evidences.push("以中獎、返現或獎勵作為誘因，可能是釣魚型訊息。");
-
-      const evidenceList = document.getElementById("evidenceList");
-      evidenceList.innerHTML = "";
-      if (evidences.length === 0) {
-        evidenceList.innerHTML =
-          "<li>目前尚未偵測到明顯詐騙語意特徵，但仍建議透過第二管道查證。</li>";
+      if (missingSCBKR.length === 0) {
+        scbkrStatus.textContent = "SCBKR 完整，但仍需人工判斷";
+        scbkrStatus.className = "status-pill status-safe";
+        scbkrBody.textContent =
+          "訊息在主體、原因、邊界、成本與責任上皆有敘述，但是否可信仍需比對實際官方管道。";
       } else {
-        evidences.forEach((e) => {
-          const li = document.createElement("li");
-          li.textContent = e;
-          evidenceList.appendChild(li);
-        });
-      }
-      document.getElementById("evidenceCount").textContent =
-        "偵測到 " + evidences.length + " 個特徵";
-
-      // Role integrity (Ex(y)=π)
-      const roleText = document.getElementById("roleText");
-      if (/(銀行|bank|政府|警察|法院|檢察|官方|平台|客服中心)/i.test(text)) {
-        roleText.innerHTML =
-          "<strong>疑似偽裝成具權威的主體</strong>（如銀行、政府或官方平台）。在 Ex(y)=π 模型下，該訊息不得直接被視為真正決策者指令，必須改由你或真實機構重新確認。";
-      } else {
-        roleText.innerHTML =
-          "目前看起來較像一般訊息，未明顯冒用特定權威角色，但仍需留意其中是否有不合理要求。";
+        scbkrStatus.textContent = `核心缺失 ${missingSCBKR.length}，K/R 可能不足`;
+        scbkrStatus.className =
+          risk === "FATAL"
+            ? "status-pill status-fatal"
+            : "status-pill status-risk";
+        scbkrBody.textContent =
+          "偵測到以下責任鏈缺口：\n- " +
+          missingSCBKR.join("\n- ") +
+          "\n缺口越多，代表此訊息越不適合作為正式依據。";
       }
 
-      // Action guidance
-      const actionList = document.getElementById("actionList");
-      actionList.innerHTML = "";
-      const addAction = (txt) => {
-        const li = document.createElement("li");
-        li.innerHTML = txt;
-        actionList.appendChild(li);
-      };
-
-      if (risk === "SAFE") {
-        addAction(
-          "請勿在陌生環境下輸入任何密碼或驗證碼，若仍感不安，可改由官網或官方 APP 重新登入確認。"
-        );
-        addAction(
-          "對於聲稱來自銀行／平台的訊息，可直接撥打卡片背面或官方網站公布的電話核實。"
-        );
-      } else if (risk === "RISK") {
-        addAction(
-          "<strong>暫停回覆或點擊任何連結。</strong> 先透過官方網站、客服電話或親自臨櫃查證。"
-        );
-        addAction(
-          "若訊息來自親友帳號，請改用另一個聯絡方式（例如直接打電話）確認對方是否真的發出。"
-        );
-        addAction(
-          "可將此訊息截圖，作為日後報案或向銀行／電信業者申訴的輔助證據。"
-        );
-      } else if (risk === "FATAL" || risk === "NON-CLOSABLE") {
-        addAction(
-          "<strong>請完全忽略訊息中的任何匯款、點擊、提供資料等要求。</strong> 不要依照訊息指示進行任何操作。"
-        );
-        addAction(
-          "立即透過銀行卡片背面的電話或官方網站聯絡原機構，詢問是否真的有「凍結、停權、扣款」等情況。"
-        );
-        addAction(
-          "若已不慎提供資訊，請盡快聯絡銀行、電信或警方，說明情況並請求協助。"
-        );
+      let patterns = [];
+      if (looksOfficial) {
+        patterns.push("偵測到詐騙關鍵字：偽裝官方單位（銀行／政府／平台）");
       }
+      if (/30 ?分|60 ?分|立即|馬上|現在/.test(text)) {
+        patterns.push("偵測到詐騙關鍵字：急迫時限，強調「立刻處理」");
+      }
+      if (/凍結|停用|鎖卡|停機/.test(text)) {
+        patterns.push("偵測到詐騙關鍵字：凍結／停用威脅");
+      }
+      if (/點選|點擊|連結|網址/.test(text)) {
+        patterns.push("偵測到模式：要求點擊連結完成驗證或領取權益");
+      }
+      if (/匯款|轉帳|帳號|卡號|OTP|一次性密碼/.test(text)) {
+        patterns.push("偵測到模式：要求提供帳戶或一次性密碼資訊");
+      }
+
+      const count = patterns.length;
+      patternStatus.textContent = `Detected：${count} 個特徵`;
+      patternStatus.className =
+        count === 0 ? "status-pill status-idle" : "status-pill status-risk";
+      patternBody.textContent =
+        count === 0
+          ? "未明顯偵測到詐騙特徵，但仍建議確認訊息來源與官方管道。"
+          : patterns.map((p) => "• " + p).join("\n");
+
+      actionStatus.textContent =
+        risk === "SAFE"
+          ? "建議：仍需基本查證"
+          : risk === "RISK"
+          ? "建議：高風險訊息，勿直接操作"
+          : "建議：極高風險，立即停止互動";
+      actionStatus.className =
+        risk === "SAFE"
+          ? "status-pill status-safe"
+          : risk === "RISK"
+          ? "status-pill status-risk"
+          : "status-pill status-fatal";
+
+      const actions = [];
+      actions.push("暫停所有回覆、點擊與操作，先冷靜確認。");
+      actions.push("不要使用訊息中附上的電話或連結，改用官方網站或客服電話自行查證。");
+      if (risk !== "SAFE") {
+        actions.push("若已提供任何個資或金流資訊，請立即聯繫銀行或相關機構。");
+      }
+      if (risk === "FATAL") {
+        actions.push("考慮向警方或 165 反詐騙專線通報，以保留證據。");
+      }
+      actionList.innerHTML = actions.map((a) => `<li>${a}</li>`).join("");
     }
+
+    analyzeBtn.addEventListener("click", analyzeMessage);
+    clearBtn.addEventListener("click", () => {
+      textarea.value = "";
+      analyzeMessage();
+    });
+
+    roleToggle.addEventListener("click", () => {
+      roleDetail.classList.toggle("show");
+    });
+
+    analyzeMessage();
   </script>
 </body>
 </html>
