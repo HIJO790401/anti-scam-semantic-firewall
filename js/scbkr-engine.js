@@ -18,8 +18,14 @@
     const safePattern = pattern || {};
     const keywords = Array.isArray(safePattern.keywords_any) ? safePattern.keywords_any : [];
     const regexList = Array.isArray(safePattern.regex_any) ? safePattern.regex_any : [];
+    const excludes = Array.isArray(safePattern.excludes_any) ? safePattern.excludes_any : [];
 
     const compactText = compact(text);
+    const excluded = excludes.some((token) => {
+      const key = String(token).toLowerCase();
+      return text.includes(key) || compactText.includes(compact(key));
+    });
+    if (excluded) return false;
     const keywordHit = keywords.some((kw) => {
       const key = String(kw).toLowerCase();
       return text.includes(key) || compactText.includes(compact(key));
