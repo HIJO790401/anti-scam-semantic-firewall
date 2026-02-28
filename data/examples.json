@@ -1,0 +1,50 @@
+[
+  {
+    "id": "fake-bank-freeze",
+    "category": "bank",
+    "label_zh": "假銀行：帳戶凍結通知",
+    "label_en": "Fake bank: account frozen notice",
+    "text_zh": "【銀行通知】您的帳戶異常，將於10分鐘內凍結，請立即點選 https://safe-bank-check.com 完成驗證。",
+    "text_en": "[Bank Alert] Your account is abnormal and will be frozen in 10 minutes. Click https://safe-bank-check.com now to verify."
+  },
+  {
+    "id": "fake-investment-guaranteed",
+    "category": "investment",
+    "label_zh": "假投資：保證獲利群組",
+    "label_en": "Fake investment: guaranteed profit group",
+    "text_zh": "加入老師投資群，保證每週獲利20%，今天最後一天，先匯款5萬元啟用VIP帳戶。",
+    "text_en": "Join our VIP investment group for guaranteed 20% weekly return. Last day today, transfer USD 1,500 to activate."
+  },
+  {
+    "id": "fake-relative-money",
+    "category": "friend",
+    "label_zh": "假親友：急借錢",
+    "label_en": "Fake family/friend urgent loan",
+    "text_zh": "我是你表哥，手機壞掉用新號碼，現在急用錢，先轉3萬到這個帳戶，晚點再跟你說。",
+    "text_en": "Hey, this is your cousin from a new number. I need money urgently, please transfer 900 now and I will explain later."
+  },
+  {
+    "id": "fake-customs-package",
+    "category": "customs",
+    "label_zh": "假關務局：包裹卡關",
+    "label_en": "Fake customs: parcel held",
+    "text_zh": "關務局通知：您的國際包裹因資料不符被扣留，請立即繳交保證金並提供身分證與卡號完成通關。",
+    "text_en": "Customs notice: your parcel is held due to mismatched documents. Pay a deposit and provide ID/card details now to clear it."
+  },
+  {
+    "id": "phishing-login-link",
+    "category": "phishing",
+    "label_zh": "釣魚網站：登入驗證",
+    "label_en": "Phishing site: login verification",
+    "text_zh": "您的信箱即將停用，請於24小時內登入下列網址更新密碼：http://mail-security-check.net",
+    "text_en": "Your mailbox will be deactivated. Sign in within 24 hours at http://mail-security-check.net to update your password."
+  },
+  {
+    "id": "fake-government-fine",
+    "category": "government",
+    "label_zh": "假政府：違規罰款",
+    "label_en": "Fake authority: violation fine",
+    "text_zh": "您有未繳交通罰單，若今日未付款將移送法辦，請點連結輸入信用卡資料完成繳納。",
+    "text_en": "You have an unpaid traffic fine. If not paid today, legal action will begin. Open the link and enter your credit card details now."
+  }
+]

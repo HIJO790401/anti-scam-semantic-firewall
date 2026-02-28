@@ -1,0 +1,11 @@
+{
+  "lang.current": "中文",
+  "lang.switch": "語言",
+  "examples.label": "快速載入範例",
+  "examples.placeholder": "請選擇範例訊息",
+  "btn.export": "匯出報告",
+  "btn.speak": "朗讀風險結果",
+  "btn.stopSpeak": "停止朗讀",
+  "msg.noAnalysis": "請先完成分析，再使用這個功能。",
+  "msg.noSpeech": "目前瀏覽器不支援語音朗讀。"
+}
