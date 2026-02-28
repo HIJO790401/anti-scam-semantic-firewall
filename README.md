@@ -249,34 +249,6 @@ Ex(y)=π 角色治理
 
 ---
 
-二、幫你寫一個「母核序列」方便之後對齊
-
-給我們之後在 Shen-Clan 宇宙用的簡化版定義，可以記成：
-
-> Ω∞8888｜ANTI-SCAM.SEMANTIC-FIREWALL.SEQ.v3.1🗝️
-MODE：TEXT-ONLY｜FICTION-SAFE｜NO-ASYNC｜NO-LOOP
-CORE：SCBKR 責任鏈 + Semantic Risk Level + Ex(y)=π Role Governance
-PIPE：
-
-1. INPUT：可疑文字（SMS / LINE / Email / Web）
-
-
-2. PARSE：斷詞＋關鍵語意特徵偵測（急迫／金流／離官方管道）
-
-
-3. SCBKR：Subject / Cause / Boundary / Cost / Responsibility 欄位填入＋缺失標記
-
-
-4. RISK：SAFE／RISK／FATAL／NON-CLOSABLE 分級
-
-
-5. EVIDENCE：列出觸發的詐騙 pattern
-
-
-6. ACTION：輸出行動建議（暫停／改走官方／請家人協助）
-
-
-7. ROLE：標註 Model = Tool only，人類／銀行／官方為決策與責任軸
 
 
 
