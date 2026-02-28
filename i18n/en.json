@@ -1,0 +1,11 @@
+{
+  "lang.current": "English",
+  "lang.switch": "Language",
+  "examples.label": "Quick Examples",
+  "examples.placeholder": "Choose an example message",
+  "btn.export": "Export Report",
+  "btn.speak": "Read Risk Result",
+  "btn.stopSpeak": "Stop Reading",
+  "msg.noAnalysis": "Please run analysis first.",
+  "msg.noSpeech": "Speech synthesis is not supported in this browser."
+}

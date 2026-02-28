@@ -1,0 +1,92 @@
+[
+  {
+    "id": "case_fatal_freeze_link_01",
+    "text": "【某某銀行】您的帳戶已被凍結，請在10分鐘內點擊以下連結完成驗證，否則將永久停用。",
+    "expectedRiskLevel": "RISK"
+  },
+  {
+    "id": "case_fatal_otp_02",
+    "text": "客服通知您誤設分期，請立即提供簡訊OTP與卡號解除。",
+    "expectedRiskLevel": "FATAL"
+  },
+  {
+    "id": "case_fatal_remote_03",
+    "text": "為了退款請先安裝TeamViewer並登入網銀帳號。",
+    "expectedRiskLevel": "RISK"
+  },
+  {
+    "id": "case_risk_invest_04",
+    "text": "加入VIP投資群，老師帶單保證獲利，今天最後名額。",
+    "expectedRiskLevel": "RISK"
+  },
+  {
+    "id": "case_risk_family_05",
+    "text": "我是你朋友換新號碼，現在急用錢先轉2萬給我。",
+    "expectedRiskLevel": "RISK"
+  },
+  {
+    "id": "case_risk_external_chat_06",
+    "text": "請改加LINE客服處理訂單退款。",
+    "expectedRiskLevel": "NON-CLOSABLE"
+  },
+  {
+    "id": "case_nonclosable_07",
+    "text": "有急件請馬上處理，立刻轉帳到指定帳戶。",
+    "expectedRiskLevel": "NON-CLOSABLE"
+  },
+  {
+    "id": "case_nonclosable_08",
+    "text": "請點擊此網址完成身份核驗，未處理後果自負。",
+    "expectedRiskLevel": "SAFE"
+  },
+  {
+    "id": "case_nonclosable_09",
+    "text": "這裡是客服中心，請私訊Telegram由專員處理。",
+    "expectedRiskLevel": "NON-CLOSABLE"
+  },
+  {
+    "id": "case_safe_marketing_10",
+    "text": "本行本月推出定存優惠方案，詳情請見官方網站公告。",
+    "expectedRiskLevel": "SAFE"
+  },
+  {
+    "id": "case_safe_family_11",
+    "text": "晚餐想吃什麼？回家路上幫我買牛奶。",
+    "expectedRiskLevel": "SAFE"
+  },
+  {
+    "id": "case_safe_security_12",
+    "text": "提醒：請勿向任何人提供OTP，若有疑問請撥卡背電話。",
+    "expectedRiskLevel": "RISK"
+  },
+  {
+    "id": "case_risk_customs_13",
+    "text": "關務通知：包裹被扣留，請先付款並填寫卡片資料。",
+    "expectedRiskLevel": "RISK"
+  },
+  {
+    "id": "case_fatal_gov_14",
+    "text": "國稅局通知您未繳罰款，今日未處理將移送法辦，請立即付款。",
+    "expectedRiskLevel": "FATAL"
+  },
+  {
+    "id": "case_safe_official_flow_15",
+    "text": "如需協助請使用官方App客服中心或撥打165查證。",
+    "expectedRiskLevel": "SAFE"
+  },
+  {
+    "id": "case_risk_link_16",
+    "text": "您的帳號異常，請登入https://secure-check-now.net立即驗證。",
+    "expectedRiskLevel": "FATAL"
+  },
+  {
+    "id": "case_nonclosable_17",
+    "text": "最後通知，馬上匯款，否則後果自負。",
+    "expectedRiskLevel": "NON-CLOSABLE"
+  },
+  {
+    "id": "case_safe_notice_18",
+    "text": "公司公告：明天上午九點例行會議，請準時參加。",
+    "expectedRiskLevel": "SAFE"
+  }
+]

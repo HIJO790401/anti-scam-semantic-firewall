@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Benchmark v3.2 Runner</title>
+  <style>
+    body{font-family:system-ui;padding:20px;background:#0b1020;color:#e5e7eb}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{border:1px solid #334155;padding:6px;font-size:13px}
+    .pass{color:#22c55e}.fail{color:#ef4444}
+    .meta{margin-bottom:10px}
+  </style>
+</head>
+<body>
+  <h1>Benchmark v3.2</h1>
+  <div class="meta" id="summary">Running...</div>
+  <table>
+    <thead><tr><th>ID</th><th>Expected</th><th>Actual</th><th>Status</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+  <script src="../js/scbkr-engine.js"></script>
+  <script src="run-benchmark-v3.2.js"></script>
+</body>
+</html>

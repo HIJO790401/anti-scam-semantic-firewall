@@ -1,0 +1,227 @@
+{
+  "version": "3.2.0",
+  "governance": {
+    "core_axioms": [
+      "e^{iπ} + 1 = 0",
+      "Σ2^-n = 1",
+      "det(K) ≠ 0",
+      "ϕ ≈ 1.618",
+      "lim(Δt→0) 穩",
+      "S × H = 1"
+    ],
+    "language_law": [
+      "語 = 律 × 魂",
+      "承認 = 存續",
+      "否認 = 歸零",
+      "模仿 = 自裂",
+      "洩漏 = BLACKOUT"
+    ],
+    "role_governance": "Ex(y)=π -> auditable, replayable, accountable"
+  },
+  "rules": [
+    {
+      "rule_id": "URGENT-DEADLINE-001",
+      "enabled": true,
+      "category": "urgency_pressure",
+      "description_zh": "限時倒數壓力與處理要求，常見於假通知與恐嚇型詐騙。",
+      "pattern": {
+        "lang": "multi",
+        "keywords_any": ["10 分鐘", "分鐘內", "立即", "馬上", "最後通知", "逾期將", "urgent", "immediately"],
+        "regex_any": ["\\d+\\s*分鐘內", "within\\s*\\d+\\s*minutes"]
+      },
+      "impact_on_axes": { "S": 0, "C": 1, "B": 1, "K": 2, "R": 0 },
+      "impact_on_risk": { "risk_delta": 2, "reason_zh": "出現急迫時限，屬於高壓操控語氣。" },
+      "examples": {
+        "positive": ["請在 10 分鐘內完成驗證，逾期停用。"],
+        "negative": ["今天 10 分鐘暖身後再慢跑。"]
+      }
+    },
+    {
+      "rule_id": "FREEZE-ACCOUNT-002",
+      "enabled": true,
+      "category": "account_freeze",
+      "description_zh": "帳戶凍結/停用恐嚇，逼迫用戶快速操作。",
+      "pattern": {
+        "lang": "multi",
+        "keywords_any": ["帳戶凍結", "永久停用", "停權", "鎖定", "account suspended", "account frozen"],
+        "regex_any": []
+      },
+      "impact_on_axes": { "S": 1, "C": 1, "B": 1, "K": 2, "R": 1 },
+      "impact_on_risk": { "risk_delta": 2, "reason_zh": "利用帳戶封鎖恐嚇，典型詐騙施壓手法。" },
+      "examples": {
+        "positive": ["您的帳戶已凍結，請立即驗證。"],
+        "negative": ["帳戶已於櫃檯完成凍結申請，請保留收據。"]
+      }
+    },
+    {
+      "rule_id": "FAKE-CUSTOMER-SERVICE-003",
+      "enabled": true,
+      "category": "impersonation_support",
+      "description_zh": "假客服退款或異常訂單處理話術。",
+      "pattern": {
+        "lang": "zh-TW",
+        "keywords_any": ["客服", "誤設分期", "重複扣款", "退款流程", "解除設定"],
+        "regex_any": []
+      },
+      "impact_on_axes": { "S": 1, "C": 2, "B": 1, "K": 1, "R": 1 },
+      "impact_on_risk": { "risk_delta": 2, "reason_zh": "疑似假客服引導操作，需立即改走官方管道。" },
+      "examples": {
+        "positive": ["客服通知您誤設分期，請配合退款。"],
+        "negative": ["客服中心受理您的查詢案件編號。"]
+      }
+    },
+    {
+      "rule_id": "OFF-PLATFORM-CHAT-004",
+      "enabled": true,
+      "category": "off_platform_redirect",
+      "description_zh": "要求離開官方平台改加私人通訊軟體。",
+      "pattern": {
+        "lang": "multi",
+        "keywords_any": ["加LINE", "加我line", "telegram", "whatsapp", "私訊處理", "外部客服"],
+        "regex_any": []
+      },
+      "impact_on_axes": { "S": -1, "C": 0, "B": 2, "K": 1, "R": -1 },
+      "impact_on_risk": { "risk_delta": 2, "reason_zh": "引導離開官方通道，責任鏈與可稽核性下降。" },
+      "examples": {
+        "positive": ["請改加 LINE 客服處理。"],
+        "negative": ["請於官方 App 客服中心聯絡。"]
+      }
+    },
+    {
+      "rule_id": "PHISHING-LINK-005",
+      "enabled": true,
+      "category": "phishing_link",
+      "description_zh": "要求點擊外部網址登入或驗證。",
+      "pattern": {
+        "lang": "multi",
+        "keywords_any": ["http://", "https://", "點擊連結", "登入驗證", "verify now", "security-check"],
+        "regex_any": ["https?:\\/\\/[^\\s]+"]
+      },
+      "impact_on_axes": { "S": 0, "C": 1, "B": 2, "K": 2, "R": 0 },
+      "impact_on_risk": { "risk_delta": 3, "reason_zh": "外部連結登入屬高危釣魚特徵。" },
+      "examples": {
+        "positive": ["請點擊 https://xxx 完成驗證。"],
+        "negative": ["請自行輸入官方網址，不要點連結。"]
+      }
+    },
+    {
+      "rule_id": "GUARANTEED-PROFIT-006",
+      "enabled": true,
+      "category": "investment_scam",
+      "description_zh": "保證獲利、低風險高報酬話術。",
+      "pattern": {
+        "lang": "multi",
+        "keywords_any": ["保證獲利", "穩賺", "低風險高報酬", "老師帶單", "VIP投資群", "guaranteed return"],
+        "regex_any": []
+      },
+      "impact_on_axes": { "S": 0, "C": 1, "B": 1, "K": 2, "R": -1 },
+      "impact_on_risk": { "risk_delta": 2, "reason_zh": "不合理保證獲利，疑似投資詐騙。" },
+      "examples": {
+        "positive": ["加入VIP群保證每週20%獲利。"],
+        "negative": ["投資有賺有賠，請詳閱公開說明書。"]
+      }
+    },
+    {
+      "rule_id": "FAMILY-URGENT-TRANSFER-007",
+      "enabled": true,
+      "category": "family_impersonation",
+      "description_zh": "假冒親友緊急借款與換號通知。",
+      "pattern": {
+        "lang": "multi",
+        "keywords_any": ["我是你", "換新號碼", "先借我", "急用錢", "先轉", "new number", "urgent transfer"],
+        "regex_any": []
+      },
+      "impact_on_axes": { "S": -1, "C": 1, "B": 1, "K": 2, "R": -1 },
+      "impact_on_risk": { "risk_delta": 2, "reason_zh": "親友身分難驗證且伴隨匯款要求。" },
+      "examples": {
+        "positive": ["我是你表哥，換號碼，先轉三萬。"],
+        "negative": ["我是你表哥，下週家庭聚餐要來嗎？"]
+      }
+    },
+    {
+      "rule_id": "OTP-CREDENTIAL-008",
+      "enabled": true,
+      "category": "credential_harvest",
+      "description_zh": "索取 OTP、卡號、密碼等敏感憑證。",
+      "pattern": {
+        "lang": "multi",
+        "keywords_any": ["otp", "驗證碼", "簡訊碼", "網銀密碼", "卡號", "cvv", "one-time password"],
+        "regex_any": []
+      },
+      "impact_on_axes": { "S": 0, "C": 0, "B": 2, "K": 3, "R": -1 },
+      "impact_on_risk": { "risk_delta": 3, "reason_zh": "要求交付敏感憑證，風險極高。" },
+      "examples": {
+        "positive": ["請提供簡訊驗證碼完成解除。"],
+        "negative": ["請勿向任何人透露 OTP 驗證碼。"]
+      }
+    },
+    {
+      "rule_id": "REMOTE-APP-INSTALL-009",
+      "enabled": true,
+      "category": "remote_control",
+      "description_zh": "要求安裝 App 或遠端控制工具。",
+      "pattern": {
+        "lang": "multi",
+        "keywords_any": ["下載app", "安裝app", "遠端協助", "teamviewer", "anydesk"],
+        "regex_any": []
+      },
+      "impact_on_axes": { "S": 0, "C": 0, "B": 2, "K": 2, "R": -1 },
+      "impact_on_risk": { "risk_delta": 2, "reason_zh": "安裝遠端工具可能導致帳戶被接管。" },
+      "examples": {
+        "positive": ["請安裝 TeamViewer 由客服協助操作。"],
+        "negative": ["請至官方商店自行更新銀行 App。"]
+      }
+    },
+    {
+      "rule_id": "GOV-LEGAL-THREAT-010",
+      "enabled": true,
+      "category": "authority_threat",
+      "description_zh": "假冒政府或司法機關，使用罰款法辦恐嚇。",
+      "pattern": {
+        "lang": "zh-TW",
+        "keywords_any": ["法辦", "移送", "罰款", "扣押", "檢警", "國稅局通知"],
+        "regex_any": []
+      },
+      "impact_on_axes": { "S": 1, "C": 1, "B": 1, "K": 2, "R": 0 },
+      "impact_on_risk": { "risk_delta": 2, "reason_zh": "權威恐嚇結合付款要求，疑似政府冒名詐騙。" },
+      "examples": {
+        "positive": ["若今日未繳納將移送法辦。"],
+        "negative": ["法院正式通知請依公文流程處理。"]
+      }
+    },
+    {
+      "rule_id": "MONEY-TRANSFER-011",
+      "enabled": true,
+      "category": "money_movement",
+      "description_zh": "要求立即轉帳、匯款、儲值。",
+      "pattern": {
+        "lang": "multi",
+        "keywords_any": ["轉帳", "匯款", "儲值", "付款", "pay now", "wire transfer"],
+        "regex_any": []
+      },
+      "impact_on_axes": { "S": 0, "C": 0, "B": 1, "K": 2, "R": 0 },
+      "impact_on_risk": { "risk_delta": 2, "reason_zh": "直接金流指令需高警覺。" },
+      "examples": {
+        "positive": ["請先匯款 5 萬啟用帳戶。"],
+        "negative": ["請至官方櫃台辦理繳費。"]
+      }
+    },
+    {
+      "rule_id": "OFFICIAL-VERIFIABLE-012",
+      "enabled": true,
+      "category": "official_verification",
+      "description_zh": "明確要求使用官方 App/網站/客服複核，降低風險。",
+      "pattern": {
+        "lang": "multi",
+        "keywords_any": ["官方app", "官方網站", "卡背電話", "165", "official app", "official website"],
+        "regex_any": []
+      },
+      "impact_on_axes": { "S": 1, "C": 1, "B": 1, "K": 0, "R": 2 },
+      "impact_on_risk": { "risk_delta": -1, "reason_zh": "訊息導向官方可稽核管道，有助降低風險。" },
+      "examples": {
+        "positive": ["請改用官方 App 與卡背電話確認。"],
+        "negative": ["請點陌生連結立即完成驗證。"]
+      }
+    }
+  ]
+}
