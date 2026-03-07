@@ -107,5 +107,34 @@
     };
   }
 
-  global.SCBKREngine = { analyzeMessage, calculateRisk };
+  async function callLLMExplain(result) {
+    // AWS integration hook (placeholder):
+    // This function intentionally returns null for now.
+    // In production, replace with fetch() to API Gateway/Lambda endpoint.
+    void result;
+    return null;
+  }
+
+  async function analyzeWithOptionalLLM(inputText, options = { useLLM: false }) {
+    const baseResult = analyzeMessage(inputText);
+    if (!options || !options.useLLM) return baseResult;
+
+    try {
+      const llmExtra = await callLLMExplain(baseResult);
+      if (llmExtra && typeof llmExtra === "object") {
+        // Expected future response shape:
+        // {
+        //   explanation: "plain-language summary",
+        //   extraEvidence: ["..."],
+        //   extraActions: ["..."]
+        // }
+        baseResult.llm = llmExtra;
+      }
+    } catch (e) {
+      console.error("LLM explanation failed", e);
+    }
+    return baseResult;
+  }
+
+  global.SCBKREngine = { analyzeMessage, analyzeWithOptionalLLM, callLLMExplain, calculateRisk };
 })(window);
