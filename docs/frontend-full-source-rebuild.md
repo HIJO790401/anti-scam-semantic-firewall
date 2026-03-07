@@ -1,3 +1,10 @@
+# Frontend Full Source Rebuild
+
+---
+
+## FILE: index.html
+
+```
 <!DOCTYPE html>
 <html lang="zh-Hant" data-mode="standard">
 <head>
@@ -368,40 +375,6 @@
       gap: 8px;
     }
 
-    .toggle-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
-      align-items: center;
-    }
-
-    .toggle-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      color: var(--text-soft);
-      background: rgba(15, 23, 42, 0.86);
-      border: 1px solid rgba(75, 85, 99, 0.95);
-      border-radius: 999px;
-      padding: 4px 10px;
-    }
-
-    .llm-note {
-      margin-top: 8px;
-      font-size: 11px;
-      color: var(--text-faint);
-    }
-
-    .llm-box {
-      margin-top: 8px;
-      border: 1px dashed rgba(59, 130, 246, 0.6);
-      border-radius: 12px;
-      padding: 8px 10px;
-      background: rgba(30, 64, 175, 0.12);
-    }
-
     .btn {
       border-radius: 999px;
       border: 1px solid rgba(148, 163, 184, 0.7);
@@ -732,26 +705,6 @@
       word-break: break-all;
     }
 
-    #apiPacketPanel {
-      display: none;
-      margin-top: 8px;
-      padding-top: 6px;
-      border-top: 1px dashed rgba(59, 130, 246, 0.6);
-    }
-
-    #apiPacketJson {
-      margin-top: 6px;
-      padding: 8px;
-      border-radius: 10px;
-      background: rgba(30, 64, 175, 0.18);
-      border: 1px solid rgba(96, 165, 250, 0.55);
-      font-size: 10px;
-      color: var(--text-main);
-      font-family: var(--font-mono);
-      white-space: pre-wrap;
-      word-break: break-all;
-    }
-
     .hint-senior-hero {
       display: none;
       font-size: 13px;
@@ -935,20 +888,21 @@
           <div class="char-counter" id="charCounter">0 字 / chars</div>
           <div class="btn-row">
             <button class="btn btn-secondary" id="clearBtn" type="button">
-              <span>清除（Clear）</span>
+              <span>清除內容</span>
+              <span class="en-label">Clear</span>
             </button>
             <button class="btn btn-primary" id="analyzeBtn" type="button">
-              <span>分析（Analyze）</span>
+              <span>分析這則訊息</span>
+              <span class="en-label">Analyze</span>
             </button>
             <button class="btn btn-secondary" id="exportBtn" type="button" style="display:none;">
-              <span data-i18n="btn.export">匯出報告（Export）</span>
+              <span data-i18n="btn.export">匯出報告</span>
             </button>
           </div>
         </div>
         <div class="btn-row" id="seniorVoiceRow" style="display:none;margin-top:10px;">
-          <button class="btn btn-secondary" id="speakBtn" type="button" data-i18n="btn.speak">朗讀風險結果（Read Risk）</button>
+          <button class="btn btn-secondary" id="speakBtn" type="button" data-i18n="btn.speak">朗讀風險結果</button>
           <button class="btn btn-secondary" id="stopSpeakBtn" type="button" data-i18n="btn.stopSpeak">停止朗讀</button>
-          <button class="btn btn-secondary" id="speakInputBtn" type="button">朗讀這段訊息（Read Message）</button>
         </div>
       </section>
 
@@ -1043,16 +997,6 @@
           </ul>
         </div>
 
-                <div style="margin-top: 10px;">
-          <div class="section-title">命中規則｜Triggered Rules</div>
-          <div class="section-subtitle">
-            列出 rule_id、category 與理由，確保分析可回放、可審計。
-          </div>
-          <ul class="list" id="triggeredRulesList">
-            <li class="list-item">尚未分析。</li>
-          </ul>
-        </div>
-
         <div style="margin-top: 10px;">
           <div class="section-title">行動建議｜Action Guidance</div>
           <div class="section-subtitle">
@@ -1065,7 +1009,7 @@
           </ul>
         </div>
 
-<div style="margin-top: 10px;">
+        <div style="margin-top: 10px;">
           <div class="section-title">角色治理｜Role Governance Ex(y)=π</div>
           <div class="role-note" id="roleNote">
             在這個 Demo 裡，<strong>AI / 模型永遠只是輔助工具層</strong>，真正做決定的人是
@@ -1074,17 +1018,6 @@
             <strong>official channels and human review</strong>.
           </div>
           <div id="proDebug"></div>
-
-          <div style="margin-top: 10px;" id="auditInsightBlock">
-            <div class="section-title">審計與洞察｜Audit & Insight</div>
-            <div class="section-subtitle" id="auditInsightPlaceholder">尚未產生 2.3 審計資料。</div>
-            <div class="kv-row"><div class="kv-key">Rules Version</div><div class="kv-val" id="auditRulesVersion">-</div></div>
-            <div class="kv-row"><div class="kv-key">Triggered Count</div><div class="kv-val" id="auditTriggeredCount">0</div></div>
-            <div class="kv-row"><div class="kv-key">Latency</div><div class="kv-val" id="auditLatency">0 ms</div></div>
-            <div class="kv-row"><div class="kv-key">Audit Hash</div><div class="kv-val" id="auditHash">-</div></div>
-            <div class="kv-row"><div class="kv-key">Insight (ZH)</div><div class="kv-val" id="insightZh">-</div></div>
-            <div class="kv-row"><div class="kv-key">Insight (EN)</div><div class="kv-val" id="insightEn">-</div></div>
-          </div>
         </div>
       </section>
     </main>
@@ -1095,7 +1028,7 @@
   <script src="js/examples-loader.js"></script>
   <script src="js/voice.js"></script>
   <script src="js/report-export.js"></script>
-    <script>
+  <script>
     (async function () {
       const htmlEl = document.documentElement;
       const inputEl = document.getElementById("inputText");
@@ -1105,7 +1038,6 @@
       const exportBtn = document.getElementById("exportBtn");
       const speakBtn = document.getElementById("speakBtn");
       const stopSpeakBtn = document.getElementById("stopSpeakBtn");
-      const speakInputBtn = document.getElementById("speakInputBtn");
       const seniorVoiceRow = document.getElementById("seniorVoiceRow");
       const langSwitcher = document.getElementById("langSwitcher");
       const modeButtons = document.querySelectorAll("[data-mode-btn]");
@@ -1115,20 +1047,42 @@
       const riskLabel = document.getElementById("riskLabel");
       const riskMainLine = document.getElementById("riskMainLine");
       const riskSubLine = document.getElementById("riskSubLine");
+
       const flagS = document.getElementById("flagS");
       const flagC = document.getElementById("flagC");
       const flagB = document.getElementById("flagB");
       const flagK = document.getElementById("flagK");
       const flagR = document.getElementById("flagR");
+
       const scbkrSeniorList = document.getElementById("scbkrSeniorList");
       const evidenceList = document.getElementById("evidenceList");
-      const triggeredRulesList = document.getElementById("triggeredRulesList");
       const actionList = document.getElementById("actionList");
       const roleNote = document.getElementById("roleNote");
       const proDebug = document.getElementById("proDebug");
 
       let currentMode = "standard";
       let lastResult = null;
+
+      function actionGuidanceByRisk(risk) {
+        if (risk === "SAFE") return [
+          "如果你完全看得懂內容，且確認是你主動申請的服務，可以依照正常流程進行。",
+          "若你「看不懂」「沒印象申請」或心裡覺得怪，請改用官方 App 或卡片背面電話再次確認。",
+        ];
+        if (risk === "RISK") return [
+          "暫停所有操作，不要在這個訊息裡點任何連結或輸入資料。",
+          "請自行輸入銀行官方網址，或開啟已安裝的官方 App 重新登入確認。",
+          "如果你是長輩或覺得不放心，請先把訊息給家人看，一起判斷。",
+        ];
+        if (risk === "FATAL") return [
+          "立刻停止轉帳、不要提供任何密碼／驗證碼。",
+          "關閉這個訊息中的所有連結與視窗，改由官方 App 或卡片背面電話聯繫銀行。",
+          "如果你已經轉出款項或提供資料，請儘快撥打 165 反詐騙專線或報警。",
+        ];
+        return [
+          "在你確認對方真實身分之前，不要轉帳、不點連結、不提供任何驗證碼。",
+          "直接撥打官方客服專線或 165 反詐騙專線，轉述整段訊息請對方協助判斷。",
+        ];
+      }
 
       function setMode(mode) {
         currentMode = mode;
@@ -1142,11 +1096,11 @@
         seniorVoiceRow.style.display = mode === "senior" ? "inline-flex" : "none";
 
         if (mode === "pro") {
-          modeLabel.textContent = "專業版 PRO – 顯示 SCBKR 分數、命中規則與 trace，支援審計回放。";
+          modeLabel.textContent = "專業版 PRO – 顯示完整 SCBKR 責任鏈、風險線索與原始規則匹配資訊，方便風控與治理團隊檢閱。";
         } else if (mode === "senior") {
-          modeLabel.textContent = "長輩安心版 SENIOR SAFE – 大字提示與朗讀，先查證再操作。";
+          modeLabel.textContent = "長輩安心版 SENIOR SAFE – 大字體、中文為主，用簡單句子提醒「看不懂就不要做，先問家人或官方」。";
         } else {
-          modeLabel.textContent = "標準版 STANDARD – 中英雙語提示，保留可解釋分析流程。";
+          modeLabel.textContent = "標準版 STANDARD – 一般使用者友善介面，中英文雙語提示。";
         }
       }
 
@@ -1154,137 +1108,92 @@
         charCounter.textContent = `${inputEl.value.length} 字 / chars`;
       }
 
-      function setFlag(el, score, axis) {
-        let cls = "flag-ok";
-        const n = Number(score);
-        if (n <= 0) cls = "flag-bad";
-        else if (n === 1) cls = "flag-warn";
-        el.className = `scbkr-flag ${cls}`;
-        el.textContent = `${axis}: ${score}`;
-      }
-
-      function renderList(target, items, formatter) {
-        target.innerHTML = "";
-        (items && items.length ? items : [null]).forEach((item) => {
-          const li = document.createElement("li");
-          li.className = "list-item";
-          li.textContent = item ? formatter(item) : "尚未分析";
-          target.appendChild(li);
-        });
+      function setFlag(el, ok, okText, failText) {
+        el.className = `scbkr-flag ${ok ? "flag-ok" : "flag-bad"}`;
+        el.textContent = ok ? okText : failText;
       }
 
       function renderResult(result) {
         riskBadge.classList.remove("safe", "risk", "fatal", "non-closable");
         riskBadge.classList.add(result.riskDisplay.badgeClass);
-        riskLabel.textContent = `${result.riskDisplay.label}｜Score ${result.riskScore}`;
+        riskLabel.textContent = result.riskDisplay.label;
         riskMainLine.textContent = result.riskDisplay.main;
         riskSubLine.textContent = result.riskDisplay.sub;
 
-        setFlag(flagS, result.scbkr.S, "S");
-        setFlag(flagC, result.scbkr.C, "C");
-        setFlag(flagB, result.scbkr.B, "B");
-        setFlag(flagK, result.scbkr.K, "K");
-        setFlag(flagR, result.scbkr.R, "R");
+        setFlag(flagS, result.scbkr.S, "有主體描述", "主體不清 / 可能偽裝官方");
+        setFlag(flagC, result.scbkr.C, "有說明聯絡原因", "聯絡原因模糊 / 未交代");
+        setFlag(flagB, result.scbkr.B, "有具體行動要求", "沒有說清楚要做到哪一步");
+        setFlag(flagK, result.scbkr.K, "提到風險／代價", "未說明錯信可能造成的損失");
+        setFlag(flagR, result.scbkr.R, "有留下責任／客服資訊", "沒有說明出事誰負責");
 
         scbkrSeniorList.innerHTML = `
-          <li>S 主體（Subject）分數：${result.scbkr.S}</li>
-          <li>C 原因（Cause）分數：${result.scbkr.C}</li>
-          <li>B 邊界（Boundary）分數：${result.scbkr.B}</li>
-          <li>K 成本（Cost）分數：${result.scbkr.K}</li>
-          <li>R 責任（Responsibility）分數：${result.scbkr.R}</li>`;
+          <li>${result.scbkr.S ? "主體有提到官方或機構名稱。" : "主體沒有清楚自我介紹或來源可疑。"}</li>
+          <li>${result.scbkr.C ? "有稍微解釋聯絡原因。" : "沒有說明為什麼要聯絡你。"}</li>
+          <li>${result.scbkr.B ? "有具體請你做什麼（點連結／轉帳／提供資訊）。" : "行動要求不明或藏在話術裡。"}</li>
+          <li>${result.scbkr.K ? "有提到凍結、損失或罰款等代價。" : "沒有講如果是假的你會損失什麼。"}</li>
+          <li>${result.scbkr.R ? "有留下客服或聯繫管道，但仍需確認是否為真正官方。" : "完全沒說出事誰負責，只要你照著做就可能自己全扛。"}</li>`;
 
-        renderList(evidenceList, result.coreReasonsZh, (text) => text);
-        renderList(triggeredRulesList, result.triggeredRules, (item) => `${item.rule_id} [${item.category}]：${item.reason_zh}`);
+        evidenceList.innerHTML = "";
+        (result.reasons.length ? result.reasons : ["目前未偵測到明顯詐騙語意特徵，但仍建議你養成『看不懂就先暫停』的習慣。"]).forEach((text) => {
+          const li = document.createElement("li");
+          li.className = "list-item";
+          li.textContent = text;
+          evidenceList.appendChild(li);
+        });
 
-        const actions = [
-          "不要直接點訊息內連結，改用官方 App / 官方網站。",
-          "不要提供 OTP、密碼、卡號或網銀憑證。",
-          "若涉及金流與急迫壓力，請先停手並撥 165 或官方客服。"
-        ];
-        renderList(actionList, actions, (text) => text);
+        const actions = actionGuidanceByRisk(result.risk);
+        result.actions = actions;
+        actionList.innerHTML = "";
+        actions.forEach((text) => {
+          const li = document.createElement("li");
+          li.className = "list-item";
+          li.textContent = text;
+          actionList.appendChild(li);
+        });
 
-        roleNote.innerHTML = `
-          Ex(y)=π：可審計、可回放、可負責。<br />
-          ${result.roleGovernance.isImpersonatingOfficial ? "疑似偽裝官方身分，請二次查證。" : "目前未強烈命中官方偽裝語彙。"}<br />
-          <strong>Model Role = Tool only</strong>；最終決策者是使用者與官方管道。`;
+        roleNote.innerHTML = '在這個 Demo 裡，<strong>AI / 模型永遠只是輔助工具層</strong>，真正做決定的人是 <strong>你自己 + 官方管道</strong>。<br />This engine helps you see the <strong>semantic risk structure</strong>, but <strong>final decisions</strong> must go through <strong>official apps, websites, call centers and human review</strong>.';
 
-        if (currentMode === "pro") {
-          proDebug.textContent = "TRACE / AUDIT:\n" + JSON.stringify({
-            riskLevel: result.riskLevel,
-            riskScore: result.riskScore,
-            scbkr: result.scbkr,
-            triggeredRules: result.triggeredRules,
-            meta: result.meta,
-          }, null, 2);
-        } else {
-          proDebug.textContent = "";
-        }
+        proDebug.textContent = currentMode === "pro" ? "DEBUG (規則匹配結果 / Rule Matches):\n" + JSON.stringify({ risk: result.risk, ...result.debug, scbkr: result.scbkr }, null, 2) : "";
       }
 
       function resetOutputs() {
         riskBadge.classList.remove("safe", "risk", "fatal", "non-closable");
         riskLabel.textContent = "未分析｜Not analyzed";
-        riskMainLine.textContent = "請先貼上訊息，並點選「分析（Analyze）」。";
-        riskSubLine.textContent = "系統會根據 Mother-Core 規則輸出可審計結果。";
-        [flagS, flagC, flagB, flagK, flagR].forEach((f, idx) => {
+        riskMainLine.textContent = "請先貼上訊息，並點選「分析這則訊息」。";
+        riskSubLine.textContent = "系統會依照語意特徵與責任鏈結構，給出 SAFE / RISK / FATAL / NON-CLOSABLE 分級。";
+        [flagS, flagC, flagB, flagK].forEach((f, i) => {
           f.className = "scbkr-flag flag-warn";
-          f.textContent = ["S:1", "C:1", "B:1", "K:1", "R:1"][idx];
+          f.textContent = ["未知 / Unknown", "模糊 / Vague", "不明 / Unclear", "潛在風險 / Risk"][i];
         });
-        renderList(evidenceList, [], () => "");
-        renderList(triggeredRulesList, [], () => "");
+        flagR.className = "scbkr-flag flag-bad";
+        flagR.textContent = "無責任說明";
       }
 
       modeButtons.forEach((btn) => btn.addEventListener("click", () => setMode(btn.getAttribute("data-mode"))));
       inputEl.addEventListener("input", updateCharCounter);
       clearBtn.addEventListener("click", () => {
         inputEl.value = "";
-        lastResult = null;
         updateCharCounter();
         resetOutputs();
+        lastResult = null;
       });
-
       analyzeBtn.addEventListener("click", () => {
         lastResult = SCBKREngine.analyzeMessage(inputEl.value);
         renderResult(lastResult);
       });
-
       exportBtn.addEventListener("click", () => {
         if (!lastResult) return alert(AppI18n.t("msg.noAnalysis"));
-        if (!ReportExport.exportReport(lastResult)) {
-          alert("匯出失敗：請允許瀏覽器開啟新視窗後重試。");
-        }
+        ReportExport.exportReport(lastResult);
       });
-
       speakBtn.addEventListener("click", () => {
         if (!lastResult) return alert(AppI18n.t("msg.noAnalysis"));
         if (!VoiceModule.speakRiskResult(lastResult, AppI18n.getCurrentLang() === "en" ? "en-US" : "zh-TW")) {
           alert(AppI18n.t("msg.noSpeech"));
         }
       });
-      speakInputBtn.addEventListener("click", () => {
-        if (!inputEl.value.trim()) return alert("請先貼上要朗讀的訊息。\nPaste a message first.");
-        if (typeof VoiceModule.speakText === "function") {
-          if (!VoiceModule.speakText(inputEl.value, AppI18n.getCurrentLang() === "en" ? "en-US" : "zh-TW")) {
-            alert(AppI18n.t("msg.noSpeech"));
-          }
-        } else {
-          const fake = { risk: "MESSAGE", actions: [inputEl.value] };
-          if (!VoiceModule.speakRiskResult(fake, AppI18n.getCurrentLang() === "en" ? "en-US" : "zh-TW")) {
-            alert(AppI18n.t("msg.noSpeech"));
-          }
-        }
-      });
       stopSpeakBtn.addEventListener("click", () => VoiceModule.stopSpeaking());
 
       await AppI18n.init("zh");
-      if (typeof SCBKREngine.loadRules === "function") {
-        await SCBKREngine.loadRules();
-      }
-      const status = typeof SCBKREngine.getRulesStatus === "function" ? SCBKREngine.getRulesStatus() : { error: null };
-      if (status.error) {
-        riskSubLine.textContent = `規則檔載入失敗，使用 fallback（${status.error}）`;
-      }
-
       const loader = await ExamplesLoader.init({
         containerId: "exampleContainer",
         inputId: "inputText",
@@ -1303,3 +1212,409 @@
   </script>
 </body>
 </html>
+```
+
+---
+
+## FILE: js/scbkr-engine.js
+
+```
+(function (global) {
+  const urgentKw = ["立即", "馬上", "立刻", "緊急", "限時", "最後通知", "within", "urgent", "asap", "24小時", "10分鐘", "幾分鐘內"];
+  const moneyKw = ["轉帳", "匯款", "款項", "金額", "帳戶", "收款", "付款", "繳費", "投資", "獲利", "保證獲利", "驗證碼", "one-time password", "otp", "銀行卡", "信用卡"];
+  const appKw = ["下載 app", "安裝 app", "安裝應用程式", "遠端協助", "teamviewer"];
+  const linkKw = ["http://", "https://", "網址", "link", "點選連結", "點擊連結"];
+  const officialKw = ["銀行", "郵局", "警察局", "法院", "檢察署", "國稅局", "官方", "客服"];
+  const askSecretKw = ["密碼", "驗證碼", "簡訊碼", "簡訊認證", "卡號", "背面三碼", "cvv"];
+  const threatKw = ["凍結", "停用", "停權", "鎖定", "罰款", "罰金", "沒收", "追討"];
+
+  function hitAny(text, arr) {
+    return arr.some((kw) => text.includes(kw.toLowerCase()));
+  }
+
+  function calculateRisk(scbkrFlags, patterns) {
+    const flagCount = Object.values(scbkrFlags).filter(Boolean).length;
+    if ((patterns.hasMoney || patterns.asksSecret) && (patterns.hasLink || patterns.hasApp) && patterns.hasUrgent) {
+      return "FATAL";
+    }
+    if (patterns.hasAnyScamPattern && flagCount <= 2) {
+      return "NON-CLOSABLE";
+    }
+    if (patterns.hasAnyScamPattern) {
+      return "RISK";
+    }
+    return "SAFE";
+  }
+
+  function analyzeMessage(inputText) {
+    const text = String(inputText || "").toLowerCase();
+
+    const hasUrgent = hitAny(text, urgentKw);
+    const hasMoney = hitAny(text, moneyKw);
+    const hasApp = hitAny(text, appKw);
+    const hasLink = hitAny(text, linkKw);
+    const hasOfficial = hitAny(text, officialKw);
+    const asksSecret = hitAny(text, askSecretKw);
+    const hasThreat = hitAny(text, threatKw);
+
+    const hasAnyScamPattern = hasMoney || hasApp || hasLink || asksSecret || hasThreat;
+
+    const hasReason = text.includes("因為") || text.includes("由於") || text.includes("通知") || text.includes("告知") || text.includes("提醒");
+    const hasBoundary = text.includes("請在") || text.includes("請於") || text.includes("請點選") || text.includes("請點擊") || text.includes("請完成") || text.includes("請輸入") || text.includes("請提供");
+    const mentionsCost = hasThreat || text.includes("損失") || text.includes("風險") || text.includes("金額") || text.includes("款項");
+    const mentionsResp = text.includes("客服") || text.includes("服務專員") || text.includes("專線") || text.includes("如有疑問") || text.includes("如有任何問題");
+
+    const scbkr = {
+      S: hasOfficial,
+      C: hasReason,
+      B: hasBoundary,
+      K: mentionsCost,
+      R: mentionsResp,
+    };
+
+    const reasons = [];
+    if (hasMoney) reasons.push("訊息內容涉及轉帳／匯款／帳戶等金流行為。");
+    if (hasUrgent) reasons.push("使用「立即」「限時」「幾分鐘內」等急迫語氣。");
+    if (hasLink) reasons.push("包含連結或要求你點選網址，可能導向偽造網站。");
+    if (hasApp) reasons.push("要求下載或安裝 App，可能導致裝置被遠端控制。");
+    if (asksSecret) reasons.push("要求提供密碼／驗證碼或卡片資訊，這在正常流程中極少見。");
+    if (!scbkr.S) reasons.push("沒有清楚可驗證的主體（例如：官方銀行 App 名稱）。");
+    if (!scbkr.R) reasons.push("沒有說明一旦出事誰負責，責任鏈幾乎是空的。");
+
+    const risk = calculateRisk(scbkr, {
+      hasUrgent,
+      hasMoney,
+      hasApp,
+      hasLink,
+      asksSecret,
+      hasThreat,
+      hasAnyScamPattern,
+    });
+
+    const riskDisplay = {
+      SAFE: {
+        label: "SAFE｜目前未偵測到明顯詐騙語意",
+        main: "這則訊息目前看起來比較像一般通知，不包含明顯詐騙關鍵語意。",
+        sub: "即便是 SAFE，若你本人「看不懂內容」或覺得不安，仍建議優先改走官方管道確認。",
+        badgeClass: "safe",
+      },
+      RISK: {
+        label: "RISK｜中度風險，建議提高警覺",
+        main: "這則訊息包含多個可疑語意特徵，建議不要直接依照指示操作，優先改走官方管道。",
+        sub: "請不要在這則訊息中點連結或輸入任何密碼／驗證碼，改由銀行 App、官方網站或卡片背面電話重新確認。",
+        badgeClass: "risk",
+      },
+      FATAL: {
+        label: "FATAL｜高度風險，建議立刻停止",
+        main: "這則訊息同時具備「急迫感＋金流操作＋非官方管道」等強烈詐騙特徵，非常危險。",
+        sub: "請立刻停止所有轉帳與輸入資料的動作，不要點任何連結，直接聯繫官方客服或警政機關。",
+        badgeClass: "fatal",
+      },
+      "NON-CLOSABLE": {
+        label: "NON-CLOSABLE｜主體與責任不清，暫停所有高風險操作",
+        main: "這則訊息沒有說清楚誰在跟你說話、為什麼、出事誰負責，責任鏈幾乎是斷裂的。",
+        sub: "在你確認對方真實身分與官方管道之前，請不要轉帳、不提供密碼或任何驗證碼。",
+        badgeClass: "non-closable",
+      },
+    };
+
+    return {
+      inputText,
+      risk,
+      reasons,
+      scbkr,
+      debug: { hasUrgent, hasMoney, hasApp, hasLink, asksSecret, hasThreat, hasAnyScamPattern },
+      riskDisplay: riskDisplay[risk],
+    };
+  }
+
+  global.SCBKREngine = { analyzeMessage, calculateRisk };
+})(window);
+```
+
+---
+
+## FILE: js/report-export.js
+
+```
+(function (global) {
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function exportReport(resultObj) {
+    if (!resultObj) return;
+    const win = window.open("", "_blank", "noopener,noreferrer");
+    if (!win) return;
+
+    const evidences = (resultObj.reasons || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+    const actions = (resultObj.actions || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+    const scbkrEntries = Object.entries(resultObj.scbkr || {}).map(([k, v]) => `<li><strong>${k}</strong>: ${v ? "✅" : "⚠️"}</li>`).join("");
+
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Anti-Scam Report</title>
+      <style>body{font-family:system-ui;padding:24px;line-height:1.5;}h1{margin:0 0 12px;}h2{margin:18px 0 6px;}ul{margin-top:4px;}</style>
+      </head><body>
+      <h1>Anti-Scam Analysis Report</h1>
+      <p><strong>Risk Level:</strong> ${escapeHtml(resultObj.risk)}</p>
+      <h2>SCBKR</h2><ul>${scbkrEntries}</ul>
+      <h2>Evidence</h2><ul>${evidences || "<li>None</li>"}</ul>
+      <h2>Action Guidance</h2><ul>${actions || "<li>None</li>"}</ul>
+      </body></html>`);
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 250);
+  }
+
+  global.ReportExport = { exportReport };
+})(window);
+```
+
+---
+
+## FILE: js/i18n.js
+
+```
+(function (global) {
+  let currentLang = "zh";
+  const bundles = {};
+  const listeners = [];
+
+  async function loadLang(lang) {
+    if (!bundles[lang]) {
+      const res = await fetch(`i18n/${lang}.json`);
+      bundles[lang] = await res.json();
+    }
+    return bundles[lang];
+  }
+
+  function t(key) {
+    return (bundles[currentLang] && bundles[currentLang][key]) || key;
+  }
+
+  function applyI18nToDom() {
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      el.textContent = t(el.getAttribute("data-i18n"));
+    });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+      el.setAttribute("placeholder", t(el.getAttribute("data-i18n-placeholder")));
+    });
+  }
+
+  async function setLanguage(lang) {
+    currentLang = lang;
+    await loadLang(lang);
+    applyI18nToDom();
+    listeners.forEach((cb) => cb(lang));
+  }
+
+  function onChange(cb) {
+    listeners.push(cb);
+  }
+
+  async function init(defaultLang) {
+    await loadLang(defaultLang || currentLang);
+    currentLang = defaultLang || currentLang;
+    applyI18nToDom();
+  }
+
+  global.AppI18n = { init, setLanguage, t, onChange, getCurrentLang: () => currentLang };
+})(window);
+```
+
+---
+
+## FILE: js/examples-loader.js
+
+```
+(function (global) {
+  let examples = [];
+
+  async function init(options) {
+    const { containerId, inputId, getLang, t } = options;
+    const container = document.getElementById(containerId);
+    const inputEl = document.getElementById(inputId);
+    if (!container || !inputEl) return;
+
+    const res = await fetch("data/examples.json");
+    examples = await res.json();
+
+    const label = document.createElement("label");
+    label.setAttribute("for", "exampleSelect");
+    label.className = "card-caption";
+    label.style.display = "block";
+    label.style.marginTop = "10px";
+    label.setAttribute("data-example-label", "1");
+
+    const select = document.createElement("select");
+    select.id = "exampleSelect";
+    select.className = "textarea";
+    select.style.minHeight = "unset";
+    select.style.height = "40px";
+    select.style.padding = "8px 10px";
+
+    container.appendChild(label);
+    container.appendChild(select);
+
+    function renderSelect() {
+      const lang = getLang();
+      label.textContent = t("examples.label");
+      select.innerHTML = "";
+      const placeholder = document.createElement("option");
+      placeholder.value = "";
+      placeholder.textContent = t("examples.placeholder");
+      select.appendChild(placeholder);
+
+      examples.forEach((example) => {
+        const opt = document.createElement("option");
+        opt.value = example.id;
+        opt.textContent = lang === "en" ? example.label_en : example.label_zh;
+        select.appendChild(opt);
+      });
+    }
+
+    select.addEventListener("change", () => {
+      const selected = examples.find((example) => example.id === select.value);
+      if (!selected) return;
+      const lang = getLang();
+      inputEl.value = lang === "en" ? selected.text_en : selected.text_zh;
+      inputEl.dispatchEvent(new Event("input"));
+    });
+
+    renderSelect();
+    return { rerender: renderSelect };
+  }
+
+  global.ExamplesLoader = { init };
+})(window);
+```
+
+---
+
+## FILE: js/voice.js
+
+```
+(function (global) {
+  function isSupported() {
+    return "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+  }
+
+  function stopSpeaking() {
+    if (isSupported()) {
+      window.speechSynthesis.cancel();
+    }
+  }
+
+  function speakRiskResult(resultObj, lang) {
+    if (!isSupported() || !resultObj) return false;
+    stopSpeaking();
+    const advice = (resultObj.actions || []).slice(0, 3).join("。") || "請改用官方管道再次確認";
+    const text = `風險等級：${resultObj.risk}。重點建議：${advice}。`;
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = lang || "zh-TW";
+    utter.rate = 0.95;
+    utter.pitch = 1;
+    window.speechSynthesis.speak(utter);
+    return true;
+  }
+
+  global.VoiceModule = { speakRiskResult, stopSpeaking, isSupported };
+})(window);
+```
+
+---
+
+## FILE: i18n/zh.json
+
+```
+{
+  "lang.current": "中文",
+  "lang.switch": "語言",
+  "examples.label": "快速載入範例",
+  "examples.placeholder": "請選擇範例訊息",
+  "btn.export": "匯出報告",
+  "btn.speak": "朗讀風險結果",
+  "btn.stopSpeak": "停止朗讀",
+  "msg.noAnalysis": "請先完成分析，再使用這個功能。",
+  "msg.noSpeech": "目前瀏覽器不支援語音朗讀。"
+}
+```
+
+---
+
+## FILE: i18n/en.json
+
+```
+{
+  "lang.current": "English",
+  "lang.switch": "Language",
+  "examples.label": "Quick Examples",
+  "examples.placeholder": "Choose an example message",
+  "btn.export": "Export Report",
+  "btn.speak": "Read Risk Result",
+  "btn.stopSpeak": "Stop Reading",
+  "msg.noAnalysis": "Please run analysis first.",
+  "msg.noSpeech": "Speech synthesis is not supported in this browser."
+}
+```
+
+---
+
+## FILE: data/examples.json
+
+```
+[
+  {
+    "id": "fake-bank-freeze",
+    "category": "bank",
+    "label_zh": "假銀行：帳戶凍結通知",
+    "label_en": "Fake bank: account frozen notice",
+    "text_zh": "【銀行通知】您的帳戶異常，將於10分鐘內凍結，請立即點選 https://safe-bank-check.com 完成驗證。",
+    "text_en": "[Bank Alert] Your account is abnormal and will be frozen in 10 minutes. Click https://safe-bank-check.com now to verify."
+  },
+  {
+    "id": "fake-investment-guaranteed",
+    "category": "investment",
+    "label_zh": "假投資：保證獲利群組",
+    "label_en": "Fake investment: guaranteed profit group",
+    "text_zh": "加入老師投資群，保證每週獲利20%，今天最後一天，先匯款5萬元啟用VIP帳戶。",
+    "text_en": "Join our VIP investment group for guaranteed 20% weekly return. Last day today, transfer USD 1,500 to activate."
+  },
+  {
+    "id": "fake-relative-money",
+    "category": "friend",
+    "label_zh": "假親友：急借錢",
+    "label_en": "Fake family/friend urgent loan",
+    "text_zh": "我是你表哥，手機壞掉用新號碼，現在急用錢，先轉3萬到這個帳戶，晚點再跟你說。",
+    "text_en": "Hey, this is your cousin from a new number. I need money urgently, please transfer 900 now and I will explain later."
+  },
+  {
+    "id": "fake-customs-package",
+    "category": "customs",
+    "label_zh": "假關務局：包裹卡關",
+    "label_en": "Fake customs: parcel held",
+    "text_zh": "關務局通知：您的國際包裹因資料不符被扣留，請立即繳交保證金並提供身分證與卡號完成通關。",
+    "text_en": "Customs notice: your parcel is held due to mismatched documents. Pay a deposit and provide ID/card details now to clear it."
+  },
+  {
+    "id": "phishing-login-link",
+    "category": "phishing",
+    "label_zh": "釣魚網站：登入驗證",
+    "label_en": "Phishing site: login verification",
+    "text_zh": "您的信箱即將停用，請於24小時內登入下列網址更新密碼：http://mail-security-check.net",
+    "text_en": "Your mailbox will be deactivated. Sign in within 24 hours at http://mail-security-check.net to update your password."
+  },
+  {
+    "id": "fake-government-fine",
+    "category": "government",
+    "label_zh": "假政府：違規罰款",
+    "label_en": "Fake authority: violation fine",
+    "text_zh": "您有未繳交通罰單，若今日未付款將移送法辦，請點連結輸入信用卡資料完成繳納。",
+    "text_en": "You have an unpaid traffic fine. If not paid today, legal action will begin. Open the link and enter your credit card details now."
+  }
+]
+```
