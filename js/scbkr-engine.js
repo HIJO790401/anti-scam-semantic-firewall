@@ -193,6 +193,19 @@
     // v3 apiPacket end
     return resultObj;
   }
+  // v3 aws llm hook end
+
+  // v3 apiPacket start
+  global.runScbkrApiPacket = function (inputText) {
+    try {
+      const result = analyzeMessage(inputText);
+      return result && result.apiPacket ? result.apiPacket : buildSafeAnalyzeResult(inputText).apiPacket;
+    } catch (err) {
+      console.error("runScbkrApiPacket failed", err);
+      return buildSafeAnalyzeResult(inputText).apiPacket;
+    }
+  };
+  // v3 apiPacket end
 
 
 
