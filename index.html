@@ -1304,6 +1304,14 @@
           lastResult = SCBKREngine.analyzeMessage(inputEl.value);
         }
         renderResult(lastResult);
+        if (lastResult && lastResult.apiPacket && apiPacketJson) {
+          apiPacketJson.textContent = JSON.stringify(lastResult.apiPacket, null, 2);
+        }
+      }
+
+      analyzeBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        runAnalysis();
       });
       exportBtn.addEventListener("click", () => {
         if (!lastResult) return alert(AppI18n.t("msg.noAnalysis"));
