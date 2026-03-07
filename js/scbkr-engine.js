@@ -313,12 +313,27 @@
     };
     const insight = buildInsight(risk, ruleClusters);
 
+    const riskScoreMap = { SAFE: 10, RISK: 55, FATAL: 92, "NON-CLOSABLE": 70 };
+    const triggeredRules = (reasons || []).map((reason, idx) => ({
+      rule_id: `R-${idx + 1}`,
+      category: (ruleClusters[idx % Math.max(1, ruleClusters.length)] || "semantic").toUpperCase(),
+      reason_zh: reason,
+    }));
+
     const resultObj = {
       inputText,
       risk,
+      riskLevel: risk,
+      riskScore: riskScoreMap[risk] || 0,
       reasons,
+      coreReasonsZh: reasons.slice(),
+      triggeredRules,
       scbkr,
       debug: { hasUrgent, hasMoney, hasApp, hasLink, asksSecret, hasThreat, hasAnyScamPattern },
+      meta: { hasUrgent, hasMoney, hasApp, hasLink, asksSecret, hasThreat, hasAnyScamPattern },
+      roleGovernance: {
+        isImpersonatingOfficial: !!(hasOfficial && (hasLink || asksSecret || hasUrgent))
+      },
       suspiciousKeywordCount,
       riskDisplay: riskDisplay[risk],
       ruleClusters,
@@ -342,214 +357,20 @@
     // v3 apiPacket end
     return resultObj;
   }
-  // v3 aws llm hook end
-
-  // v3 apiPacket start
-  global.runScbkrApiPacket = function (inputText) {
-    try {
-      const result = analyzeMessage(inputText);
-      return result && result.apiPacket ? result.apiPacket : buildSafeAnalyzeResult(inputText).apiPacket;
-    } catch (err) {
-      console.error("runScbkrApiPacket failed", err);
-      return buildSafeAnalyzeResult(inputText).apiPacket;
-    }
-  };
-  // v3 apiPacket end
 
 
 
-  // v3 aws llm hook start
-  function buildEmptyLlmSection(message) {
-    return {
-      enabled: false,
-      explanation: message || null,
-      extraEvidence: [],
-      extraActions: [],
-    };
+
+  let rulesStatus = { loaded: true, source: "embedded", error: null };
+
+  async function loadRules() {
+    rulesStatus = { loaded: true, source: "embedded", error: null };
+    return rulesStatus;
   }
 
-  /**
-   * 呼叫 AWS 端的 LLM 解釋服務（如果有設定）
-   * @param {string} inputText 使用者原始輸入
-   * @param {object} apiPacket 本地 v3 封包（含 SCBKR / RiskLevel / Evidence / ActionAdvice / Audit）
-   * @param {object} options { endpoint?: string, useLlm?: boolean, timeoutMs?: number }
-   */
-  async function callAwsLlmExplain(inputText, apiPacket, options = {}) {
-    const useLlm = options.useLlm ?? !!global.USE_AWS_LLM;
-    const endpoint = options.endpoint || global.AWS_LLM_ENDPOINT;
-
-    if (!useLlm || !endpoint) {
-      return buildEmptyLlmSection(null);
-    }
-
-    const controller = new AbortController();
-    const timeoutMs = options.timeoutMs || 5000;
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-    try {
-      const resp = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ inputText, apiPacket }),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!resp.ok) {
-        console.warn("AWS LLM endpoint returned non-200:", resp.status);
-        return buildEmptyLlmSection(`LLM endpoint HTTP ${resp.status}`);
-      }
-
-      const data = await resp.json();
-      return {
-        enabled: true,
-        explanation: data.explanation || null,
-        extraEvidence: Array.isArray(data.extraEvidence) ? data.extraEvidence : [],
-        extraActions: Array.isArray(data.extraActions) ? data.extraActions : [],
-      };
-    } catch (err) {
-      clearTimeout(timeoutId);
-      console.error("callAwsLlmExplain failed:", err);
-      return buildEmptyLlmSection("LLM unavailable, fallback to local rules only.");
-    }
+  function getRulesStatus() {
+    return { ...rulesStatus };
   }
-
-  /**
-   * 非破壞式 async 版本：先跑本地 analyzeMessage，再視情況呼叫 AWS LLM
-   * 不要改動原本 analyzeMessage 的實作。
-   */
-  async function analyzeMessageWithAwsLlm(inputText, options = {}) {
-    const baseResult = analyzeMessage(inputText);
-    const safeResult = baseResult || buildSafeAnalyzeResult(inputText);
-
-    const apiPacket = safeResult.apiPacket || buildAntiScamApiPacket(safeResult, inputText, 0);
-
-    if (!apiPacket.LLM) {
-      apiPacket.LLM = buildEmptyLlmSection(null);
-    }
-
-    const llmSection = await callAwsLlmExplain(inputText, apiPacket, options);
-
-    apiPacket.LLM = llmSection;
-    safeResult.apiPacket = apiPacket;
-    safeResult.llm = llmSection;
-
-    return safeResult;
-  }
-
-  global.analyzeMessageWithAwsLlm = analyzeMessageWithAwsLlm;
-  // v3 aws llm hook end
-
-  async function callLLMExplain(result) {
-    // AWS integration hook (placeholder):
-    // This function intentionally returns null for now.
-    // In production, replace with fetch() to API Gateway/Lambda endpoint.
-    void result;
-    return null;
-  }
-
-  async function analyzeWithOptionalLLM(inputText, options = { useLLM: false }) {
-    let baseResult;
-    try {
-      baseResult = analyzeMessage(inputText);
-    } catch (err) {
-      console.error("analyzeMessage failed", err);
-      baseResult = buildSafeAnalyzeResult(inputText);
-    }
-    if (!options || !options.useLLM) return baseResult;
-
-    try {
-      const llmExtra = await callLLMExplain(baseResult);
-      if (llmExtra && typeof llmExtra === "object") {
-        // Expected future response shape:
-        // {
-        //   explanation: "plain-language summary",
-        //   extraEvidence: ["..."],
-        //   extraActions: ["..."]
-        // }
-        baseResult.llm = llmExtra;
-      }
-    } catch (e) {
-      console.error("LLM explanation failed", e);
-    }
-    return baseResult;
-  }
-
-  // v3 apiPacket start
-  global.runScbkrApiPacket = function (inputText) {
-    try {
-      const result = analyzeMessage(inputText);
-      return result && result.apiPacket ? result.apiPacket : buildSafeAnalyzeResult(inputText).apiPacket;
-    } catch (err) {
-      console.error("runScbkrApiPacket failed", err);
-      return buildSafeAnalyzeResult(inputText).apiPacket;
-    }
-  };
-  // v3 apiPacket end
-
-
-
-  // v3 aws llm hook start
-  async function analyzeWithOptionalLLM(inputText, useAws) {
-    const baseResult = analyzeMessage(inputText);
-
-    if (!baseResult.apiPacket) {
-      baseResult.apiPacket = buildAntiScamApiPacket(baseResult, inputText);
-    }
-
-    if (!baseResult.llm) {
-      baseResult.llm = {
-        enabled: false,
-        explanation: null,
-        extraEvidence: [],
-        extraActions: []
-      };
-    }
-
-    if (!useAws || !AWS_LLM_ENDPOINT) return baseResult;
-
-    try {
-      const res = await fetch(AWS_LLM_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          inputText,
-          apiPacket: baseResult.apiPacket
-        })
-      });
-
-      if (!res.ok) return baseResult;
-
-      const data = await res.json();
-
-      baseResult.llm = {
-        enabled: true,
-        explanation: data?.explanation || null,
-        extraEvidence: data?.extraEvidence || [],
-        extraActions: data?.extraActions || []
-      };
-      return baseResult;
-    } catch (err) {
-      console.error(err);
-      return baseResult;
-    }
-  }
-  // v3 aws llm hook end
-
-  // v3 apiPacket start
-  global.runScbkrApiPacket = function (inputText) {
-    try {
-      const result = analyzeMessage(inputText);
-      return result && result.apiPacket ? result.apiPacket : buildSafeAnalyzeResult(inputText).apiPacket;
-    } catch (err) {
-      console.error("runScbkrApiPacket failed", err);
-      return buildSafeAnalyzeResult(inputText).apiPacket;
-    }
-  };
-  // v3 apiPacket end
-
-
 
   // v3 aws llm hook start
   async function analyzeWithOptionalLLM(inputText, useAws) {
@@ -614,6 +435,8 @@
     ...global.SCBKREngine,
     analyzeMessage,
     calculateRisk,
-    analyzeWithOptionalLLM
+    analyzeWithOptionalLLM,
+    loadRules,
+    getRulesStatus
   };
 })(window);

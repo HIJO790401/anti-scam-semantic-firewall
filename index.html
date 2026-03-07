@@ -160,6 +160,40 @@
       background: rgba(30, 64, 175, 0.12);
     }
 
+    .toggle-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+      align-items: center;
+    }
+
+    .toggle-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-soft);
+      background: rgba(15, 23, 42, 0.86);
+      border: 1px solid rgba(75, 85, 99, 0.95);
+      border-radius: 999px;
+      padding: 4px 10px;
+    }
+
+    .llm-note {
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--text-faint);
+    }
+
+    .llm-box {
+      margin-top: 8px;
+      border: 1px dashed rgba(59, 130, 246, 0.6);
+      border-radius: 12px;
+      padding: 8px 10px;
+      background: rgba(30, 64, 175, 0.12);
+    }
+
     .btn {
       border-radius: 999px;
       border: 1px solid rgba(148, 163, 184, 0.7);
@@ -379,6 +413,26 @@
       word-break: break-all;
     }
 
+    #apiPacketPanel {
+      display: none;
+      margin-top: 8px;
+      padding-top: 6px;
+      border-top: 1px dashed rgba(59, 130, 246, 0.6);
+    }
+
+    #apiPacketJson {
+      margin-top: 6px;
+      padding: 8px;
+      border-radius: 10px;
+      background: rgba(30, 64, 175, 0.18);
+      border: 1px solid rgba(96, 165, 250, 0.55);
+      font-size: 10px;
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
     .hint-senior-hero {
       display: none;
       font-size: 13px;
@@ -509,21 +563,20 @@
           <div class="char-counter" id="charCounter">0 字 / chars</div>
           <div class="btn-row">
             <button class="btn btn-secondary" id="clearBtn" type="button">
-              <span>清除內容</span>
-              <span class="en-label">Clear</span>
+              <span>清除（Clear）</span>
             </button>
             <button class="btn btn-primary" id="analyzeBtn" type="button">
-              <span>分析這則訊息</span>
-              <span class="en-label">Analyze</span>
+              <span>分析（Analyze）</span>
             </button>
             <button class="btn btn-secondary" id="exportBtn" type="button" style="display:none;">
-              <span data-i18n="btn.export">匯出報告</span>
+              <span data-i18n="btn.export">匯出報告（Export）</span>
             </button>
           </div>
         </div>
         <div class="btn-row" id="seniorVoiceRow" style="display:none;margin-top:10px;">
-          <button class="btn btn-secondary" id="speakBtn" type="button" data-i18n="btn.speak">朗讀風險結果</button>
+          <button class="btn btn-secondary" id="speakBtn" type="button" data-i18n="btn.speak">朗讀風險結果（Read Risk）</button>
           <button class="btn btn-secondary" id="stopSpeakBtn" type="button" data-i18n="btn.stopSpeak">停止朗讀</button>
+          <button class="btn btn-secondary" id="speakInputBtn" type="button">朗讀這段訊息（Read Message）</button>
         </div>
         <div class="toggle-row" aria-label="Analysis options">
           <label class="toggle-item" for="seniorModeToggle">
@@ -623,6 +676,16 @@
           </ul>
         </div>
 
+                <div style="margin-top: 10px;">
+          <div class="section-title">命中規則｜Triggered Rules</div>
+          <div class="section-subtitle">
+            列出 rule_id、category 與理由，確保分析可回放、可審計。
+          </div>
+          <ul class="list" id="triggeredRulesList">
+            <li class="list-item">尚未分析。</li>
+          </ul>
+        </div>
+
         <div style="margin-top: 10px;">
           <div class="section-title">風險簇群｜Rule Clusters</div>
           <div class="section-subtitle">用簡單群組看這段訊息落在哪些高風險模式。</div>
@@ -699,7 +762,7 @@
           </div>
         </div>
 
-        <div style="margin-top: 10px;">
+<div style="margin-top: 10px;">
           <div class="section-title">角色治理｜Role Governance Ex(y)=π</div>
           <div class="role-note" id="roleNote">
             在這個 Demo 裡，<strong>AI / 模型永遠只是輔助工具層</strong>，真正做決定的人是
@@ -719,12 +782,6 @@
             <div class="kv-row"><div class="kv-key">Insight (ZH)</div><div class="kv-val" id="insightZh">-</div></div>
             <div class="kv-row"><div class="kv-key">Insight (EN)</div><div class="kv-val" id="insightEn">-</div></div>
           </div>
-
-          <div id="apiPacketPanel">
-            <div class="section-subtitle">v3 SCBKR API 封包（JSON）</div>
-            <button class="btn btn-secondary" type="button" id="toggleApiPacketBtn">顯示 JSON</button>
-            <pre id="apiPacketJson" hidden><code></code></pre>
-          </div>
         </div>
       </section>
     </div>
@@ -732,7 +789,8 @@
 
   <script src="js/scbkr-engine.js"></script>
   <script src="js/voice.js"></script>
-  <script>
+  <script src="js/report-export.js"></script>
+    <script>
     (async function () {
       const htmlEl = document.documentElement;
       const inputEl = document.getElementById("inputText");
@@ -742,9 +800,8 @@
       const exportBtn = document.getElementById("exportBtn");
       const speakBtn = document.getElementById("speakBtn");
       const stopSpeakBtn = document.getElementById("stopSpeakBtn");
-      const seniorModeToggle = document.getElementById("seniorModeToggle");
-      const voiceEnabledToggle = document.getElementById("voiceEnabledToggle");
-      const useLLMToggle = document.getElementById("useLLMToggle");
+      const speakInputBtn = document.getElementById("speakInputBtn");
+      const seniorVoiceRow = document.getElementById("seniorVoiceRow");
       const langSwitcher = document.getElementById("langSwitcher");
       const modeButtons = document.querySelectorAll("[data-mode-btn]");
       const modeLabel = document.getElementById("modeLabel");
@@ -753,15 +810,14 @@
       const riskLabel = document.getElementById("riskLabel");
       const riskMainLine = document.getElementById("riskMainLine");
       const riskSubLine = document.getElementById("riskSubLine");
-
       const flagS = document.getElementById("flagS");
       const flagC = document.getElementById("flagC");
       const flagB = document.getElementById("flagB");
       const flagK = document.getElementById("flagK");
       const flagR = document.getElementById("flagR");
-
       const scbkrSeniorList = document.getElementById("scbkrSeniorList");
       const evidenceList = document.getElementById("evidenceList");
+      const triggeredRulesList = document.getElementById("triggeredRulesList");
       const actionList = document.getElementById("actionList");
       const ruleClustersList = document.getElementById("ruleClustersList");
       const policySeverity = document.getElementById("policySeverity");
@@ -789,27 +845,6 @@
       let lastResult = null;
       let apiPacketExpanded = false;
 
-      function actionGuidanceByRisk(risk) {
-        if (risk === "SAFE") return [
-          "如果你完全看得懂內容，且確認是你主動申請的服務，可以依照正常流程進行。",
-          "若你「看不懂」「沒印象申請」或心裡覺得怪，請改用官方 App 或卡片背面電話再次確認。",
-        ];
-        if (risk === "RISK") return [
-          "暫停所有操作，不要在這個訊息裡點任何連結或輸入資料。",
-          "請自行輸入銀行官方網址，或開啟已安裝的官方 App 重新登入確認。",
-          "如果你是長輩或覺得不放心，請先把訊息給家人看，一起判斷。",
-        ];
-        if (risk === "FATAL") return [
-          "立刻停止轉帳、不要提供任何密碼／驗證碼。",
-          "關閉這個訊息中的所有連結與視窗，改由官方 App 或卡片背面電話聯繫銀行。",
-          "如果你已經轉出款項或提供資料，請儘快撥打 165 反詐騙專線或報警。",
-        ];
-        return [
-          "在你確認對方真實身分之前，不要轉帳、不點連結、不提供任何驗證碼。",
-          "直接撥打官方客服專線或 165 反詐騙專線，轉述整段訊息請對方協助判斷。",
-        ];
-      }
-
       function setMode(mode) {
         currentMode = mode;
         htmlEl.setAttribute("data-mode", mode);
@@ -829,11 +864,11 @@
         }
 
         if (mode === "pro") {
-          modeLabel.textContent = "專業版 PRO – 顯示完整 SCBKR 責任鏈、風險線索與原始規則匹配資訊，方便風控與治理團隊檢閱。";
+          modeLabel.textContent = "專業版 PRO – 顯示 SCBKR 分數、命中規則與 trace，支援審計回放。";
         } else if (mode === "senior") {
-          modeLabel.textContent = "長輩安心版 SENIOR SAFE – 大字體、中文為主，用簡單句子提醒「看不懂就不要做，先問家人或官方」。";
+          modeLabel.textContent = "長輩安心版 SENIOR SAFE – 大字提示與朗讀，先查證再操作。";
         } else {
-          modeLabel.textContent = "標準版 STANDARD – 一般使用者友善介面，中英文雙語提示。";
+          modeLabel.textContent = "標準版 STANDARD – 中英雙語提示，保留可解釋分析流程。";
         }
 
         function setScbkrFlags(flags) {
@@ -852,197 +887,84 @@
           }
         }
 
-        function renderList(container, items) {
-          if (!container) return;
-          container.innerHTML = "";
-          (items || []).forEach((text) => {
-            const li = document.createElement("li");
-            li.textContent = text;
-            container.appendChild(li);
-          });
-        }
-
-        function renderResult(result) {
-          try {
-            if (!result) {
-              riskBadge.textContent = "未分析 | NOT ANALYZED";
-              riskBadge.className = "badge badge-neutral";
-              riskTitle.textContent = "請先貼上訊息，並點選「分析這則訊息」。";
-              riskSubtitle.textContent = "系統會依照語意特徵與責任鏈結構給出 SAFE / RISK / FATAL / NON-CLOSABLE 分級。";
-              setScbkrFlags({ S: false, C: false, B: false, K: false, R: false });
-              renderList(evidenceList, []);
-              renderList(actionList, []);
-              if (llmSection) llmSection.hidden = true;
-              if (apiPacketJson) apiPacketJson.textContent = "";
-              return;
-            }
-
-            const risk = result.risk || "SAFE";
-            const disp = result.riskDisplay || {};
-            riskBadge.textContent = disp.label || risk;
-            riskBadge.className = "badge badge-" + String(risk).toLowerCase();
-            riskTitle.textContent = disp.main || "";
-            riskSubtitle.textContent = disp.sub || "";
-
-            setScbkrFlags(result.scbkr || {});
-            renderList(evidenceList, result.reasons || []);
-
-            const mainAdvice = disp.main ? [disp.main] : [];
-            const subAdvice = disp.sub ? [disp.sub] : [];
-            renderList(actionList, [...mainAdvice, ...subAdvice]);
-
-            if (result.llm && result.llm.enabled) {
-              if (llmSection) llmSection.hidden = false;
-              if (llmExplanationText) llmExplanationText.textContent = result.llm.explanation || "";
-              renderList(llmExtraEvidence, result.llm.extraEvidence || []);
-              renderList(llmExtraActions, result.llm.extraActions || []);
-            } else if (llmSection) {
-              llmSection.hidden = true;
-              if (llmExplanationText) llmExplanationText.textContent = "";
-              renderList(llmExtraEvidence, []);
-              renderList(llmExtraActions, []);
-            }
-
-            if (apiPacketJson && window.SCBKREngine && typeof window.SCBKREngine.analyzeMessage === "function") {
-              const packet = result.apiPacket || window.SCBKREngine.analyzeMessage(result.inputText || "").apiPacket;
-              apiPacketJson.textContent = JSON.stringify(packet, null, 2);
-            }
-          } catch (err) {
-            console.error("renderResult failed", err);
-          }
-        }
-
-        async function runAnalysis() {
-          const text = (inputEl.value || "").trim();
-          if (!text) {
-            renderResult(null);
-            return;
-          }
-
-          const useLLM = !!(useAwsLlmCheckbox && useAwsLlmCheckbox.checked);
-
-          try {
-            if (!window.SCBKREngine || typeof window.SCBKREngine.analyzeWithOptionalLLM !== "function") {
-              throw new Error("SCBKREngine.analyzeWithOptionalLLM not available");
-            }
-            const result = await window.SCBKREngine.analyzeWithOptionalLLM(text, { useLLM });
-            renderResult(result);
-          } catch (err) {
-            console.error("runAnalysis failed, fallback to local analyzeMessage", err);
-            try {
-              const fallback = window.SCBKREngine && typeof window.SCBKREngine.analyzeMessage === "function"
-                ? window.SCBKREngine.analyzeMessage(text)
-                : null;
-              renderResult(fallback);
-            } catch (fallbackErr) {
-              console.error("fallback analyzeMessage failed", fallbackErr);
-              renderResult(null);
-            }
-          }
-        }
-
-        [btnStandard, btnPro, btnSenior].forEach((btn) => {
-          if (!btn) return;
-          btn.addEventListener("click", function (e) {
-            e.preventDefault();
-            const mode = btn.getAttribute("data-mode") || "standard";
-            setMode(mode);
-          });
-        });
-
-        if (ruleClustersList) {
-          const ruleClusters = result.ruleClusters || [];
-          ruleClustersList.innerHTML = ruleClusters.length
-            ? ruleClusters.map((cluster) => `<div class="pill-mini">${cluster}</div>`).join("")
-            : '<div class="pill-mini">目前沒有額外 cluster。</div>';
-        }
-
-        const policy = result.policy || {};
-        if (policySeverity) policySeverity.textContent = policy.severity || result.risk || "SAFE";
-        if (policyAction) policyAction.textContent = policy.recommendedAction || "observe";
-        if (policyEscalation) policyEscalation.textContent = String(policy.escalationLevel ?? 0);
-        if (policyHumanAdvice) policyHumanAdvice.textContent = policy.humanAdviceZh || "-";
-
-        const auditInfo = result.audit || {};
-        const insight = result.insight || {};
-        if (auditInsightPlaceholder) {
-          auditInsightPlaceholder.textContent = auditInfo.auditHash ? "已產生 2.3 審計資料。" : "尚未產生 2.3 審計資料。";
-        }
-        if (auditRulesVersion) auditRulesVersion.textContent = auditInfo.rulesVersion || "3.3.0";
-        if (auditTriggeredCount) auditTriggeredCount.textContent = String(auditInfo.triggeredCount ?? 0);
-        if (auditLatency) auditLatency.textContent = `${auditInfo.latencyMs ?? 0} ms`;
-        if (auditHash) auditHash.textContent = auditInfo.auditHash || "-";
-        if (insightZh) insightZh.textContent = insight.summary_zh || "-";
-        if (insightEn) insightEn.textContent = insight.summary_en || "-";
-
-        roleNote.innerHTML = '在這個 Demo 裡，<strong>AI / 模型永遠只是輔助工具層</strong>，真正做決定的人是 <strong>你自己 + 官方管道</strong>。<br />This engine helps you see the <strong>semantic risk structure</strong>, but <strong>final decisions</strong> must go through <strong>official apps, websites, call centers and human review</strong>.';
-
-        if (result.llm && typeof result.llm === "object") {
-          llmSection.hidden = false;
-          llmExplanation.textContent = result.llm.explanation || "LLM returned without explanation.";
-
-          llmEvidenceList.innerHTML = "";
-          (Array.isArray(result.llm.extraEvidence) ? result.llm.extraEvidence : []).forEach((text) => {
-            const li = document.createElement("li");
-            li.className = "list-item";
-            li.textContent = text;
-            llmEvidenceList.appendChild(li);
-          });
-
-          llmActionList.innerHTML = "";
-          (Array.isArray(result.llm.extraActions) ? result.llm.extraActions : []).forEach((text) => {
-            const li = document.createElement("li");
-            li.className = "list-item";
-            li.textContent = text;
-            llmActionList.appendChild(li);
-          });
-        } else {
-          llmSection.hidden = true;
-          llmExplanation.textContent = "尚無 LLM 補充內容。";
-          llmEvidenceList.innerHTML = "";
-          llmActionList.innerHTML = "";
-        }
-
-        if (result.apiPacket) {
-          apiPacketJson.textContent = JSON.stringify(result.apiPacket, null, 2);
-        } else {
-          apiPacketJson.textContent = JSON.stringify({
-            SCBKR: { S: false, C: false, B: false, K: false, R: false },
-            RiskLevel: "SAFE",
-            Evidence: [],
-            ActionAdvice: [],
-            Audit: { TokenAudit: 0, TokenGateway: "ANON", Source: "BrowserLocalEngine" },
-            LLM: { enabled: false, explanation: null, extraEvidence: [], extraActions: [] },
-          }, null, 2);
-        }
-
-        proDebug.textContent = currentMode === "pro" ? "DEBUG (規則匹配結果 / Rule Matches):\n" + JSON.stringify({ risk: result.risk, ...result.debug, scbkr: result.scbkr }, null, 2) : "";
+      function setFlag(el, score, axis) {
+        let cls = "flag-ok";
+        const n = Number(score);
+        if (n <= 0) cls = "flag-bad";
+        else if (n === 1) cls = "flag-warn";
+        el.className = `scbkr-flag ${cls}`;
+        el.textContent = `${axis}: ${score}`;
       }
 
-        btnClear.addEventListener("click", function (e) {
-          e.preventDefault();
-          inputEl.value = "";
-          renderResult(null);
+      function renderList(target, items, formatter) {
+        target.innerHTML = "";
+        (items && items.length ? items : [null]).forEach((item) => {
+          const li = document.createElement("li");
+          li.className = "list-item";
+          li.textContent = item ? formatter(item) : "尚未分析";
+          target.appendChild(li);
         });
-        flagR.className = "scbkr-flag flag-bad";
-        flagR.textContent = "無責任說明";
-        llmSection.hidden = true;
-        llmExplanation.textContent = "尚無 LLM 補充內容。";
-        llmEvidenceList.innerHTML = "";
-        llmActionList.innerHTML = "";
-        apiPacketJson.textContent = "";
-        if (ruleClustersList) ruleClustersList.innerHTML = '<div class="pill-mini">目前沒有額外 cluster。</div>';
-        if (policySeverity) policySeverity.textContent = "SAFE";
-        if (policyAction) policyAction.textContent = "observe";
-        if (policyEscalation) policyEscalation.textContent = "0";
-        if (policyHumanAdvice) policyHumanAdvice.textContent = "-";
-        if (auditInsightPlaceholder) auditInsightPlaceholder.textContent = "尚未產生 2.3 審計資料。";
-        if (auditRulesVersion) auditRulesVersion.textContent = "-";
-        if (auditTriggeredCount) auditTriggeredCount.textContent = "0";
-        if (auditLatency) auditLatency.textContent = "0 ms";
-        if (auditHash) auditHash.textContent = "-";
-        if (insightZh) insightZh.textContent = "-";
-        if (insightEn) insightEn.textContent = "-";
+      }
+
+      function renderResult(result) {
+        riskBadge.classList.remove("safe", "risk", "fatal", "non-closable");
+        riskBadge.classList.add(result.riskDisplay.badgeClass);
+        riskLabel.textContent = `${result.riskDisplay.label}｜Score ${result.riskScore}`;
+        riskMainLine.textContent = result.riskDisplay.main;
+        riskSubLine.textContent = result.riskDisplay.sub;
+
+        setFlag(flagS, result.scbkr.S, "S");
+        setFlag(flagC, result.scbkr.C, "C");
+        setFlag(flagB, result.scbkr.B, "B");
+        setFlag(flagK, result.scbkr.K, "K");
+        setFlag(flagR, result.scbkr.R, "R");
+
+        scbkrSeniorList.innerHTML = `
+          <li>S 主體（Subject）分數：${result.scbkr.S}</li>
+          <li>C 原因（Cause）分數：${result.scbkr.C}</li>
+          <li>B 邊界（Boundary）分數：${result.scbkr.B}</li>
+          <li>K 成本（Cost）分數：${result.scbkr.K}</li>
+          <li>R 責任（Responsibility）分數：${result.scbkr.R}</li>`;
+
+        renderList(evidenceList, result.coreReasonsZh, (text) => text);
+        renderList(triggeredRulesList, result.triggeredRules, (item) => `${item.rule_id} [${item.category}]：${item.reason_zh}`);
+
+        const actions = [
+          "不要直接點訊息內連結，改用官方 App / 官方網站。",
+          "不要提供 OTP、密碼、卡號或網銀憑證。",
+          "若涉及金流與急迫壓力，請先停手並撥 165 或官方客服。"
+        ];
+        renderList(actionList, actions, (text) => text);
+
+        roleNote.innerHTML = `
+          Ex(y)=π：可審計、可回放、可負責。<br />
+          ${result.roleGovernance.isImpersonatingOfficial ? "疑似偽裝官方身分，請二次查證。" : "目前未強烈命中官方偽裝語彙。"}<br />
+          <strong>Model Role = Tool only</strong>；最終決策者是使用者與官方管道。`;
+
+        if (currentMode === "pro") {
+          proDebug.textContent = "TRACE / AUDIT:\n" + JSON.stringify({
+            riskLevel: result.riskLevel,
+            riskScore: result.riskScore,
+            scbkr: result.scbkr,
+            triggeredRules: result.triggeredRules,
+            meta: result.meta,
+          }, null, 2);
+        } else {
+          proDebug.textContent = "";
+        }
+      }
+
+      function resetOutputs() {
+        riskBadge.classList.remove("safe", "risk", "fatal", "non-closable");
+        riskLabel.textContent = "未分析｜Not analyzed";
+        riskMainLine.textContent = "請先貼上訊息，並點選「分析（Analyze）」。";
+        riskSubLine.textContent = "系統會根據 Mother-Core 規則輸出可審計結果。";
+        [flagS, flagC, flagB, flagK, flagR].forEach((f, idx) => {
+          f.className = "scbkr-flag flag-warn";
+          f.textContent = ["S:1", "C:1", "B:1", "K:1", "R:1"][idx];
+        });
+        renderList(evidenceList, [], () => "");
+        renderList(triggeredRulesList, [], () => "");
       }
 
       modeButtons.forEach((btn) => btn.addEventListener("click", () => setMode(btn.getAttribute("data-mode"))));
@@ -1057,28 +979,64 @@
       inputEl.addEventListener("input", updateCharCounter);
       clearBtn.addEventListener("click", () => {
         inputEl.value = "";
+        lastResult = null;
         updateCharCounter();
         resetOutputs();
-        lastResult = null;
       });
-      analyzeBtn.addEventListener("click", async () => {
-        if (useLLMToggle.checked && typeof SCBKREngine.analyzeWithOptionalLLM === "function") {
-          lastResult = await SCBKREngine.analyzeWithOptionalLLM(inputEl.value, useLLMToggle.checked);
-        } else {
-          lastResult = SCBKREngine.analyzeMessage(inputEl.value);
-        }
+
+      analyzeBtn.addEventListener("click", () => {
+        lastResult = SCBKREngine.analyzeMessage(inputEl.value);
         renderResult(lastResult);
       });
+
       exportBtn.addEventListener("click", () => {
         if (!lastResult) return alert(AppI18n.t("msg.noAnalysis"));
-        ReportExport.exportReport(lastResult);
+        if (!ReportExport.exportReport(lastResult)) {
+          alert("匯出失敗：請允許瀏覽器開啟新視窗後重試。");
+        }
       });
+
       speakBtn.addEventListener("click", () => {
         if (!lastResult) return alert(AppI18n.t("msg.noAnalysis"));
         if (!voiceEnabledToggle.checked) return alert("語音朗讀目前已停用。請先勾選『啟用語音朗讀』。");
         if (!VoiceModule.speakRiskResult(lastResult, AppI18n.getCurrentLang() === "en" ? "en-US" : "zh-TW")) {
           alert(AppI18n.t("msg.noSpeech"));
         }
+      });
+      speakInputBtn.addEventListener("click", () => {
+        if (!inputEl.value.trim()) return alert("請先貼上要朗讀的訊息。\nPaste a message first.");
+        if (typeof VoiceModule.speakText === "function") {
+          if (!VoiceModule.speakText(inputEl.value, AppI18n.getCurrentLang() === "en" ? "en-US" : "zh-TW")) {
+            alert(AppI18n.t("msg.noSpeech"));
+          }
+        } else {
+          const fake = { risk: "MESSAGE", actions: [inputEl.value] };
+          if (!VoiceModule.speakRiskResult(fake, AppI18n.getCurrentLang() === "en" ? "en-US" : "zh-TW")) {
+            alert(AppI18n.t("msg.noSpeech"));
+          }
+        }
+      });
+      stopSpeakBtn.addEventListener("click", () => VoiceModule.stopSpeaking());
+
+      await AppI18n.init("zh");
+      if (typeof SCBKREngine.loadRules === "function") {
+        await SCBKREngine.loadRules();
+      }
+      const status = typeof SCBKREngine.getRulesStatus === "function" ? SCBKREngine.getRulesStatus() : { error: null };
+      if (status.error) {
+        riskSubLine.textContent = `規則檔載入失敗，使用 fallback（${status.error}）`;
+      }
+
+      const loader = await ExamplesLoader.init({
+        containerId: "exampleContainer",
+        inputId: "inputText",
+        getLang: () => AppI18n.getCurrentLang(),
+        t: AppI18n.t,
+      });
+      AppI18n.onChange(() => loader && loader.rerender());
+      langSwitcher.addEventListener("change", async (e) => {
+        await AppI18n.setLanguage(e.target.value);
+      });
 
         // 若 js/scbkr-engine.js 尚未定義，才補一份安全 fallback，不重覆覆蓋。
         if (typeof window.runScbkrApiPacket !== "function") {
