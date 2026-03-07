@@ -6,6 +6,7 @@
   const officialKw = ["銀行", "郵局", "警察局", "法院", "檢察署", "國稅局", "官方", "客服"];
   const askSecretKw = ["密碼", "驗證碼", "簡訊碼", "簡訊認證", "卡號", "背面三碼", "cvv"];
   const threatKw = ["凍結", "停用", "停權", "鎖定", "罰款", "罰金", "沒收", "追討"];
+  const AWS_LLM_ENDPOINT = ""; // 之後使用者自己填，預設留空就代表關閉遠端
 
   function hitAny(text, arr) {
     return arr.some((kw) => text.includes(kw.toLowerCase()));
@@ -25,6 +26,85 @@
     return "SAFE";
   }
 
+
+  // v3 apiPacket start
+  function buildSafeApiPacket() {
+    return {
+      SCBKR: { S: false, C: false, B: false, K: false, R: false },
+      RiskLevel: "SAFE",
+      Evidence: [],
+      ActionAdvice: [],
+      Audit: {
+        TokenAudit: 0,
+        TokenGateway: "ANON",
+        Source: "BrowserLocalEngine",
+      },
+      LLM: {
+        enabled: false,
+        explanation: null,
+        extraEvidence: [],
+        extraActions: [],
+      },
+    };
+  }
+
+  function buildAntiScamApiPacket(resultObj, normalizedText, suspiciousKeywordCount) {
+    const packet = buildSafeApiPacket();
+    if (!resultObj || typeof resultObj !== "object") return packet;
+
+    const textLength = Math.max(1, String(normalizedText || "").length);
+    const tokenAuditRaw = suspiciousKeywordCount / textLength;
+    const tokenAudit = Math.max(0, Math.min(1, Number(tokenAuditRaw.toFixed(4))));
+
+    packet.SCBKR = {
+      S: !!(resultObj.scbkr && resultObj.scbkr.S),
+      C: !!(resultObj.scbkr && resultObj.scbkr.C),
+      B: !!(resultObj.scbkr && resultObj.scbkr.B),
+      K: !!(resultObj.scbkr && resultObj.scbkr.K),
+      R: !!(resultObj.scbkr && resultObj.scbkr.R),
+    };
+    packet.RiskLevel = resultObj.risk || "SAFE";
+    packet.Evidence = Array.isArray(resultObj.reasons) ? resultObj.reasons.slice() : [];
+
+    const mainAdvice = resultObj.riskDisplay && resultObj.riskDisplay.main ? [resultObj.riskDisplay.main] : [];
+    const subAdvice = resultObj.riskDisplay && resultObj.riskDisplay.sub ? [resultObj.riskDisplay.sub] : [];
+    packet.ActionAdvice = [...mainAdvice, ...subAdvice];
+
+    packet.Audit = {
+      TokenAudit: tokenAudit,
+      TokenGateway: packet.SCBKR.S ? "LocalRuleEngine" : "ANON",
+      Source: "BrowserLocalEngine",
+    };
+
+    packet.LLM = {
+      enabled: false,
+      explanation: null,
+      extraEvidence: [],
+      extraActions: [],
+    };
+
+    return packet;
+  }
+  // v3 apiPacket end
+
+
+  function buildSafeAnalyzeResult(inputText) {
+    return {
+      inputText,
+      risk: "SAFE",
+      reasons: [],
+      scbkr: { S: false, C: false, B: false, K: false, R: false },
+      debug: { hasUrgent: false, hasMoney: false, hasApp: false, hasLink: false, asksSecret: false, hasThreat: false, hasAnyScamPattern: false },
+      riskDisplay: {
+        label: "SAFE｜目前未偵測到明顯詐騙語意",
+        main: "目前以安全預設值回傳。",
+        sub: "如有疑慮，請改走官方管道再次確認。",
+        badgeClass: "safe",
+      },
+      apiPacket: buildSafeApiPacket(),
+    };
+  }
+
   function analyzeMessage(inputText) {
     const text = String(inputText || "").toLowerCase();
 
@@ -37,6 +117,7 @@
     const hasThreat = hitAny(text, threatKw);
 
     const hasAnyScamPattern = hasMoney || hasApp || hasLink || asksSecret || hasThreat;
+    const suspiciousKeywordCount = [hasUrgent, hasMoney, hasApp, hasLink, asksSecret, hasThreat].filter(Boolean).length;
 
     const hasReason = text.includes("因為") || text.includes("由於") || text.includes("通知") || text.includes("告知") || text.includes("提醒");
     const hasBoundary = text.includes("請在") || text.includes("請於") || text.includes("請點選") || text.includes("請點擊") || text.includes("請完成") || text.includes("請輸入") || text.includes("請提供");
@@ -97,15 +178,107 @@
       },
     };
 
-    return {
+    const resultObj = {
       inputText,
       risk,
       reasons,
       scbkr,
       debug: { hasUrgent, hasMoney, hasApp, hasLink, asksSecret, hasThreat, hasAnyScamPattern },
+      suspiciousKeywordCount,
       riskDisplay: riskDisplay[risk],
+    };
+
+    // v3 apiPacket start
+    resultObj.apiPacket = buildAntiScamApiPacket(resultObj, text, suspiciousKeywordCount);
+    // v3 apiPacket end
+    return resultObj;
+  }
+
+
+
+  // v3 aws llm hook start
+  function buildEmptyLlmSection(message) {
+    return {
+      enabled: false,
+      explanation: message || null,
+      extraEvidence: [],
+      extraActions: []
     };
   }
 
-  global.SCBKREngine = { analyzeMessage, calculateRisk };
+  async function analyzeWithOptionalLLM(inputText, useAws) {
+    // 1. 先跑本地 SCBKR
+    const baseResult = analyzeMessage(inputText);
+
+    // 確保有 apiPacket 與 llm 欄位
+    if (!baseResult.apiPacket) {
+      baseResult.apiPacket = buildAntiScamApiPacket(baseResult, inputText, baseResult.suspiciousKeywordCount || 0);
+    }
+    if (!baseResult.llm) {
+      baseResult.llm = {
+        enabled: false,
+        explanation: null,
+        extraEvidence: [],
+        extraActions: []
+      };
+    }
+
+    // 2. 判斷是否要打 AWS
+    if (!useAws || !AWS_LLM_ENDPOINT) {
+      baseResult.apiPacket.LLM = { ...baseResult.llm };
+      return baseResult;
+    }
+
+    try {
+      const payload = {
+        inputText,
+        apiPacket: baseResult.apiPacket
+      };
+
+      const res = await fetch(AWS_LLM_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        console.error("AWS LLM HTTP error", res.status);
+        baseResult.apiPacket.LLM = { ...baseResult.llm };
+        return baseResult;
+      }
+
+      const data = await res.json();
+
+      baseResult.llm = {
+        enabled: true,
+        explanation: data?.explanation || null,
+        extraEvidence: Array.isArray(data?.extraEvidence) ? data.extraEvidence : [],
+        extraActions: Array.isArray(data?.extraActions) ? data.extraActions : []
+      };
+
+      baseResult.apiPacket.LLM = { ...baseResult.llm };
+      return baseResult;
+    } catch (err) {
+      console.error("AWS LLM call failed", err);
+      // 任何錯誤都不能讓整個分析掛掉，直接回本地結果
+      baseResult.llm = buildEmptyLlmSection(null);
+      baseResult.apiPacket.LLM = { ...baseResult.llm };
+      return baseResult;
+    }
+  }
+  // v3 aws llm hook end
+
+  // v3 apiPacket start
+  global.runScbkrApiPacket = function (inputText) {
+    try {
+      const result = analyzeMessage(inputText);
+      return result && result.apiPacket ? result.apiPacket : buildSafeAnalyzeResult(inputText).apiPacket;
+    } catch (err) {
+      console.error("runScbkrApiPacket failed", err);
+      return buildSafeAnalyzeResult(inputText).apiPacket;
+    }
+  };
+  // v3 apiPacket end
+
+  global.SCBKREngine = { analyzeMessage, analyzeWithOptionalLLM, calculateRisk };
 })(window);
