@@ -1,371 +1,110 @@
 <!DOCTYPE html>
-<html lang="zh-Hant" data-mode="standard">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
-  <title>反詐騙語意防火牆引擎 Anti-Scam Semantic Firewall Engine</title>
+  <meta charset="utf-8" />
+  <title>Anti-Scam Semantic Firewall Engine</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://unpkg.com/modern-css-reset/dist/reset.min.css" />
   <style>
     :root {
-      --bg: #050816;
-      --bg-elevated: #0b1020;
-      --bg-elevated-soft: #10172a;
-      --border-subtle: #1f2937;
+      --bg: #0b1020;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
       --accent: #f97316;
-      --accent-soft: rgba(249, 115, 22, 0.16);
-      --accent-strong: #f97316;
-      --accent-green: #22c55e;
-      --accent-red: #ef4444;
-      --accent-amber: #facc15;
-      --text-main: #e5e7eb;
-      --text-soft: #9ca3af;
-      --text-faint: #6b7280;
-      --text-strong: #f9fafb;
-      --chip-bg: rgba(15, 23, 42, 0.9);
-      --radius-lg: 18px;
-      --radius-sm: 999px;
-      --shadow-soft: 0 18px 40px rgba(15, 23, 42, 0.85);
-      --shadow-chip: 0 10px 25px rgba(15, 23, 42, 0.9);
-      --shadow-strong: 0 0 40px rgba(249, 115, 22, 0.45);
-      --transition-fast: 140ms ease-out;
-      --transition-med: 190ms ease-out;
-      --font-base: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-        "Segoe UI", sans-serif;
-      --font-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-        "Courier New", monospace;
+      --safe: #22c55e;
+      --risk: #facc15;
+      --fatal: #ef4444;
+      --neutral: #64748b;
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
-    html,
     body {
       margin: 0;
-      padding: 0;
-      background: radial-gradient(circle at top left, #111827 0, #020617 50%);
-      color: var(--text-main);
-      font-family: var(--font-base);
-      -webkit-font-smoothing: antialiased;
-    }
-
-    body {
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
+      background: radial-gradient(circle at top left, #020617 0, #111827 40%, #030712 100%);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.45;
       padding: 16px;
     }
 
-    .app-shell {
-      width: 100%;
-      max-width: 1120px;
-      background: linear-gradient(140deg, #020617 0%, #020617 40%, #0b1120 100%);
-      border-radius: 28px;
-      border: 1px solid rgba(148, 163, 184, 0.25);
-      box-shadow: var(--shadow-soft);
-      padding: 20px 20px 24px;
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 16px;
+      background: rgba(2, 6, 23, 0.85);
     }
 
-    @media (min-width: 960px) {
-      .app-shell {
-        padding: 24px 26px 28px;
-      }
-    }
-
-    header.app-header {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      margin-bottom: 18px;
-    }
-
-    @media (min-width: 768px) {
-      header.app-header {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: flex-start;
-      }
-    }
-
-    .title-block {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .title-chip-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: var(--radius-sm);
-      background: var(--chip-bg);
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      box-shadow: var(--shadow-chip);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--text-soft);
-    }
-
-    .chip-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent-strong);
-      box-shadow: 0 0 12px rgba(249, 115, 22, 0.9);
-    }
-
-    .chip-green {
-      border-color: rgba(34, 197, 94, 0.5);
-      color: #bbf7d0;
-    }
-
-    .chip-green .chip-dot {
-      background: var(--accent-green);
-      box-shadow: 0 0 12px rgba(34, 197, 94, 0.9);
-    }
-
-    h1.app-title {
-      margin: 0;
-      font-size: 18px;
-      color: var(--text-strong);
-      letter-spacing: 0.04em;
-    }
-
-    h1.app-title span.sub-en {
-      font-weight: 400;
-      color: var(--text-soft);
-      font-size: 13px;
-      letter-spacing: 0.06em;
+    h1 {
+      font-size: 20px;
+      margin: 0 0 8px;
     }
 
     .subtitle {
+      margin: 0 0 12px;
+      color: var(--muted);
       font-size: 13px;
-      color: var(--text-soft);
-      max-width: 640px;
     }
 
-    .subtitle strong {
-      color: #e5e7eb;
-    }
-
-    .head-meta {
+    #modeSwitch {
       display: flex;
-      flex-direction: column;
       gap: 8px;
-      align-items: flex-start;
-      margin-top: 6px;
-    }
-
-    @media (min-width: 768px) {
-      .head-meta {
-        align-items: flex-end;
-      }
-    }
-
-    .meta-line {
-      font-size: 11px;
-      color: var(--text-faint);
-      display: flex;
+      margin-bottom: 12px;
       flex-wrap: wrap;
-      gap: 10px;
-      justify-content: flex-start;
     }
 
-    @media (min-width: 768px) {
-      .meta-line {
-        justify-content: flex-end;
-      }
-    }
-
-    .meta-line span.label {
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: #cbd5f5;
-    }
-
-    .small-link {
-      color: #bfdbfe;
-      text-decoration: none;
-      border-bottom: 1px dotted rgba(191, 219, 254, 0.6);
-      transition: color var(--transition-fast), border-color var(--transition-fast);
-      font-size: 11px;
-    }
-
-    .small-link:hover {
-      color: #e5e7eb;
-      border-bottom-color: rgba(229, 231, 235, 0.85);
-    }
-
-    .mode-switch {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 16px;
-      margin-top: 4px;
-    }
-
-    @media (min-width: 768px) {
-      .mode-switch {
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-      }
-    }
-
-    .mode-tabs {
-      display: inline-flex;
-      padding: 4px;
-      gap: 4px;
+    #modeSwitch button {
+      border: 1px solid #475569;
       border-radius: 999px;
-      background: rgba(15, 23, 42, 0.95);
-      border: 1px solid rgba(148, 163, 184, 0.45);
-      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.9);
-    }
-
-    .mode-btn {
-      border: none;
-      background: transparent;
+      background: #0f172a;
+      color: var(--text);
       padding: 6px 12px;
-      border-radius: 999px;
-      color: var(--text-soft);
-      font-size: 11px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: background var(--transition-fast),
-        color var(--transition-fast), transform var(--transition-fast),
-        box-shadow var(--transition-fast);
+      font-size: 12px;
     }
 
-    .mode-btn span.badge {
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.5);
+    #modeSwitch button.active {
+      background: linear-gradient(120deg, #f97316, #ea580c);
+      color: #111827;
+      border-color: transparent;
+      font-weight: 700;
     }
 
-    .mode-btn[data-active="true"] {
-      background: radial-gradient(circle at top left, #f97316 0, #ea580c 45%, #7c2d12 100%);
-      color: #0b1020;
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-strong);
-    }
-
-    .mode-btn[data-active="true"] span.badge {
-      border-color: rgba(15, 23, 42, 0.7);
-      background: rgba(15, 23, 42, 0.12);
-      color: #f9fafb;
-    }
-
-    .mode-caption {
-      font-size: 11px;
-      color: var(--text-faint);
-    }
-
-    main.app-main {
+    .grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.5fr);
-      gap: 14px;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.4fr);
+      gap: 12px;
     }
 
     @media (max-width: 900px) {
-      main.app-main {
-        grid-template-columns: minmax(0, 1fr);
-      }
+      .grid { grid-template-columns: 1fr; }
     }
 
     .card {
-      background: radial-gradient(circle at top left, #111827 0, #020617 55%);
-      border-radius: var(--radius-lg);
-      border: 1px solid rgba(55, 65, 81, 0.9);
-      box-shadow: 0 18px 32px rgba(15, 23, 42, 0.9);
-      padding: 14px 14px 16px;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      background: var(--panel);
+      padding: 12px;
     }
 
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      gap: 8px;
-    }
-
-    .card-title {
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #cbd5f5;
-    }
-
-    .card-title span.en {
-      font-size: 11px;
-      color: var(--text-faint);
-    }
-
-    .card-caption {
-      font-size: 11px;
-      color: var(--text-faint);
-    }
-
-    .textarea {
+    textarea,
+    input[type="text"] {
       width: 100%;
-      min-height: 160px;
-      resize: vertical;
-      border-radius: 16px;
-      border: 1px solid rgba(75, 85, 99, 0.9);
-      padding: 11px 11px 28px;
-      background: radial-gradient(circle at top left, #030712 0, #020617 60%);
-      color: var(--text-main);
-      font-family: var(--font-base);
-      font-size: 13px;
-      line-height: 1.5;
-      outline: none;
-      transition: border var(--transition-med), box-shadow var(--transition-med),
-        background var(--transition-med);
+      background: #0f172a;
+      color: var(--text);
+      border: 1px solid #475569;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 14px;
     }
 
-    .textarea::placeholder {
-      color: var(--text-faint);
-    }
-
-    .textarea:focus {
-      border-color: var(--accent-strong);
-      box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.75),
-        0 0 40px rgba(249, 115, 22, 0.38);
-      background: radial-gradient(circle at top left, #020617 0, #020617 50%);
-    }
-
-    .input-footer {
+    .actions {
+      margin-top: 8px;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 6px;
-      gap: 10px;
-    }
-
-    .char-counter {
-      font-size: 11px;
-      color: var(--text-faint);
-      font-family: var(--font-mono);
-    }
-
-    .btn-row {
-      display: inline-flex;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     .toggle-row {
@@ -408,328 +147,90 @@
       padding: 6px 14px;
       font-size: 12px;
       cursor: pointer;
-      background: rgba(15, 23, 42, 0.95);
-      color: var(--text-main);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: background var(--transition-med), border var(--transition-med),
-        transform var(--transition-fast), box-shadow var(--transition-fast),
-        color var(--transition-fast);
-      white-space: nowrap;
-    }
-
-    .btn span.en-label {
-      font-size: 10px;
-      color: var(--text-faint);
-    }
-
-    .btn-primary {
-      background: radial-gradient(circle at top left, #f97316 0, #ea580c 50%, #7c2d12 100%);
-      border-color: transparent;
-      color: #0b1020;
-      font-weight: 600;
-      box-shadow: 0 12px 30px rgba(249, 115, 22, 0.65);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 16px 40px rgba(249, 115, 22, 0.7);
-    }
-
-    .btn-secondary:hover {
-      background: rgba(30, 64, 175, 0.7);
-      border-color: rgba(129, 140, 248, 0.95);
-      box-shadow: 0 10px 28px rgba(30, 64, 175, 0.75);
-    }
-
-    .pill-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 3px 9px;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.86);
-      border: 1px solid rgba(55, 65, 81, 0.95);
-      font-size: 11px;
-      color: var(--text-soft);
-    }
-
-    .pill-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--accent-strong);
-      box-shadow: 0 0 12px rgba(249, 115, 22, 0.9);
-    }
-
-    .risk-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-size: 11px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      background: var(--accent-soft);
-      border: 1px solid rgba(249, 115, 22, 0.65);
-      color: #fed7aa;
-    }
-
-    .risk-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: var(--accent-strong);
-      box-shadow: 0 0 14px rgba(249, 115, 22, 0.95);
-    }
-
-    .risk-badge.safe {
-      background: rgba(22, 163, 74, 0.16);
-      border-color: rgba(34, 197, 94, 0.8);
-      color: #bbf7d0;
-    }
-
-    .risk-badge.safe .risk-dot {
-      background: var(--accent-green);
-      box-shadow: 0 0 14px rgba(34, 197, 94, 0.95);
-    }
-
-    .risk-badge.risk {
-      background: rgba(250, 204, 21, 0.14);
-      border-color: rgba(250, 204, 21, 0.85);
-      color: #fef9c3;
-    }
-
-    .risk-badge.risk .risk-dot {
-      background: var(--accent-amber);
-      box-shadow: 0 0 14px rgba(250, 204, 21, 0.95);
-    }
-
-    .risk-badge.fatal,
-    .risk-badge.non-closable {
-      background: rgba(248, 113, 113, 0.22);
-      border-color: rgba(248, 113, 113, 0.9);
-      color: #fee2e2;
-    }
-
-    .risk-badge.fatal .risk-dot,
-    .risk-badge.non-closable .risk-dot {
-      background: var(--accent-red);
-      box-shadow: 0 0 14px rgba(239, 68, 68, 0.95);
-    }
-
-    .risk-main-line {
-      margin-top: 10px;
       font-size: 13px;
-      color: var(--text-strong);
     }
 
-    .risk-sub-line {
-      font-size: 11px;
-      color: var(--text-soft);
-      margin-top: 4px;
+    #btnAnalyze {
+      background: linear-gradient(120deg, #f97316, #ea580c);
+      color: #111827;
+      border-color: transparent;
+      font-weight: 700;
     }
 
-    .pill-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 8px;
-    }
-
-    .pill-mini {
-      padding: 3px 8px;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px dashed rgba(75, 85, 99, 0.95);
-      font-size: 11px;
-      color: var(--text-faint);
-    }
-
-    .section-title {
+    .hint, .text-muted {
+      color: var(--muted);
       font-size: 12px;
-      color: #e5e7eb;
-      margin-bottom: 6px;
     }
 
-    .section-subtitle {
-      font-size: 11px;
-      color: var(--text-faint);
-      margin-bottom: 6px;
-    }
-
-    .kv-row {
-      display: grid;
-      grid-template-columns: 100px minmax(0, 1fr);
-      gap: 4px 10px;
-      font-size: 11px;
-      margin-bottom: 2px;
-    }
-
-    .kv-key {
-      color: var(--text-soft);
-    }
-
-    .kv-val {
-      color: var(--text-main);
-    }
-
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 2px 8px;
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
       border-radius: 999px;
-      border: 1px solid rgba(75, 85, 99, 0.95);
-      font-size: 11px;
-      color: var(--text-soft);
+      font-size: 12px;
+      margin-bottom: 8px;
+      border: 1px solid transparent;
     }
 
-    .tag-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: rgba(148, 163, 184, 0.95);
-    }
+    .badge-neutral { background: rgba(100, 116, 139, 0.15); color: #cbd5e1; border-color: #64748b; }
+    .badge-safe { background: rgba(34, 197, 94, 0.15); color: #bbf7d0; border-color: var(--safe); }
+    .badge-risk { background: rgba(250, 204, 21, 0.15); color: #fef9c3; border-color: var(--risk); }
+    .badge-fatal,
+    .badge-non-closable { background: rgba(239, 68, 68, 0.18); color: #fee2e2; border-color: var(--fatal); }
 
-    .list {
-      list-style: none;
-      padding: 0;
-      margin: 4px 0 0;
-    }
-
-    .list-item {
-      position: relative;
-      padding-left: 14px;
-      font-size: 11px;
-      color: var(--text-main);
-      margin-bottom: 4px;
-    }
-
-    .list-item::before {
-      content: "•";
-      position: absolute;
-      left: 3px;
-      top: 0;
-      color: var(--accent-strong);
-    }
-
-    .list-item span.badge {
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid rgba(75, 85, 99, 0.95);
-      margin-left: 4px;
-      color: var(--text-soft);
-    }
-
-    .scbkr-grid {
+    #scbkrSection {
+      margin-top: 10px;
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 4px;
-      margin-top: 4px;
+      gap: 8px;
     }
 
-    .scbkr-cell {
-      padding: 6px 6px 7px;
-      border-radius: 8px;
-      background: rgba(15, 23, 42, 0.95);
-      border: 1px solid rgba(55, 65, 81, 0.95);
-      font-size: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      min-height: 44px;
+    @media (max-width: 900px) {
+      #scbkrSection { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
 
-    .scbkr-label {
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #9ca3af;
-    }
-
-    .scbkr-zh {
-      font-size: 10px;
-      color: var(--text-faint);
-    }
-
-    .scbkr-flag {
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 999px;
-      align-self: flex-start;
-    }
-
-    .flag-ok {
-      background: rgba(34, 197, 94, 0.18);
-      color: #bbf7d0;
-      border: 1px solid rgba(34, 197, 94, 0.8);
-    }
-
-    .flag-warn {
-      background: rgba(250, 204, 21, 0.14);
-      color: #fef9c3;
-      border: 1px solid rgba(250, 204, 21, 0.85);
-    }
-
-    .flag-bad {
-      background: rgba(248, 113, 113, 0.22);
-      color: #fee2e2;
-      border: 1px solid rgba(248, 113, 113, 0.9);
-    }
-
-    .scbkr-senior {
-      display: none;
-      margin-top: 6px;
-      padding-top: 6px;
-      border-top: 1px dashed rgba(55, 65, 81, 0.9);
+    .scbkr-card {
+      border: 1px dashed #64748b;
+      border-radius: 10px;
+      padding: 8px;
       font-size: 12px;
+      color: #cbd5e1;
+      background: rgba(15, 23, 42, 0.7);
     }
 
-    .scbkr-senior ul {
-      list-style: none;
+    .scbkr-card.on {
+      border-style: solid;
+      border-color: var(--safe);
+      color: #dcfce7;
+      background: rgba(34, 197, 94, 0.12);
+    }
+
+    ul {
+      margin: 8px 0 0 18px;
       padding: 0;
-      margin: 4px 0 0;
     }
 
-    .scbkr-senior li {
-      margin-bottom: 4px;
-      padding-left: 10px;
-      position: relative;
+    li { margin-bottom: 4px; font-size: 13px; }
+
+    #apiPacketPanel,
+    #llmSection {
+      margin-top: 10px;
+      border-top: 1px dashed #475569;
+      padding-top: 10px;
     }
 
-    .scbkr-senior li::before {
-      content: "▹";
-      position: absolute;
-      left: 0;
-      color: var(--accent-strong);
-      font-size: 11px;
-    }
-
-    .role-note {
-      font-size: 11px;
-      color: var(--text-soft);
-      margin-top: 4px;
-    }
-
-    .role-note strong {
-      color: #e5e7eb;
-    }
-
-    #proDebug {
-      display: none;
+    #apiPacketJson {
       margin-top: 8px;
-      padding-top: 6px;
-      border-top: 1px dashed rgba(55, 65, 81, 0.9);
-      font-size: 10px;
-      color: var(--text-faint);
-      font-family: var(--font-mono);
+      border: 1px solid #475569;
+      border-radius: 8px;
+      padding: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      color: #bfdbfe;
+      background: #0f172a;
       white-space: pre-wrap;
       word-break: break-all;
+      max-height: 320px;
+      overflow: auto;
     }
 
     #apiPacketPanel {
@@ -767,93 +268,40 @@
       color: #fee2e2;
     }
 
-    html[data-mode="senior"] body {
+    body.senior-mode {
       font-size: 18px;
     }
 
-    html[data-mode="senior"] .app-shell {
-      border-width: 2px;
-    }
-
-    html[data-mode="senior"] .textarea {
-      font-size: 15px;
-      min-height: 190px;
-    }
-
-    html[data-mode="senior"] .btn {
-      font-size: 14px;
-      padding: 8px 18px;
-    }
-
-    html[data-mode="senior"] .btn span.en-label {
-      display: none;
-    }
-
-    html[data-mode="senior"] .scbkr-grid {
-      display: none;
-    }
-
-    html[data-mode="senior"] .scbkr-senior {
-      display: block;
-    }
-
-    html[data-mode="senior"] .subtitle {
-      font-size: 14px;
-    }
-
-    html[data-mode="senior"] .hint-senior-hero {
-      display: block;
-    }
-
-    html[data-mode="senior"] .mode-caption {
-      font-size: 12px;
-    }
-
-    html[data-mode="senior"] .risk-main-line {
-      font-size: 14px;
-    }
-
-    html[data-mode="senior"] .risk-sub-line {
-      font-size: 12px;
-    }
-
-    html[data-mode="senior"] .section-title {
-      font-size: 13px;
-    }
-
-    html[data-mode="senior"] .section-subtitle,
-    html[data-mode="senior"] .list-item {
-      font-size: 12px;
-    }
-
-    html[data-mode="pro"] #proDebug {
-      display: block;
-    }
-
-    @media (max-width: 600px) {
-      .card {
-        padding: 12px 10px 13px;
-      }
-
-      .scbkr-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
+    body.senior-mode .subtitle,
+    body.senior-mode .hint,
+    body.senior-mode .text-muted,
+    body.senior-mode .scbkr-card,
+    body.senior-mode li,
+    body.senior-mode button,
+    body.senior-mode textarea,
+    body.senior-mode input[type="text"] {
+      font-size: 16px;
     }
   </style>
 </head>
 <body>
-  <div class="app-shell">
-    <header class="app-header">
-      <div class="title-block">
-        <div class="title-chip-row">
-          <div class="chip chip-green">
-            <span class="chip-dot"></span>
-            <span>ANTI-SCAM SEMANTIC FIREWALL ENGINE</span>
-          </div>
-          <div class="chip">
-            <span class="chip-dot"></span>
-            <span>SCBKR · Ex(y)=π · LINGUISTIC GOVERNANCE</span>
-          </div>
+  <div class="app">
+    <h1>Anti-Scam Semantic Firewall Engine</h1>
+    <p class="subtitle">SCBKR 本地語意分析 Demo｜保留 Standard / Pro / Senior Safe 三模式，AWS LLM 僅可選預留。</p>
+
+    <div id="modeSwitch">
+      <button id="btnStandard" data-mode="standard" class="active">STANDARD</button>
+      <button id="btnPro" data-mode="pro">PRO</button>
+      <button id="btnSenior" data-mode="senior">SENIOR SAFE</button>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <label class="sr-only" for="inputText">可疑訊息</label>
+        <textarea id="inputText" rows="6" placeholder="把可疑簡訊 / Line / Email 貼在這裡"></textarea>
+        <div class="actions">
+          <button id="btnClear">清除內容</button>
+          <button id="btnAnalyze">分析這則訊息</button>
         </div>
         <h1 class="app-title">
           反詐騙語意防火牆引擎
@@ -968,21 +416,11 @@
         <div class="llm-note">LLM 選項目前是介接預留（hook），預設仍是本地規則分析。</div>
       </section>
 
-      <section class="card" aria-label="分析結果 Output">
-        <div class="card-header">
-          <div>
-            <div class="card-title">
-              風險等級與總結
-              <span class="en">｜ Risk Level & Summary</span>
-            </div>
-            <div class="card-caption">
-              這不是「感覺怪怪的」，而是可被說清楚的語意結構。
-            </div>
-          </div>
-          <div id="riskBadge" class="risk-badge">
-            <span class="risk-dot"></span>
-            <span id="riskLabel">未分析｜Not analyzed</span>
-          </div>
+        <div style="margin-top:10px;">
+          <label>
+            <input type="checkbox" id="seniorModeCheckbox" />
+            切換長輩模式（大字體 / 簡化）
+          </label>
         </div>
 
         <div class="risk-main-line" id="riskMainLine">
@@ -1078,6 +516,7 @@
             </li>
           </ul>
         </div>
+      </section>
 
         <div style="margin-top: 10px;">
           <div class="section-title">政策建議｜Policy Recommendation</div>
@@ -1125,14 +564,11 @@
           </div>
         </div>
       </section>
-    </main>
+    </div>
   </div>
 
-  <script src="js/i18n.js"></script>
   <script src="js/scbkr-engine.js"></script>
-  <script src="js/examples-loader.js"></script>
   <script src="js/voice.js"></script>
-  <script src="js/report-export.js"></script>
   <script>
     (async function () {
       const htmlEl = document.documentElement;
@@ -1235,53 +671,119 @@
         } else {
           modeLabel.textContent = "標準版 STANDARD – 一般使用者友善介面，中英文雙語提示。";
         }
-      }
 
-      function updateCharCounter() {
-        charCounter.textContent = `${inputEl.value.length} 字 / chars`;
-      }
+        function setScbkrFlags(flags) {
+          const mapping = [
+            ["scbkrS", "S"],
+            ["scbkrC", "C"],
+            ["scbkrB", "B"],
+            ["scbkrK", "K"],
+            ["scbkrR", "R"],
+          ];
+          for (const [id, key] of mapping) {
+            const el = document.getElementById(id);
+            if (!el) continue;
+            const on = !!(flags && flags[key]);
+            el.classList.toggle("on", on);
+          }
+        }
 
-      function setFlag(el, ok, okText, failText) {
-        el.className = `scbkr-flag ${ok ? "flag-ok" : "flag-bad"}`;
-        el.textContent = ok ? okText : failText;
-      }
+        function renderList(container, items) {
+          if (!container) return;
+          container.innerHTML = "";
+          (items || []).forEach((text) => {
+            const li = document.createElement("li");
+            li.textContent = text;
+            container.appendChild(li);
+          });
+        }
 
-      function renderResult(result) {
-        riskBadge.classList.remove("safe", "risk", "fatal", "non-closable");
-        riskBadge.classList.add(result.riskDisplay.badgeClass);
-        riskLabel.textContent = result.riskDisplay.label;
-        riskMainLine.textContent = result.riskDisplay.main;
-        riskSubLine.textContent = result.riskDisplay.sub;
+        function renderResult(result) {
+          try {
+            if (!result) {
+              riskBadge.textContent = "未分析 | NOT ANALYZED";
+              riskBadge.className = "badge badge-neutral";
+              riskTitle.textContent = "請先貼上訊息，並點選「分析這則訊息」。";
+              riskSubtitle.textContent = "系統會依照語意特徵與責任鏈結構給出 SAFE / RISK / FATAL / NON-CLOSABLE 分級。";
+              setScbkrFlags({ S: false, C: false, B: false, K: false, R: false });
+              renderList(evidenceList, []);
+              renderList(actionList, []);
+              if (llmSection) llmSection.hidden = true;
+              if (apiPacketJson) apiPacketJson.textContent = "";
+              return;
+            }
 
-        setFlag(flagS, result.scbkr.S, "有主體描述", "主體不清 / 可能偽裝官方");
-        setFlag(flagC, result.scbkr.C, "有說明聯絡原因", "聯絡原因模糊 / 未交代");
-        setFlag(flagB, result.scbkr.B, "有具體行動要求", "沒有說清楚要做到哪一步");
-        setFlag(flagK, result.scbkr.K, "提到風險／代價", "未說明錯信可能造成的損失");
-        setFlag(flagR, result.scbkr.R, "有留下責任／客服資訊", "沒有說明出事誰負責");
+            const risk = result.risk || "SAFE";
+            const disp = result.riskDisplay || {};
+            riskBadge.textContent = disp.label || risk;
+            riskBadge.className = "badge badge-" + String(risk).toLowerCase();
+            riskTitle.textContent = disp.main || "";
+            riskSubtitle.textContent = disp.sub || "";
 
-        scbkrSeniorList.innerHTML = `
-          <li>${result.scbkr.S ? "主體有提到官方或機構名稱。" : "主體沒有清楚自我介紹或來源可疑。"}</li>
-          <li>${result.scbkr.C ? "有稍微解釋聯絡原因。" : "沒有說明為什麼要聯絡你。"}</li>
-          <li>${result.scbkr.B ? "有具體請你做什麼（點連結／轉帳／提供資訊）。" : "行動要求不明或藏在話術裡。"}</li>
-          <li>${result.scbkr.K ? "有提到凍結、損失或罰款等代價。" : "沒有講如果是假的你會損失什麼。"}</li>
-          <li>${result.scbkr.R ? "有留下客服或聯繫管道，但仍需確認是否為真正官方。" : "完全沒說出事誰負責，只要你照著做就可能自己全扛。"}</li>`;
+            setScbkrFlags(result.scbkr || {});
+            renderList(evidenceList, result.reasons || []);
 
-        evidenceList.innerHTML = "";
-        (result.reasons.length ? result.reasons : ["目前未偵測到明顯詐騙語意特徵，但仍建議你養成『看不懂就先暫停』的習慣。"]).forEach((text) => {
-          const li = document.createElement("li");
-          li.className = "list-item";
-          li.textContent = text;
-          evidenceList.appendChild(li);
-        });
+            const mainAdvice = disp.main ? [disp.main] : [];
+            const subAdvice = disp.sub ? [disp.sub] : [];
+            renderList(actionList, [...mainAdvice, ...subAdvice]);
 
-        const actions = actionGuidanceByRisk(result.risk);
-        result.actions = actions;
-        actionList.innerHTML = "";
-        actions.forEach((text) => {
-          const li = document.createElement("li");
-          li.className = "list-item";
-          li.textContent = text;
-          actionList.appendChild(li);
+            if (result.llm && result.llm.enabled) {
+              if (llmSection) llmSection.hidden = false;
+              if (llmExplanationText) llmExplanationText.textContent = result.llm.explanation || "";
+              renderList(llmExtraEvidence, result.llm.extraEvidence || []);
+              renderList(llmExtraActions, result.llm.extraActions || []);
+            } else if (llmSection) {
+              llmSection.hidden = true;
+              if (llmExplanationText) llmExplanationText.textContent = "";
+              renderList(llmExtraEvidence, []);
+              renderList(llmExtraActions, []);
+            }
+
+            if (apiPacketJson && window.SCBKREngine && typeof window.SCBKREngine.analyzeMessage === "function") {
+              const packet = result.apiPacket || window.SCBKREngine.analyzeMessage(result.inputText || "").apiPacket;
+              apiPacketJson.textContent = JSON.stringify(packet, null, 2);
+            }
+          } catch (err) {
+            console.error("renderResult failed", err);
+          }
+        }
+
+        async function runAnalysis() {
+          const text = (inputEl.value || "").trim();
+          if (!text) {
+            renderResult(null);
+            return;
+          }
+
+          const useLLM = !!(useAwsLlmCheckbox && useAwsLlmCheckbox.checked);
+
+          try {
+            if (!window.SCBKREngine || typeof window.SCBKREngine.analyzeWithOptionalLLM !== "function") {
+              throw new Error("SCBKREngine.analyzeWithOptionalLLM not available");
+            }
+            const result = await window.SCBKREngine.analyzeWithOptionalLLM(text, { useLLM });
+            renderResult(result);
+          } catch (err) {
+            console.error("runAnalysis failed, fallback to local analyzeMessage", err);
+            try {
+              const fallback = window.SCBKREngine && typeof window.SCBKREngine.analyzeMessage === "function"
+                ? window.SCBKREngine.analyzeMessage(text)
+                : null;
+              renderResult(fallback);
+            } catch (fallbackErr) {
+              console.error("fallback analyzeMessage failed", fallbackErr);
+              renderResult(null);
+            }
+          }
+        }
+
+        [btnStandard, btnPro, btnSenior].forEach((btn) => {
+          if (!btn) return;
+          btn.addEventListener("click", function (e) {
+            e.preventDefault();
+            const mode = btn.getAttribute("data-mode") || "standard";
+            setMode(mode);
+          });
         });
 
         if (ruleClustersRow) {
@@ -1352,14 +854,10 @@
         proDebug.textContent = currentMode === "pro" ? "DEBUG (規則匹配結果 / Rule Matches):\n" + JSON.stringify({ risk: result.risk, ...result.debug, scbkr: result.scbkr }, null, 2) : "";
       }
 
-      function resetOutputs() {
-        riskBadge.classList.remove("safe", "risk", "fatal", "non-closable");
-        riskLabel.textContent = "未分析｜Not analyzed";
-        riskMainLine.textContent = "請先貼上訊息，並點選「分析這則訊息」。";
-        riskSubLine.textContent = "系統會依照語意特徵與責任鏈結構，給出 SAFE / RISK / FATAL / NON-CLOSABLE 分級。";
-        [flagS, flagC, flagB, flagK].forEach((f, i) => {
-          f.className = "scbkr-flag flag-warn";
-          f.textContent = ["未知 / Unknown", "模糊 / Vague", "不明 / Unclear", "潛在風險 / Risk"][i];
+        btnClear.addEventListener("click", function (e) {
+          e.preventDefault();
+          inputEl.value = "";
+          renderResult(null);
         });
         flagR.className = "scbkr-flag flag-bad";
         flagR.textContent = "無責任說明";
@@ -1415,24 +913,26 @@
         if (!VoiceModule.speakRiskResult(lastResult, AppI18n.getCurrentLang() === "en" ? "en-US" : "zh-TW")) {
           alert(AppI18n.t("msg.noSpeech"));
         }
-      });
-      stopSpeakBtn.addEventListener("click", () => VoiceModule.stopSpeaking());
 
-      await AppI18n.init("zh");
-      const loader = await ExamplesLoader.init({
-        containerId: "exampleContainer",
-        inputId: "inputText",
-        getLang: () => AppI18n.getCurrentLang(),
-        t: AppI18n.t,
-      });
-      AppI18n.onChange(() => loader && loader.rerender());
-      langSwitcher.addEventListener("change", async (e) => {
-        await AppI18n.setLanguage(e.target.value);
-      });
+        // 若 js/scbkr-engine.js 尚未定義，才補一份安全 fallback，不重覆覆蓋。
+        if (typeof window.runScbkrApiPacket !== "function") {
+          window.runScbkrApiPacket = function (inputText) {
+            const result = window.SCBKREngine && typeof window.SCBKREngine.analyzeMessage === "function"
+              ? window.SCBKREngine.analyzeMessage(inputText || "")
+              : null;
+            return result && result.apiPacket
+              ? result.apiPacket
+              : (window.SCBKREngine && typeof window.SCBKREngine.analyzeMessage === "function"
+                ? window.SCBKREngine.analyzeMessage("").apiPacket
+                : null);
+          };
+        }
 
-      setMode("standard");
-      resetOutputs();
-      updateCharCounter();
+        setMode("standard");
+        renderResult(null);
+      } catch (initErr) {
+        console.error("Demo init failed", initErr);
+      }
     })();
   </script>
 </body>
