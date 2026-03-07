@@ -977,6 +977,19 @@
           </div>
         </div>
 
+        <div style="margin-top: 10px;" id="srMathBlock">
+          <div class="section-title">主體責任判決｜Subject Responsibility Math</div>
+          <div class="section-subtitle">
+            先判定請求是否具備主體與責任成立性，再進入風險分級。
+          </div>
+          <div class="pill-row">
+            <span class="scbkr-flag flag-warn" id="srMathFinalBadge">Final Validity: VOID</span>
+          </div>
+          <ul class="list" id="srMathList">
+            <li class="list-item">尚未進行主體責任數學判決。</li>
+          </ul>
+        </div>
+
         <div style="margin-top: 10px;">
           <div class="section-title">可疑語意特徵｜Evidence Patterns</div>
           <div class="section-subtitle">
@@ -1082,6 +1095,9 @@
       const flagK = document.getElementById("flagK");
       const flagR = document.getElementById("flagR");
       const scbkrSeniorList = document.getElementById("scbkrSeniorList");
+      const srMathBlock = document.getElementById("srMathBlock");
+      const srMathFinalBadge = document.getElementById("srMathFinalBadge");
+      const srMathList = document.getElementById("srMathList");
       const evidenceList = document.getElementById("evidenceList");
       const triggeredRulesList = document.getElementById("triggeredRulesList");
       const ruleClustersList = document.getElementById("ruleClustersList");
@@ -1155,6 +1171,40 @@
           <li>B 邊界（Boundary）分數：${result.scbkr.B}</li>
           <li>K 成本（Cost）分數：${result.scbkr.K}</li>
           <li>R 責任（Responsibility）分數：${result.scbkr.R}</li>`;
+
+        const srMath = result.srMath || {
+          subjectValidity: false,
+          responsibilityValidity: false,
+          boundaryValidity: false,
+          subjectDecision: "VOID",
+          responsibilityDecision: "VOID",
+          finalValidity: "VOID",
+          voidReason: "尚未分析",
+        };
+
+        const srBlock = document.getElementById("srMathBlock");
+        if (srBlock) {
+          const srBadge = document.getElementById("srMathFinalBadge");
+          if (srBadge) {
+            srBadge.className = "scbkr-flag " + (srMath.finalValidity === "VALID" ? "flag-ok" : (srMath.finalValidity === "REVIEW" ? "flag-warn" : "flag-bad"));
+            srBadge.textContent = `Final Validity: ${srMath.finalValidity}`;
+          }
+
+          const srListEl = document.getElementById("srMathList");
+          if (srListEl) {
+            renderList(srListEl, [
+              `Subject Validity：${srMath.subjectDecision || "VOID"}`,
+              `Responsibility Validity：${srMath.responsibilityDecision || "VOID"}`,
+              `Boundary Validity：${srMath.boundaryValidity ? "VALID" : "VOID"}`,
+              `Final Validity：${srMath.finalValidity || "VOID"}`,
+              `Void Reason：${srMath.voidReason || ""}`,
+            ], (text) => text);
+          }
+        }
+
+        if (srMath.finalValidity === "VOID") {
+          riskSubLine.textContent = `${result.riskDisplay.sub}｜此請求在主體責任層不成立。`;
+        }
 
         renderList(evidenceList, result.coreReasonsZh, (text) => text);
         renderList(triggeredRulesList, result.triggeredRules, (item) => `${item.rule_id} [${item.category}]：${item.reason_zh}`);
@@ -1247,6 +1297,15 @@
         });
         renderList(evidenceList, [], () => "");
         renderList(triggeredRulesList, [], () => "");
+        if (srMathFinalBadge) {
+          srMathFinalBadge.className = "scbkr-flag flag-warn";
+          srMathFinalBadge.textContent = "Final Validity: VOID";
+        }
+        if (srMathList) {
+          renderList(srMathList, [], () => "");
+          const first = srMathList.querySelector(".list-item");
+          if (first) first.textContent = "尚未進行主體責任數學判決。";
+        }
         if (ruleClustersList) {
           ruleClustersList.innerHTML = '<div class="pill-mini">目前沒有額外 cluster。</div>';
         }
