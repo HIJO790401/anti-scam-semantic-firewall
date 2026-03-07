@@ -1,4 +1,6 @@
 (function (global) {
+  // VoiceModule wraps browser Web Speech API for optional result read-out.
+  // It is used by Senior Mode and can also help non-technical users.
   function isSupported() {
     return "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
   }
