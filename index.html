@@ -1,1206 +1,523 @@
 <!DOCTYPE html>
-<html lang="zh-Hant" data-mode="standard">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
-  <title>反詐騙語意防火牆引擎 Anti-Scam Semantic Firewall Engine</title>
+  <meta charset="utf-8" />
+  <title>Anti-Scam Semantic Firewall Engine</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://unpkg.com/modern-css-reset/dist/reset.min.css" />
   <style>
     :root {
-      --bg: #050816;
-      --bg-elevated: #0b1020;
-      --bg-elevated-soft: #10172a;
-      --border-subtle: #1f2937;
+      --bg: #0b1020;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
       --accent: #f97316;
-      --accent-soft: rgba(249, 115, 22, 0.16);
-      --accent-strong: #f97316;
-      --accent-green: #22c55e;
-      --accent-red: #ef4444;
-      --accent-amber: #facc15;
-      --text-main: #e5e7eb;
-      --text-soft: #9ca3af;
-      --text-faint: #6b7280;
-      --text-strong: #f9fafb;
-      --chip-bg: rgba(15, 23, 42, 0.9);
-      --radius-lg: 18px;
-      --radius-sm: 999px;
-      --shadow-soft: 0 18px 40px rgba(15, 23, 42, 0.85);
-      --shadow-chip: 0 10px 25px rgba(15, 23, 42, 0.9);
-      --shadow-strong: 0 0 40px rgba(249, 115, 22, 0.45);
-      --transition-fast: 140ms ease-out;
-      --transition-med: 190ms ease-out;
-      --font-base: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-        "Segoe UI", sans-serif;
-      --font-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-        "Courier New", monospace;
+      --safe: #22c55e;
+      --risk: #facc15;
+      --fatal: #ef4444;
+      --neutral: #64748b;
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
-    html,
     body {
       margin: 0;
-      padding: 0;
-      background: radial-gradient(circle at top left, #111827 0, #020617 50%);
-      color: var(--text-main);
-      font-family: var(--font-base);
-      -webkit-font-smoothing: antialiased;
-    }
-
-    body {
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
+      background: radial-gradient(circle at top left, #020617 0, #111827 40%, #030712 100%);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.45;
       padding: 16px;
     }
 
-    .app-shell {
-      width: 100%;
-      max-width: 1120px;
-      background: linear-gradient(140deg, #020617 0%, #020617 40%, #0b1120 100%);
-      border-radius: 28px;
-      border: 1px solid rgba(148, 163, 184, 0.25);
-      box-shadow: var(--shadow-soft);
-      padding: 20px 20px 24px;
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 16px;
+      background: rgba(2, 6, 23, 0.85);
     }
 
-    @media (min-width: 960px) {
-      .app-shell {
-        padding: 24px 26px 28px;
-      }
-    }
-
-    header.app-header {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      margin-bottom: 18px;
-    }
-
-    @media (min-width: 768px) {
-      header.app-header {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: flex-start;
-      }
-    }
-
-    .title-block {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .title-chip-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: var(--radius-sm);
-      background: var(--chip-bg);
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      box-shadow: var(--shadow-chip);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--text-soft);
-    }
-
-    .chip-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent-strong);
-      box-shadow: 0 0 12px rgba(249, 115, 22, 0.9);
-    }
-
-    .chip-green {
-      border-color: rgba(34, 197, 94, 0.5);
-      color: #bbf7d0;
-    }
-
-    .chip-green .chip-dot {
-      background: var(--accent-green);
-      box-shadow: 0 0 12px rgba(34, 197, 94, 0.9);
-    }
-
-    h1.app-title {
-      margin: 0;
-      font-size: 18px;
-      color: var(--text-strong);
-      letter-spacing: 0.04em;
-    }
-
-    h1.app-title span.sub-en {
-      font-weight: 400;
-      color: var(--text-soft);
-      font-size: 13px;
-      letter-spacing: 0.06em;
+    h1 {
+      font-size: 20px;
+      margin: 0 0 8px;
     }
 
     .subtitle {
+      margin: 0 0 12px;
+      color: var(--muted);
       font-size: 13px;
-      color: var(--text-soft);
-      max-width: 640px;
     }
 
-    .subtitle strong {
-      color: #e5e7eb;
-    }
-
-    .head-meta {
+    #modeSwitch {
       display: flex;
-      flex-direction: column;
       gap: 8px;
-      align-items: flex-start;
-      margin-top: 6px;
-    }
-
-    @media (min-width: 768px) {
-      .head-meta {
-        align-items: flex-end;
-      }
-    }
-
-    .meta-line {
-      font-size: 11px;
-      color: var(--text-faint);
-      display: flex;
+      margin-bottom: 12px;
       flex-wrap: wrap;
-      gap: 10px;
-      justify-content: flex-start;
     }
 
-    @media (min-width: 768px) {
-      .meta-line {
-        justify-content: flex-end;
-      }
-    }
-
-    .meta-line span.label {
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: #cbd5f5;
-    }
-
-    .small-link {
-      color: #bfdbfe;
-      text-decoration: none;
-      border-bottom: 1px dotted rgba(191, 219, 254, 0.6);
-      transition: color var(--transition-fast), border-color var(--transition-fast);
-      font-size: 11px;
-    }
-
-    .small-link:hover {
-      color: #e5e7eb;
-      border-bottom-color: rgba(229, 231, 235, 0.85);
-    }
-
-    .mode-switch {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 16px;
-      margin-top: 4px;
-    }
-
-    @media (min-width: 768px) {
-      .mode-switch {
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-      }
-    }
-
-    .mode-tabs {
-      display: inline-flex;
-      padding: 4px;
-      gap: 4px;
+    #modeSwitch button {
+      border: 1px solid #475569;
       border-radius: 999px;
-      background: rgba(15, 23, 42, 0.95);
-      border: 1px solid rgba(148, 163, 184, 0.45);
-      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.9);
-    }
-
-    .mode-btn {
-      border: none;
-      background: transparent;
+      background: #0f172a;
+      color: var(--text);
       padding: 6px 12px;
-      border-radius: 999px;
-      color: var(--text-soft);
-      font-size: 11px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: background var(--transition-fast),
-        color var(--transition-fast), transform var(--transition-fast),
-        box-shadow var(--transition-fast);
+      font-size: 12px;
     }
 
-    .mode-btn span.badge {
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.5);
+    #modeSwitch button.active {
+      background: linear-gradient(120deg, #f97316, #ea580c);
+      color: #111827;
+      border-color: transparent;
+      font-weight: 700;
     }
 
-    .mode-btn[data-active="true"] {
-      background: radial-gradient(circle at top left, #f97316 0, #ea580c 45%, #7c2d12 100%);
-      color: #0b1020;
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-strong);
-    }
-
-    .mode-btn[data-active="true"] span.badge {
-      border-color: rgba(15, 23, 42, 0.7);
-      background: rgba(15, 23, 42, 0.12);
-      color: #f9fafb;
-    }
-
-    .mode-caption {
-      font-size: 11px;
-      color: var(--text-faint);
-    }
-
-    main.app-main {
+    .grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.5fr);
-      gap: 14px;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.4fr);
+      gap: 12px;
     }
 
     @media (max-width: 900px) {
-      main.app-main {
-        grid-template-columns: minmax(0, 1fr);
-      }
+      .grid { grid-template-columns: 1fr; }
     }
 
     .card {
-      background: radial-gradient(circle at top left, #111827 0, #020617 55%);
-      border-radius: var(--radius-lg);
-      border: 1px solid rgba(55, 65, 81, 0.9);
-      box-shadow: 0 18px 32px rgba(15, 23, 42, 0.9);
-      padding: 14px 14px 16px;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      background: var(--panel);
+      padding: 12px;
     }
 
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      gap: 8px;
-    }
-
-    .card-title {
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #cbd5f5;
-    }
-
-    .card-title span.en {
-      font-size: 11px;
-      color: var(--text-faint);
-    }
-
-    .card-caption {
-      font-size: 11px;
-      color: var(--text-faint);
-    }
-
-    .textarea {
+    textarea,
+    input[type="text"] {
       width: 100%;
-      min-height: 160px;
-      resize: vertical;
-      border-radius: 16px;
-      border: 1px solid rgba(75, 85, 99, 0.9);
-      padding: 11px 11px 28px;
-      background: radial-gradient(circle at top left, #030712 0, #020617 60%);
-      color: var(--text-main);
-      font-family: var(--font-base);
-      font-size: 13px;
-      line-height: 1.5;
-      outline: none;
-      transition: border var(--transition-med), box-shadow var(--transition-med),
-        background var(--transition-med);
+      background: #0f172a;
+      color: var(--text);
+      border: 1px solid #475569;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 14px;
     }
 
-    .textarea::placeholder {
-      color: var(--text-faint);
-    }
-
-    .textarea:focus {
-      border-color: var(--accent-strong);
-      box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.75),
-        0 0 40px rgba(249, 115, 22, 0.38);
-      background: radial-gradient(circle at top left, #020617 0, #020617 50%);
-    }
-
-    .input-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 6px;
-      gap: 10px;
-    }
-
-    .char-counter {
-      font-size: 11px;
-      color: var(--text-faint);
-      font-family: var(--font-mono);
-    }
-
-    .btn-row {
-      display: inline-flex;
-      gap: 8px;
-    }
-
-    .btn {
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.7);
-      padding: 6px 14px;
-      font-size: 12px;
-      cursor: pointer;
-      background: rgba(15, 23, 42, 0.95);
-      color: var(--text-main);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: background var(--transition-med), border var(--transition-med),
-        transform var(--transition-fast), box-shadow var(--transition-fast),
-        color var(--transition-fast);
-      white-space: nowrap;
-    }
-
-    .btn span.en-label {
-      font-size: 10px;
-      color: var(--text-faint);
-    }
-
-    .btn-primary {
-      background: radial-gradient(circle at top left, #f97316 0, #ea580c 50%, #7c2d12 100%);
-      border-color: transparent;
-      color: #0b1020;
-      font-weight: 600;
-      box-shadow: 0 12px 30px rgba(249, 115, 22, 0.65);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 16px 40px rgba(249, 115, 22, 0.7);
-    }
-
-    .btn-secondary:hover {
-      background: rgba(30, 64, 175, 0.7);
-      border-color: rgba(129, 140, 248, 0.95);
-      box-shadow: 0 10px 28px rgba(30, 64, 175, 0.75);
-    }
-
-    .pill-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 3px 9px;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.86);
-      border: 1px solid rgba(55, 65, 81, 0.95);
-      font-size: 11px;
-      color: var(--text-soft);
-    }
-
-    .pill-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--accent-strong);
-      box-shadow: 0 0 12px rgba(249, 115, 22, 0.9);
-    }
-
-    .risk-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-size: 11px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      background: var(--accent-soft);
-      border: 1px solid rgba(249, 115, 22, 0.65);
-      color: #fed7aa;
-    }
-
-    .risk-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: var(--accent-strong);
-      box-shadow: 0 0 14px rgba(249, 115, 22, 0.95);
-    }
-
-    .risk-badge.safe {
-      background: rgba(22, 163, 74, 0.16);
-      border-color: rgba(34, 197, 94, 0.8);
-      color: #bbf7d0;
-    }
-
-    .risk-badge.safe .risk-dot {
-      background: var(--accent-green);
-      box-shadow: 0 0 14px rgba(34, 197, 94, 0.95);
-    }
-
-    .risk-badge.risk {
-      background: rgba(250, 204, 21, 0.14);
-      border-color: rgba(250, 204, 21, 0.85);
-      color: #fef9c3;
-    }
-
-    .risk-badge.risk .risk-dot {
-      background: var(--accent-amber);
-      box-shadow: 0 0 14px rgba(250, 204, 21, 0.95);
-    }
-
-    .risk-badge.fatal,
-    .risk-badge.non-closable {
-      background: rgba(248, 113, 113, 0.22);
-      border-color: rgba(248, 113, 113, 0.9);
-      color: #fee2e2;
-    }
-
-    .risk-badge.fatal .risk-dot,
-    .risk-badge.non-closable .risk-dot {
-      background: var(--accent-red);
-      box-shadow: 0 0 14px rgba(239, 68, 68, 0.95);
-    }
-
-    .risk-main-line {
-      margin-top: 10px;
-      font-size: 13px;
-      color: var(--text-strong);
-    }
-
-    .risk-sub-line {
-      font-size: 11px;
-      color: var(--text-soft);
-      margin-top: 4px;
-    }
-
-    .pill-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
+    .actions {
       margin-top: 8px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
-    .pill-mini {
-      padding: 3px 8px;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px dashed rgba(75, 85, 99, 0.95);
-      font-size: 11px;
-      color: var(--text-faint);
+    button {
+      border: 1px solid #64748b;
+      border-radius: 8px;
+      background: #0f172a;
+      color: var(--text);
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 13px;
     }
 
-    .section-title {
+    #btnAnalyze {
+      background: linear-gradient(120deg, #f97316, #ea580c);
+      color: #111827;
+      border-color: transparent;
+      font-weight: 700;
+    }
+
+    .hint, .text-muted {
+      color: var(--muted);
       font-size: 12px;
-      color: #e5e7eb;
-      margin-bottom: 6px;
     }
 
-    .section-subtitle {
-      font-size: 11px;
-      color: var(--text-faint);
-      margin-bottom: 6px;
-    }
-
-    .kv-row {
-      display: grid;
-      grid-template-columns: 100px minmax(0, 1fr);
-      gap: 4px 10px;
-      font-size: 11px;
-      margin-bottom: 2px;
-    }
-
-    .kv-key {
-      color: var(--text-soft);
-    }
-
-    .kv-val {
-      color: var(--text-main);
-    }
-
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 2px 8px;
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
       border-radius: 999px;
-      border: 1px solid rgba(75, 85, 99, 0.95);
-      font-size: 11px;
-      color: var(--text-soft);
+      font-size: 12px;
+      margin-bottom: 8px;
+      border: 1px solid transparent;
     }
 
-    .tag-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: rgba(148, 163, 184, 0.95);
-    }
+    .badge-neutral { background: rgba(100, 116, 139, 0.15); color: #cbd5e1; border-color: #64748b; }
+    .badge-safe { background: rgba(34, 197, 94, 0.15); color: #bbf7d0; border-color: var(--safe); }
+    .badge-risk { background: rgba(250, 204, 21, 0.15); color: #fef9c3; border-color: var(--risk); }
+    .badge-fatal,
+    .badge-non-closable { background: rgba(239, 68, 68, 0.18); color: #fee2e2; border-color: var(--fatal); }
 
-    .list {
-      list-style: none;
-      padding: 0;
-      margin: 4px 0 0;
-    }
-
-    .list-item {
-      position: relative;
-      padding-left: 14px;
-      font-size: 11px;
-      color: var(--text-main);
-      margin-bottom: 4px;
-    }
-
-    .list-item::before {
-      content: "•";
-      position: absolute;
-      left: 3px;
-      top: 0;
-      color: var(--accent-strong);
-    }
-
-    .list-item span.badge {
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid rgba(75, 85, 99, 0.95);
-      margin-left: 4px;
-      color: var(--text-soft);
-    }
-
-    .scbkr-grid {
+    #scbkrSection {
+      margin-top: 10px;
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 4px;
-      margin-top: 4px;
+      gap: 8px;
     }
 
-    .scbkr-cell {
-      padding: 6px 6px 7px;
-      border-radius: 8px;
-      background: rgba(15, 23, 42, 0.95);
-      border: 1px solid rgba(55, 65, 81, 0.95);
-      font-size: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      min-height: 44px;
+    @media (max-width: 900px) {
+      #scbkrSection { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
 
-    .scbkr-label {
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #9ca3af;
-    }
-
-    .scbkr-zh {
-      font-size: 10px;
-      color: var(--text-faint);
-    }
-
-    .scbkr-flag {
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 999px;
-      align-self: flex-start;
-    }
-
-    .flag-ok {
-      background: rgba(34, 197, 94, 0.18);
-      color: #bbf7d0;
-      border: 1px solid rgba(34, 197, 94, 0.8);
-    }
-
-    .flag-warn {
-      background: rgba(250, 204, 21, 0.14);
-      color: #fef9c3;
-      border: 1px solid rgba(250, 204, 21, 0.85);
-    }
-
-    .flag-bad {
-      background: rgba(248, 113, 113, 0.22);
-      color: #fee2e2;
-      border: 1px solid rgba(248, 113, 113, 0.9);
-    }
-
-    .scbkr-senior {
-      display: none;
-      margin-top: 6px;
-      padding-top: 6px;
-      border-top: 1px dashed rgba(55, 65, 81, 0.9);
+    .scbkr-card {
+      border: 1px dashed #64748b;
+      border-radius: 10px;
+      padding: 8px;
       font-size: 12px;
+      color: #cbd5e1;
+      background: rgba(15, 23, 42, 0.7);
     }
 
-    .scbkr-senior ul {
-      list-style: none;
+    .scbkr-card.on {
+      border-style: solid;
+      border-color: var(--safe);
+      color: #dcfce7;
+      background: rgba(34, 197, 94, 0.12);
+    }
+
+    ul {
+      margin: 8px 0 0 18px;
       padding: 0;
-      margin: 4px 0 0;
     }
 
-    .scbkr-senior li {
-      margin-bottom: 4px;
-      padding-left: 10px;
-      position: relative;
+    li { margin-bottom: 4px; font-size: 13px; }
+
+    #apiPacketPanel,
+    #llmSection {
+      margin-top: 10px;
+      border-top: 1px dashed #475569;
+      padding-top: 10px;
     }
 
-    .scbkr-senior li::before {
-      content: "▹";
-      position: absolute;
-      left: 0;
-      color: var(--accent-strong);
-      font-size: 11px;
-    }
-
-    .role-note {
-      font-size: 11px;
-      color: var(--text-soft);
-      margin-top: 4px;
-    }
-
-    .role-note strong {
-      color: #e5e7eb;
-    }
-
-    #proDebug {
-      display: none;
+    #apiPacketJson {
       margin-top: 8px;
-      padding-top: 6px;
-      border-top: 1px dashed rgba(55, 65, 81, 0.9);
-      font-size: 10px;
-      color: var(--text-faint);
-      font-family: var(--font-mono);
+      border: 1px solid #475569;
+      border-radius: 8px;
+      padding: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      color: #bfdbfe;
+      background: #0f172a;
       white-space: pre-wrap;
       word-break: break-all;
+      max-height: 320px;
+      overflow: auto;
     }
 
-    .hint-senior-hero {
-      display: none;
-      font-size: 13px;
-      color: #e5e7eb;
-      margin-top: 4px;
-      padding: 6px 10px;
-      border-radius: 12px;
-      background: rgba(15, 23, 42, 0.95);
-      border: 1px solid rgba(55, 65, 81, 0.95);
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
 
-    .hint-senior-hero strong {
-      color: #fee2e2;
-    }
-
-    html[data-mode="senior"] body {
+    body.senior-mode {
       font-size: 18px;
     }
 
-    html[data-mode="senior"] .app-shell {
-      border-width: 2px;
-    }
-
-    html[data-mode="senior"] .textarea {
-      font-size: 15px;
-      min-height: 190px;
-    }
-
-    html[data-mode="senior"] .btn {
-      font-size: 14px;
-      padding: 8px 18px;
-    }
-
-    html[data-mode="senior"] .btn span.en-label {
-      display: none;
-    }
-
-    html[data-mode="senior"] .scbkr-grid {
-      display: none;
-    }
-
-    html[data-mode="senior"] .scbkr-senior {
-      display: block;
-    }
-
-    html[data-mode="senior"] .subtitle {
-      font-size: 14px;
-    }
-
-    html[data-mode="senior"] .hint-senior-hero {
-      display: block;
-    }
-
-    html[data-mode="senior"] .mode-caption {
-      font-size: 12px;
-    }
-
-    html[data-mode="senior"] .risk-main-line {
-      font-size: 14px;
-    }
-
-    html[data-mode="senior"] .risk-sub-line {
-      font-size: 12px;
-    }
-
-    html[data-mode="senior"] .section-title {
-      font-size: 13px;
-    }
-
-    html[data-mode="senior"] .section-subtitle,
-    html[data-mode="senior"] .list-item {
-      font-size: 12px;
-    }
-
-    html[data-mode="pro"] #proDebug {
-      display: block;
-    }
-
-    @media (max-width: 600px) {
-      .card {
-        padding: 12px 10px 13px;
-      }
-
-      .scbkr-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
+    body.senior-mode .subtitle,
+    body.senior-mode .hint,
+    body.senior-mode .text-muted,
+    body.senior-mode .scbkr-card,
+    body.senior-mode li,
+    body.senior-mode button,
+    body.senior-mode textarea,
+    body.senior-mode input[type="text"] {
+      font-size: 16px;
     }
   </style>
 </head>
 <body>
-  <div class="app-shell">
-    <header class="app-header">
-      <div class="title-block">
-        <div class="title-chip-row">
-          <div class="chip chip-green">
-            <span class="chip-dot"></span>
-            <span>ANTI-SCAM SEMANTIC FIREWALL ENGINE</span>
-          </div>
-          <div class="chip">
-            <span class="chip-dot"></span>
-            <span>SCBKR · Ex(y)=π · LINGUISTIC GOVERNANCE</span>
-          </div>
-        </div>
-        <h1 class="app-title">
-          反詐騙語意防火牆引擎
-          <span class="sub-en">Anti-Scam Semantic Firewall Engine</span>
-        </h1>
-        <div class="subtitle">
-          以 <strong>SCBKR 五軸責任鏈</strong>＋<strong>語意風險分級</strong>＋<strong>Ex(y)=π
-            角色治理</strong> 拆解每一則訊息的「誰在說、要你做什麼、風險在哪、出事誰扛」。
-        </div>
-        <div class="hint-senior-hero">
-          <strong>看不懂就先不要照做。</strong> 如果你覺得這段訊息怪怪的，貼上來讓系統幫你看，然後再打電話給
-          <strong>官方客服或家人</strong>，確認之後再決定要不要相信。
-        </div>
-      </div>
-      <div class="head-meta">
-        <div class="meta-line">
-          <span class="label" data-i18n="lang.switch">語言</span>
-          <select id="langSwitcher" style="background:#0f172a;color:#e5e7eb;border:1px solid #475569;border-radius:6px;padding:2px 6px;">
-            <option value="zh">中文</option>
-            <option value="en">English</option>
-          </select>
-        </div>
-        <div class="meta-line">
-          <span class="label">AUTHOR</span>
-          <span>沈耀 888π / Wen-Yao Hsu · Taichung, Taiwan</span>
-        </div>
-        <div class="meta-line">
-          <span class="label">DEMO</span>
-          <a class="small-link" href="https://hijo790401.github.io/anti-scam-semantic-firewall/" target="_blank"
-            rel="noopener noreferrer">Live
-            Demo</a>
-          <span class="label">GITHUB</span>
-          <a class="small-link" href="https://github.com/HIJO790401/anti-scam-semantic-firewall" target="_blank"
-            rel="noopener noreferrer">Repository</a>
-        </div>
-      </div>
-    </header>
+  <div class="app">
+    <h1>Anti-Scam Semantic Firewall Engine</h1>
+    <p class="subtitle">SCBKR 本地語意分析 Demo｜保留 Standard / Pro / Senior Safe 三模式，AWS LLM 僅可選預留。</p>
 
-    <section class="mode-switch" aria-label="模式切換 Mode Switch">
-      <div class="mode-tabs">
-        <button class="mode-btn" type="button" data-mode-btn data-mode="standard" aria-pressed="true">
-          <span>標準版</span>
-          <span class="badge">Standard</span>
-        </button>
-        <button class="mode-btn" type="button" data-mode-btn data-mode="pro" aria-pressed="false">
-          <span>專業版</span>
-          <span class="badge">Pro</span>
-        </button>
-        <button class="mode-btn" type="button" data-mode-btn data-mode="senior" aria-pressed="false">
-          <span>長輩安心版</span>
-          <span class="badge">Senior Safe</span>
-        </button>
-      </div>
-      <div class="mode-caption" id="modeLabel">
-        標準版 STANDARD – 一般使用者友善介面，中英文雙語提示。
-      </div>
-    </section>
+    <div id="modeSwitch">
+      <button id="btnStandard" data-mode="standard" class="active">STANDARD</button>
+      <button id="btnPro" data-mode="pro">PRO</button>
+      <button id="btnSenior" data-mode="senior">SENIOR SAFE</button>
+    </div>
 
-    <main class="app-main">
-      <section class="card" aria-label="可疑訊息輸入 Input">
-        <div class="card-header">
-          <div>
-            <div class="card-title">
-              可疑訊息輸入
-              <span class="en">｜ Suspicious Message Input</span>
-            </div>
-            <div class="card-caption">
-              把你收到的簡訊、Line、Email 或網頁文字貼在這裡。
-            </div>
-          </div>
-          <div class="pill-label">
-            <span class="pill-dot"></span>
-            <span>Step 1｜貼上完整訊息 Paste full text</span>
-          </div>
+    <div class="grid">
+      <section class="card">
+        <label class="sr-only" for="inputText">可疑訊息</label>
+        <textarea id="inputText" rows="6" placeholder="把可疑簡訊 / Line / Email 貼在這裡"></textarea>
+        <div class="actions">
+          <button id="btnClear">清除內容</button>
+          <button id="btnAnalyze">分析這則訊息</button>
         </div>
-        <textarea id="inputText" class="textarea" placeholder="例：『您的帳戶已被凍結，請在 10 分鐘內點選以下連結完成驗證，否則將永久停用。』"></textarea>
-        <div id="exampleContainer"></div>
-        <div class="input-footer">
-          <div class="char-counter" id="charCounter">0 字 / chars</div>
-          <div class="btn-row">
-            <button class="btn btn-secondary" id="clearBtn" type="button">
-              <span>清除內容</span>
-              <span class="en-label">Clear</span>
-            </button>
-            <button class="btn btn-primary" id="analyzeBtn" type="button">
-              <span>分析這則訊息</span>
-              <span class="en-label">Analyze</span>
-            </button>
-            <button class="btn btn-secondary" id="exportBtn" type="button" style="display:none;">
-              <span data-i18n="btn.export">匯出報告</span>
-            </button>
-          </div>
+
+        <div style="margin-top:10px;">
+          <label>
+            <input type="checkbox" id="seniorModeCheckbox" />
+            切換長輩模式（大字體 / 簡化）
+          </label>
         </div>
-        <div class="btn-row" id="seniorVoiceRow" style="display:none;margin-top:10px;">
-          <button class="btn btn-secondary" id="speakBtn" type="button" data-i18n="btn.speak">朗讀風險結果</button>
-          <button class="btn btn-secondary" id="stopSpeakBtn" type="button" data-i18n="btn.stopSpeak">停止朗讀</button>
+        <div style="margin-top:8px;">
+          <label>
+            <input type="checkbox" id="useAwsLlmCheckbox" />
+            Use AWS LLM explanation (if available)
+          </label>
+          <p class="hint">
+            LLM 選項目前只是介接預留（hook），預設仍是本地規則分析。就算遠端掛掉也不能讓整個頁面壞掉。
+          </p>
         </div>
       </section>
 
-      <section class="card" aria-label="分析結果 Output">
-        <div class="card-header">
-          <div>
-            <div class="card-title">
-              風險等級與總結
-              <span class="en">｜ Risk Level & Summary</span>
-            </div>
-            <div class="card-caption">
-              這不是「感覺怪怪的」，而是可被說清楚的語意結構。
-            </div>
-          </div>
-          <div id="riskBadge" class="risk-badge">
-            <span class="risk-dot"></span>
-            <span id="riskLabel">未分析｜Not analyzed</span>
-          </div>
-        </div>
+      <section class="card">
+        <section id="riskSection">
+          <div id="riskBadge" class="badge badge-neutral">未分析 | NOT ANALYZED</div>
+          <h3 id="riskTitle">請先貼上訊息，並點選「分析這則訊息」。</h3>
+          <p id="riskSubtitle" class="text-muted">系統會依照語意特徵與責任鏈結構給出 SAFE / RISK / FATAL / NON-CLOSABLE 分級。</p>
+        </section>
 
-        <div class="risk-main-line" id="riskMainLine">
-          請先貼上訊息，並點選「分析這則訊息」。
-        </div>
-        <div class="risk-sub-line" id="riskSubLine">
-          系統會依照語意特徵與責任鏈結構，給出 SAFE / RISK / FATAL / NON-CLOSABLE 分級。
-        </div>
+        <section id="scbkrSection">
+          <div class="scbkr-card" id="scbkrS">S 主體｜誰在說話</div>
+          <div class="scbkr-card" id="scbkrC">C 理由｜為何聯絡</div>
+          <div class="scbkr-card" id="scbkrB">B 邊界｜要做到哪裡</div>
+          <div class="scbkr-card" id="scbkrK">K 成本｜錯信代價</div>
+          <div class="scbkr-card" id="scbkrR">R 責任｜出事誰扛</div>
+        </section>
 
-        <div class="pill-row">
-          <div class="pill-mini">SAFE：正常或可安心觀察</div>
-          <div class="pill-mini">RISK：需要提高警覺，建議改走官方管道</div>
-          <div class="pill-mini">FATAL：高風險，請立刻停止並改用官方管道</div>
-          <div class="pill-mini">NON-CLOSABLE：主體與責任不清楚，暫停所有高風險操作</div>
-        </div>
+        <section>
+          <h3 style="margin-top:10px;">可疑語意特徵 | Evidence Patterns</h3>
+          <ul id="evidenceList"></ul>
+        </section>
+        <section>
+          <h3 style="margin-top:10px;">行動建議 | Action Guidance</h3>
+          <ul id="actionList"></ul>
+        </section>
 
-        <div style="margin-top: 10px;">
-          <div class="section-title">
-            SCBKR 責任鏈拆解｜Responsibility Chain
-          </div>
-          <div class="section-subtitle">
-            S 主體 / C 理由 / B 邊界 / K 成本 / R 責任 ｜任何一軸講不清楚，這則訊息就不是單純「怪」，而是責任鏈斷裂。
-          </div>
+        <section id="llmSection" hidden>
+          <h3>AWS LLM Explanation (預留)</h3>
+          <p id="llmExplanationText"></p>
+          <ul id="llmExtraEvidence"></ul>
+          <ul id="llmExtraActions"></ul>
+        </section>
 
-          <div class="scbkr-grid scbkr-detailed">
-            <div class="scbkr-cell" id="cellS">
-              <div class="scbkr-label">S</div>
-              <div class="scbkr-zh">Subject｜誰在說話</div>
-              <span class="scbkr-flag flag-warn" id="flagS">未知 / Unknown</span>
-            </div>
-            <div class="scbkr-cell" id="cellC">
-              <div class="scbkr-label">C</div>
-              <div class="scbkr-zh">Cause｜為何聯絡</div>
-              <span class="scbkr-flag flag-warn" id="flagC">模糊 / Vague</span>
-            </div>
-            <div class="scbkr-cell" id="cellB">
-              <div class="scbkr-label">B</div>
-              <div class="scbkr-zh">Boundary｜要做到哪裡</div>
-              <span class="scbkr-flag flag-warn" id="flagB">不明 / Unclear</span>
-            </div>
-            <div class="scbkr-cell" id="cellK">
-              <div class="scbkr-label">K</div>
-              <div class="scbkr-zh">Cost｜錯信代價</div>
-              <span class="scbkr-flag flag-warn" id="flagK">潛在風險 / Risk</span>
-            </div>
-            <div class="scbkr-cell" id="cellR">
-              <div class="scbkr-label">R</div>
-              <div class="scbkr-zh">Responsibility｜出事誰扛</div>
-              <span class="scbkr-flag flag-bad" id="flagR">無責任說明</span>
-            </div>
-          </div>
-
-          <div class="scbkr-senior" id="scbkrSenior">
-            <p>簡單講，這則訊息有沒有說清楚：</p>
-            <ul id="scbkrSeniorList">
-              <li>誰在跟你說話（是不是你熟悉的官方單位）。</li>
-              <li>為什麼要你做這件事。</li>
-              <li>要你做到哪一個步驟（例如：轉多少錢、點哪個連結）。</li>
-              <li>如果是假的，你會損失什麼。</li>
-              <li>如果出事，誰會負責。</li>
-            </ul>
-          </div>
-        </div>
-
-        <div style="margin-top: 10px;">
-          <div class="section-title">可疑語意特徵｜Evidence Patterns</div>
-          <div class="section-subtitle">
-            為什麼系統覺得這段話危險，用簡單條列列給你看。
-          </div>
-          <ul class="list" id="evidenceList">
-            <li class="list-item">
-              尚未分析。貼上訊息並點選「分析」後，這裡會顯示詐騙常見的語言套路。
-            </li>
-          </ul>
-        </div>
-
-        <div style="margin-top: 10px;">
-          <div class="section-title">行動建議｜Action Guidance</div>
-          <div class="section-subtitle">
-            不只說「小心」，而是告訴你下一步該怎麼做。
-          </div>
-          <ul class="list" id="actionList">
-            <li class="list-item">
-              目前沒有建議。分析後，這裡會告訴你：要不要立刻停止、要不要改走官方管道、需不需要請家人幫忙。
-            </li>
-          </ul>
-        </div>
-
-        <div style="margin-top: 10px;">
-          <div class="section-title">角色治理｜Role Governance Ex(y)=π</div>
-          <div class="role-note" id="roleNote">
-            在這個 Demo 裡，<strong>AI / 模型永遠只是輔助工具層</strong>，真正做決定的人是
-            <strong>你自己 + 官方管道（銀行 App / 官方網站 / 卡背電話 / 警政單位）</strong>。<br />
-            This engine is a <strong>tool layer</strong>, not a final judge. Final decisions should be made via
-            <strong>official channels and human review</strong>.
-          </div>
-          <div id="proDebug"></div>
-        </div>
+        <section id="apiPacketPanel" style="display:none;">
+          <h3>v3 SCBKR API 封包（JSON）</h3>
+          <button id="toggleApiPacketBtn" type="button">顯示 JSON</button>
+          <pre id="apiPacketJson" hidden></pre>
+        </section>
       </section>
-    </main>
+    </div>
   </div>
 
-  <script src="js/i18n.js"></script>
   <script src="js/scbkr-engine.js"></script>
-  <script src="js/examples-loader.js"></script>
   <script src="js/voice.js"></script>
-  <script src="js/report-export.js"></script>
   <script>
-    (async function () {
-      const htmlEl = document.documentElement;
-      const inputEl = document.getElementById("inputText");
-      const charCounter = document.getElementById("charCounter");
-      const clearBtn = document.getElementById("clearBtn");
-      const analyzeBtn = document.getElementById("analyzeBtn");
-      const exportBtn = document.getElementById("exportBtn");
-      const speakBtn = document.getElementById("speakBtn");
-      const stopSpeakBtn = document.getElementById("stopSpeakBtn");
-      const seniorVoiceRow = document.getElementById("seniorVoiceRow");
-      const langSwitcher = document.getElementById("langSwitcher");
-      const modeButtons = document.querySelectorAll("[data-mode-btn]");
-      const modeLabel = document.getElementById("modeLabel");
+    (function () {
+      try {
+        const inputEl = document.getElementById("inputText");
+        const btnAnalyze = document.getElementById("btnAnalyze");
+        const btnClear = document.getElementById("btnClear");
+        const btnStandard = document.getElementById("btnStandard");
+        const btnPro = document.getElementById("btnPro");
+        const btnSenior = document.getElementById("btnSenior");
+        const seniorModeCheckbox = document.getElementById("seniorModeCheckbox");
+        const useAwsLlmCheckbox = document.getElementById("useAwsLlmCheckbox");
 
-      const riskBadge = document.getElementById("riskBadge");
-      const riskLabel = document.getElementById("riskLabel");
-      const riskMainLine = document.getElementById("riskMainLine");
-      const riskSubLine = document.getElementById("riskSubLine");
+        const riskBadge = document.getElementById("riskBadge");
+        const riskTitle = document.getElementById("riskTitle");
+        const riskSubtitle = document.getElementById("riskSubtitle");
+        const evidenceList = document.getElementById("evidenceList");
+        const actionList = document.getElementById("actionList");
 
-      const flagS = document.getElementById("flagS");
-      const flagC = document.getElementById("flagC");
-      const flagB = document.getElementById("flagB");
-      const flagK = document.getElementById("flagK");
-      const flagR = document.getElementById("flagR");
+        const llmSection = document.getElementById("llmSection");
+        const llmExplanationText = document.getElementById("llmExplanationText");
+        const llmExtraEvidence = document.getElementById("llmExtraEvidence");
+        const llmExtraActions = document.getElementById("llmExtraActions");
 
-      const scbkrSeniorList = document.getElementById("scbkrSeniorList");
-      const evidenceList = document.getElementById("evidenceList");
-      const actionList = document.getElementById("actionList");
-      const roleNote = document.getElementById("roleNote");
-      const proDebug = document.getElementById("proDebug");
+        const apiPacketPanel = document.getElementById("apiPacketPanel");
+        const toggleApiPacketBtn = document.getElementById("toggleApiPacketBtn");
+        const apiPacketJson = document.getElementById("apiPacketJson");
 
-      let currentMode = "standard";
-      let lastResult = null;
-
-      function actionGuidanceByRisk(risk) {
-        if (risk === "SAFE") return [
-          "如果你完全看得懂內容，且確認是你主動申請的服務，可以依照正常流程進行。",
-          "若你「看不懂」「沒印象申請」或心裡覺得怪，請改用官方 App 或卡片背面電話再次確認。",
-        ];
-        if (risk === "RISK") return [
-          "暫停所有操作，不要在這個訊息裡點任何連結或輸入資料。",
-          "請自行輸入銀行官方網址，或開啟已安裝的官方 App 重新登入確認。",
-          "如果你是長輩或覺得不放心，請先把訊息給家人看，一起判斷。",
-        ];
-        if (risk === "FATAL") return [
-          "立刻停止轉帳、不要提供任何密碼／驗證碼。",
-          "關閉這個訊息中的所有連結與視窗，改由官方 App 或卡片背面電話聯繫銀行。",
-          "如果你已經轉出款項或提供資料，請儘快撥打 165 反詐騙專線或報警。",
-        ];
-        return [
-          "在你確認對方真實身分之前，不要轉帳、不點連結、不提供任何驗證碼。",
-          "直接撥打官方客服專線或 165 反詐騙專線，轉述整段訊息請對方協助判斷。",
-        ];
-      }
-
-      function setMode(mode) {
-        currentMode = mode;
-        htmlEl.setAttribute("data-mode", mode);
-        modeButtons.forEach((btn) => {
-          const active = btn.getAttribute("data-mode") === mode;
-          btn.setAttribute("data-active", active ? "true" : "false");
-          btn.setAttribute("aria-pressed", active ? "true" : "false");
-        });
-        exportBtn.style.display = mode === "pro" ? "inline-flex" : "none";
-        seniorVoiceRow.style.display = mode === "senior" ? "inline-flex" : "none";
-
-        if (mode === "pro") {
-          modeLabel.textContent = "專業版 PRO – 顯示完整 SCBKR 責任鏈、風險線索與原始規則匹配資訊，方便風控與治理團隊檢閱。";
-        } else if (mode === "senior") {
-          modeLabel.textContent = "長輩安心版 SENIOR SAFE – 大字體、中文為主，用簡單句子提醒「看不懂就不要做，先問家人或官方」。";
-        } else {
-          modeLabel.textContent = "標準版 STANDARD – 一般使用者友善介面，中英文雙語提示。";
+        if (!inputEl || !btnAnalyze || !btnClear || !riskBadge || !riskTitle || !riskSubtitle) {
+          console.warn("Essential DOM nodes not found, aborting init safely.");
+          return;
         }
-      }
 
-      function updateCharCounter() {
-        charCounter.textContent = `${inputEl.value.length} 字 / chars`;
-      }
+        let currentMode = "standard";
 
-      function setFlag(el, ok, okText, failText) {
-        el.className = `scbkr-flag ${ok ? "flag-ok" : "flag-bad"}`;
-        el.textContent = ok ? okText : failText;
-      }
+        function setMode(mode) {
+          currentMode = mode;
 
-      function renderResult(result) {
-        riskBadge.classList.remove("safe", "risk", "fatal", "non-closable");
-        riskBadge.classList.add(result.riskDisplay.badgeClass);
-        riskLabel.textContent = result.riskDisplay.label;
-        riskMainLine.textContent = result.riskDisplay.main;
-        riskSubLine.textContent = result.riskDisplay.sub;
+          [btnStandard, btnPro, btnSenior].forEach((btn) => {
+            if (!btn) return;
+            btn.classList.toggle("active", btn.getAttribute("data-mode") === mode);
+          });
 
-        setFlag(flagS, result.scbkr.S, "有主體描述", "主體不清 / 可能偽裝官方");
-        setFlag(flagC, result.scbkr.C, "有說明聯絡原因", "聯絡原因模糊 / 未交代");
-        setFlag(flagB, result.scbkr.B, "有具體行動要求", "沒有說清楚要做到哪一步");
-        setFlag(flagK, result.scbkr.K, "提到風險／代價", "未說明錯信可能造成的損失");
-        setFlag(flagR, result.scbkr.R, "有留下責任／客服資訊", "沒有說明出事誰負責");
+          document.body.classList.toggle("senior-mode", mode === "senior");
+          if (seniorModeCheckbox) seniorModeCheckbox.checked = mode === "senior";
 
-        scbkrSeniorList.innerHTML = `
-          <li>${result.scbkr.S ? "主體有提到官方或機構名稱。" : "主體沒有清楚自我介紹或來源可疑。"}</li>
-          <li>${result.scbkr.C ? "有稍微解釋聯絡原因。" : "沒有說明為什麼要聯絡你。"}</li>
-          <li>${result.scbkr.B ? "有具體請你做什麼（點連結／轉帳／提供資訊）。" : "行動要求不明或藏在話術裡。"}</li>
-          <li>${result.scbkr.K ? "有提到凍結、損失或罰款等代價。" : "沒有講如果是假的你會損失什麼。"}</li>
-          <li>${result.scbkr.R ? "有留下客服或聯繫管道，但仍需確認是否為真正官方。" : "完全沒說出事誰負責，只要你照著做就可能自己全扛。"}</li>`;
-
-        evidenceList.innerHTML = "";
-        (result.reasons.length ? result.reasons : ["目前未偵測到明顯詐騙語意特徵，但仍建議你養成『看不懂就先暫停』的習慣。"]).forEach((text) => {
-          const li = document.createElement("li");
-          li.className = "list-item";
-          li.textContent = text;
-          evidenceList.appendChild(li);
-        });
-
-        const actions = actionGuidanceByRisk(result.risk);
-        result.actions = actions;
-        actionList.innerHTML = "";
-        actions.forEach((text) => {
-          const li = document.createElement("li");
-          li.className = "list-item";
-          li.textContent = text;
-          actionList.appendChild(li);
-        });
-
-        roleNote.innerHTML = '在這個 Demo 裡，<strong>AI / 模型永遠只是輔助工具層</strong>，真正做決定的人是 <strong>你自己 + 官方管道</strong>。<br />This engine helps you see the <strong>semantic risk structure</strong>, but <strong>final decisions</strong> must go through <strong>official apps, websites, call centers and human review</strong>.';
-
-        proDebug.textContent = currentMode === "pro" ? "DEBUG (規則匹配結果 / Rule Matches):\n" + JSON.stringify({ risk: result.risk, ...result.debug, scbkr: result.scbkr }, null, 2) : "";
-      }
-
-      function resetOutputs() {
-        riskBadge.classList.remove("safe", "risk", "fatal", "non-closable");
-        riskLabel.textContent = "未分析｜Not analyzed";
-        riskMainLine.textContent = "請先貼上訊息，並點選「分析這則訊息」。";
-        riskSubLine.textContent = "系統會依照語意特徵與責任鏈結構，給出 SAFE / RISK / FATAL / NON-CLOSABLE 分級。";
-        [flagS, flagC, flagB, flagK].forEach((f, i) => {
-          f.className = "scbkr-flag flag-warn";
-          f.textContent = ["未知 / Unknown", "模糊 / Vague", "不明 / Unclear", "潛在風險 / Risk"][i];
-        });
-        flagR.className = "scbkr-flag flag-bad";
-        flagR.textContent = "無責任說明";
-      }
-
-      modeButtons.forEach((btn) => btn.addEventListener("click", () => setMode(btn.getAttribute("data-mode"))));
-      inputEl.addEventListener("input", updateCharCounter);
-      clearBtn.addEventListener("click", () => {
-        inputEl.value = "";
-        updateCharCounter();
-        resetOutputs();
-        lastResult = null;
-      });
-      analyzeBtn.addEventListener("click", () => {
-        lastResult = SCBKREngine.analyzeMessage(inputEl.value);
-        renderResult(lastResult);
-      });
-      exportBtn.addEventListener("click", () => {
-        if (!lastResult) return alert(AppI18n.t("msg.noAnalysis"));
-        ReportExport.exportReport(lastResult);
-      });
-      speakBtn.addEventListener("click", () => {
-        if (!lastResult) return alert(AppI18n.t("msg.noAnalysis"));
-        if (!VoiceModule.speakRiskResult(lastResult, AppI18n.getCurrentLang() === "en" ? "en-US" : "zh-TW")) {
-          alert(AppI18n.t("msg.noSpeech"));
+          if (apiPacketPanel) apiPacketPanel.style.display = mode === "pro" ? "block" : "none";
+          if (mode !== "pro" && apiPacketJson && toggleApiPacketBtn) {
+            apiPacketJson.hidden = true;
+            toggleApiPacketBtn.textContent = "顯示 JSON";
+          }
         }
-      });
-      stopSpeakBtn.addEventListener("click", () => VoiceModule.stopSpeaking());
 
-      await AppI18n.init("zh");
-      const loader = await ExamplesLoader.init({
-        containerId: "exampleContainer",
-        inputId: "inputText",
-        getLang: () => AppI18n.getCurrentLang(),
-        t: AppI18n.t,
-      });
-      AppI18n.onChange(() => loader && loader.rerender());
-      langSwitcher.addEventListener("change", async (e) => {
-        await AppI18n.setLanguage(e.target.value);
-      });
+        function setScbkrFlags(flags) {
+          const mapping = [
+            ["scbkrS", "S"],
+            ["scbkrC", "C"],
+            ["scbkrB", "B"],
+            ["scbkrK", "K"],
+            ["scbkrR", "R"],
+          ];
+          for (const [id, key] of mapping) {
+            const el = document.getElementById(id);
+            if (!el) continue;
+            const on = !!(flags && flags[key]);
+            el.classList.toggle("on", on);
+          }
+        }
 
-      setMode("standard");
-      resetOutputs();
-      updateCharCounter();
+        function renderList(container, items) {
+          if (!container) return;
+          container.innerHTML = "";
+          (items || []).forEach((text) => {
+            const li = document.createElement("li");
+            li.textContent = text;
+            container.appendChild(li);
+          });
+        }
+
+        function renderResult(result) {
+          try {
+            if (!result) {
+              riskBadge.textContent = "未分析 | NOT ANALYZED";
+              riskBadge.className = "badge badge-neutral";
+              riskTitle.textContent = "請先貼上訊息，並點選「分析這則訊息」。";
+              riskSubtitle.textContent = "系統會依照語意特徵與責任鏈結構給出 SAFE / RISK / FATAL / NON-CLOSABLE 分級。";
+              setScbkrFlags({ S: false, C: false, B: false, K: false, R: false });
+              renderList(evidenceList, []);
+              renderList(actionList, []);
+              if (llmSection) llmSection.hidden = true;
+              if (apiPacketJson) apiPacketJson.textContent = "";
+              return;
+            }
+
+            const risk = result.risk || "SAFE";
+            const disp = result.riskDisplay || {};
+            riskBadge.textContent = disp.label || risk;
+            riskBadge.className = "badge badge-" + String(risk).toLowerCase();
+            riskTitle.textContent = disp.main || "";
+            riskSubtitle.textContent = disp.sub || "";
+
+            setScbkrFlags(result.scbkr || {});
+            renderList(evidenceList, result.reasons || []);
+
+            const mainAdvice = disp.main ? [disp.main] : [];
+            const subAdvice = disp.sub ? [disp.sub] : [];
+            renderList(actionList, [...mainAdvice, ...subAdvice]);
+
+            if (result.llm && result.llm.enabled) {
+              if (llmSection) llmSection.hidden = false;
+              if (llmExplanationText) llmExplanationText.textContent = result.llm.explanation || "";
+              renderList(llmExtraEvidence, result.llm.extraEvidence || []);
+              renderList(llmExtraActions, result.llm.extraActions || []);
+            } else if (llmSection) {
+              llmSection.hidden = true;
+              if (llmExplanationText) llmExplanationText.textContent = "";
+              renderList(llmExtraEvidence, []);
+              renderList(llmExtraActions, []);
+            }
+
+            if (apiPacketJson && window.SCBKREngine && typeof window.SCBKREngine.analyzeMessage === "function") {
+              const packet = result.apiPacket || window.SCBKREngine.analyzeMessage(result.inputText || "").apiPacket;
+              apiPacketJson.textContent = JSON.stringify(packet, null, 2);
+            }
+          } catch (err) {
+            console.error("renderResult failed", err);
+          }
+        }
+
+        async function runAnalysis() {
+          const text = (inputEl.value || "").trim();
+          if (!text) {
+            renderResult(null);
+            return;
+          }
+
+          const useLLM = !!(useAwsLlmCheckbox && useAwsLlmCheckbox.checked);
+
+          try {
+            if (!window.SCBKREngine || typeof window.SCBKREngine.analyzeWithOptionalLLM !== "function") {
+              throw new Error("SCBKREngine.analyzeWithOptionalLLM not available");
+            }
+            const result = await window.SCBKREngine.analyzeWithOptionalLLM(text, { useLLM });
+            renderResult(result);
+          } catch (err) {
+            console.error("runAnalysis failed, fallback to local analyzeMessage", err);
+            try {
+              const fallback = window.SCBKREngine && typeof window.SCBKREngine.analyzeMessage === "function"
+                ? window.SCBKREngine.analyzeMessage(text)
+                : null;
+              renderResult(fallback);
+            } catch (fallbackErr) {
+              console.error("fallback analyzeMessage failed", fallbackErr);
+              renderResult(null);
+            }
+          }
+        }
+
+        [btnStandard, btnPro, btnSenior].forEach((btn) => {
+          if (!btn) return;
+          btn.addEventListener("click", function (e) {
+            e.preventDefault();
+            const mode = btn.getAttribute("data-mode") || "standard";
+            setMode(mode);
+          });
+        });
+
+        if (seniorModeCheckbox) {
+          seniorModeCheckbox.addEventListener("change", function () {
+            setMode(seniorModeCheckbox.checked ? "senior" : "standard");
+          });
+        }
+
+        btnAnalyze.addEventListener("click", function (e) {
+          e.preventDefault();
+          runAnalysis();
+        });
+
+        btnClear.addEventListener("click", function (e) {
+          e.preventDefault();
+          inputEl.value = "";
+          renderResult(null);
+        });
+
+        if (toggleApiPacketBtn && apiPacketJson) {
+          toggleApiPacketBtn.textContent = "顯示 JSON";
+          toggleApiPacketBtn.addEventListener("click", function () {
+            const nextHidden = !apiPacketJson.hidden;
+            apiPacketJson.hidden = nextHidden;
+            toggleApiPacketBtn.textContent = nextHidden ? "顯示 JSON" : "隱藏 JSON";
+          });
+        }
+
+        // 若 js/scbkr-engine.js 尚未定義，才補一份安全 fallback，不重覆覆蓋。
+        if (typeof window.runScbkrApiPacket !== "function") {
+          window.runScbkrApiPacket = function (inputText) {
+            const result = window.SCBKREngine && typeof window.SCBKREngine.analyzeMessage === "function"
+              ? window.SCBKREngine.analyzeMessage(inputText || "")
+              : null;
+            return result && result.apiPacket
+              ? result.apiPacket
+              : (window.SCBKREngine && typeof window.SCBKREngine.analyzeMessage === "function"
+                ? window.SCBKREngine.analyzeMessage("").apiPacket
+                : null);
+          };
+        }
+
+        setMode("standard");
+        renderResult(null);
+      } catch (initErr) {
+        console.error("Demo init failed", initErr);
+      }
     })();
   </script>
 </body>
