@@ -1000,6 +1000,16 @@
         </div>
 
         <div style="margin-top: 10px;">
+          <div class="section-title">風險簇群｜Rule Clusters</div>
+          <div class="section-subtitle">
+            將命中訊號整理成可讀風險類型，快速理解詐騙手法組合。
+          </div>
+          <div class="pill-row" id="ruleClustersList">
+            <div class="pill-mini">目前沒有額外 cluster。</div>
+          </div>
+        </div>
+
+        <div style="margin-top: 10px;">
           <div class="section-title">行動建議｜Action Guidance</div>
           <div class="section-subtitle">
             不只說「小心」，而是告訴你下一步該怎麼做。
@@ -1012,12 +1022,28 @@
         </div>
 
         <div style="margin-top: 10px;">
+          <div class="section-title">政策建議｜Policy Recommendation</div>
+          <div class="section-subtitle">
+            依風險等級提供可執行處置，避免只看到等級卻不知道下一步。
+          </div>
+          <ul class="list" id="policyList">
+            <li class="list-item">尚未產生 policy 建議。</li>
+          </ul>
+        </div>
+
+        <div style="margin-top: 10px;">
           <div class="section-title">角色治理｜Role Governance Ex(y)=π</div>
           <div class="role-note" id="roleNote">
             在這個 Demo 裡，<strong>AI / 模型永遠只是輔助工具層</strong>，真正做決定的人是
             <strong>你自己 + 官方管道（銀行 App / 官方網站 / 卡背電話 / 警政單位）</strong>。<br />
             This engine is a <strong>tool layer</strong>, not a final judge. Final decisions should be made via
             <strong>official channels and human review</strong>.
+          </div>
+          <div style="margin-top: 10px;">
+            <div class="section-title">審計與洞察｜Audit & Insight</div>
+            <ul class="list" id="auditInsightList">
+              <li class="list-item">尚未產生 2.3 審計資料。</li>
+            </ul>
           </div>
           <div id="proDebug"></div>
         </div>
@@ -1058,8 +1084,11 @@
       const scbkrSeniorList = document.getElementById("scbkrSeniorList");
       const evidenceList = document.getElementById("evidenceList");
       const triggeredRulesList = document.getElementById("triggeredRulesList");
+      const ruleClustersList = document.getElementById("ruleClustersList");
       const actionList = document.getElementById("actionList");
+      const policyList = document.getElementById("policyList");
       const roleNote = document.getElementById("roleNote");
+      const auditInsightList = document.getElementById("auditInsightList");
       const proDebug = document.getElementById("proDebug");
 
       let currentMode = "standard";
@@ -1130,6 +1159,58 @@
         renderList(evidenceList, result.coreReasonsZh, (text) => text);
         renderList(triggeredRulesList, result.triggeredRules, (item) => `${item.rule_id} [${item.category}]：${item.reason_zh}`);
 
+        const ruleClusters = result.ruleClusters || [];
+        const policy = result.policy || {};
+        const audit = result.audit || {};
+        const insight = result.insight || {};
+
+        const clustersContainer = document.getElementById("ruleClustersList");
+        if (clustersContainer) {
+          clustersContainer.innerHTML = "";
+          if (ruleClusters.length) {
+            ruleClusters.forEach((cluster) => {
+              const pill = document.createElement("div");
+              pill.className = "pill-mini";
+              pill.textContent = cluster;
+              clustersContainer.appendChild(pill);
+            });
+          } else {
+            const pill = document.createElement("div");
+            pill.className = "pill-mini";
+            pill.textContent = "目前沒有額外 cluster。";
+            clustersContainer.appendChild(pill);
+          }
+        }
+
+        const policyContainer = document.getElementById("policyList");
+        if (policyContainer) {
+          renderList(policyContainer, [
+            `Severity：${policy.severity || "N/A"}`,
+            `Recommended Action：${policy.recommendedAction || "N/A"}`,
+            `Escalation Level：${policy.escalationLevel ?? "N/A"}`,
+            `Human Advice：${policy.humanAdviceZh || "尚未提供"}`,
+          ], (text) => text);
+        }
+
+        const auditContainer = document.getElementById("auditInsightList");
+        if (auditContainer) {
+          const hasAudit = audit.rulesVersion || audit.triggeredCount !== undefined || audit.latencyMs !== undefined || audit.auditHash || insight.summary_zh || insight.summary_en;
+          if (!hasAudit) {
+            renderList(auditContainer, [], () => "");
+            const first = auditContainer.querySelector(".list-item");
+            if (first) first.textContent = "尚未產生 2.3 審計資料。";
+          } else {
+            renderList(auditContainer, [
+              `Rules Version：${audit.rulesVersion || "3.3.0"}`,
+              `Triggered Count：${audit.triggeredCount ?? 0}`,
+              `Latency：${audit.latencyMs ?? 0} ms`,
+              `Audit Hash：${audit.auditHash || ""}`,
+              `Insight (ZH)：${insight.summary_zh || ""}`,
+              `Insight (EN)：${insight.summary_en || ""}`,
+            ], (text) => text);
+          }
+        }
+
         const actions = [
           "不要直接點訊息內連結，改用官方 App / 官方網站。",
           "不要提供 OTP、密碼、卡號或網銀憑證。",
@@ -1143,7 +1224,7 @@
           <strong>Model Role = Tool only</strong>；最終決策者是使用者與官方管道。`;
 
         if (currentMode === "pro") {
-          proDebug.textContent = "TRACE / AUDIT:\n" + JSON.stringify({
+          proDebug.textContent = "TRACE / AUDIT:\n" + JSON.stringify(result.apiPacket || {
             riskLevel: result.riskLevel,
             riskScore: result.riskScore,
             scbkr: result.scbkr,
@@ -1166,6 +1247,19 @@
         });
         renderList(evidenceList, [], () => "");
         renderList(triggeredRulesList, [], () => "");
+        if (ruleClustersList) {
+          ruleClustersList.innerHTML = '<div class="pill-mini">目前沒有額外 cluster。</div>';
+        }
+        if (policyList) {
+          renderList(policyList, [], () => "");
+          const first = policyList.querySelector(".list-item");
+          if (first) first.textContent = "尚未產生 policy 建議。";
+        }
+        if (auditInsightList) {
+          renderList(auditInsightList, [], () => "");
+          const first = auditInsightList.querySelector(".list-item");
+          if (first) first.textContent = "尚未產生 2.3 審計資料。";
+        }
       }
 
       modeButtons.forEach((btn) => btn.addEventListener("click", () => setMode(btn.getAttribute("data-mode"))));
