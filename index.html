@@ -732,6 +732,26 @@
       word-break: break-all;
     }
 
+    #apiPacketPanel {
+      display: none;
+      margin-top: 8px;
+      padding-top: 6px;
+      border-top: 1px dashed rgba(59, 130, 246, 0.6);
+    }
+
+    #apiPacketJson {
+      margin-top: 6px;
+      padding: 8px;
+      border-radius: 10px;
+      background: rgba(30, 64, 175, 0.18);
+      border: 1px solid rgba(96, 165, 250, 0.55);
+      font-size: 10px;
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
     .hint-senior-hero {
       display: none;
       font-size: 13px;
@@ -1070,6 +1090,12 @@
             <strong>official channels and human review</strong>.
           </div>
           <div id="proDebug"></div>
+
+          <div id="apiPacketPanel">
+            <div class="section-subtitle">v3 SCBKR API 封包（JSON）</div>
+            <button class="btn btn-secondary" type="button" id="toggleApiPacketBtn">顯示 JSON</button>
+            <pre id="apiPacketJson" hidden><code></code></pre>
+          </div>
         </div>
       </section>
     </main>
@@ -1121,6 +1147,7 @@
 
       let currentMode = "standard";
       let lastResult = null;
+      let apiPacketExpanded = false;
 
       function actionGuidanceByRisk(risk) {
         if (risk === "SAFE") return [
