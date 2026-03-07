@@ -115,7 +115,59 @@
       align-items: center;
     }
 
+    .char-counter {
+      font-size: 11px;
+      color: var(--text-faint);
+      font-family: var(--font-mono);
+    }
+
+    .btn-row {
+      display: inline-flex;
+      gap: 8px;
+    }
+
+    .toggle-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+      align-items: center;
+    }
+
     .toggle-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-soft);
+      background: rgba(15, 23, 42, 0.86);
+      border: 1px solid rgba(75, 85, 99, 0.95);
+      border-radius: 999px;
+      padding: 4px 10px;
+    }
+
+    .llm-note {
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--text-faint);
+    }
+
+    .llm-box {
+      margin-top: 8px;
+      border: 1px dashed rgba(59, 130, 246, 0.6);
+      border-radius: 12px;
+      padding: 8px 10px;
+      background: rgba(30, 64, 175, 0.12);
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      padding: 6px 14px;
+      font-size: 12px;
+      cursor: pointer;
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text-main);
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -265,6 +317,26 @@
       word-break: break-all;
       max-height: 320px;
       overflow: auto;
+    }
+
+    #apiPacketPanel {
+      display: none;
+      margin-top: 8px;
+      padding-top: 6px;
+      border-top: 1px dashed rgba(59, 130, 246, 0.6);
+    }
+
+    #apiPacketJson {
+      margin-top: 6px;
+      padding: 8px;
+      border-radius: 10px;
+      background: rgba(30, 64, 175, 0.18);
+      border: 1px solid rgba(96, 165, 250, 0.55);
+      font-size: 10px;
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      white-space: pre-wrap;
+      word-break: break-all;
     }
 
     #apiPacketPanel {
@@ -554,7 +626,7 @@
         <div style="margin-top: 10px;">
           <div class="section-title">風險簇群｜Rule Clusters</div>
           <div class="section-subtitle">用簡單群組看這段訊息落在哪些高風險模式。</div>
-          <div class="pill-row" id="ruleClustersRow">
+          <div class="pill-row" id="ruleClustersList">
             <div class="pill-mini">目前沒有額外 cluster。</div>
           </div>
         </div>
@@ -596,6 +668,25 @@
           <div class="kv-row"><div class="kv-key">Severity</div><div class="kv-val" id="policySeverity">SAFE</div></div>
           <div class="kv-row"><div class="kv-key">Recommended Action</div><div class="kv-val" id="policyAction">observe</div></div>
           <div class="kv-row"><div class="kv-key">Escalation Level</div><div class="kv-val" id="policyEscalation">0</div></div>
+        </div>
+
+        <div style="margin-top: 10px;" id="llmSection" hidden>
+          <div class="section-title">LLM 補充說明（選用）｜Optional LLM Explanation</div>
+          <div class="section-subtitle">當 LLM 回傳可用資料時，顯示額外白話摘要與補充建議。</div>
+          <div class="llm-box">
+            <div class="list-item" id="llmExplanation">尚無 LLM 補充內容。</div>
+            <ul class="list" id="llmEvidenceList"></ul>
+            <ul class="list" id="llmActionList"></ul>
+          </div>
+        </div>
+
+        <div style="margin-top: 10px;">
+          <div class="section-title">政策建議｜Policy Recommendation</div>
+          <div class="section-subtitle">依風險等級轉換成可執行的治理建議。</div>
+          <div class="kv-row"><div class="kv-key">Severity</div><div class="kv-val" id="policySeverity">SAFE</div></div>
+          <div class="kv-row"><div class="kv-key">Recommended Action</div><div class="kv-val" id="policyAction">observe</div></div>
+          <div class="kv-row"><div class="kv-key">Escalation Level</div><div class="kv-val" id="policyEscalation">0</div></div>
+          <div class="kv-row"><div class="kv-key">Human Advice</div><div class="kv-val" id="policyHumanAdvice">-</div></div>
         </div>
 
         <div style="margin-top: 10px;" id="llmSection" hidden>
@@ -672,10 +763,11 @@
       const scbkrSeniorList = document.getElementById("scbkrSeniorList");
       const evidenceList = document.getElementById("evidenceList");
       const actionList = document.getElementById("actionList");
-      const ruleClustersRow = document.getElementById("ruleClustersRow");
+      const ruleClustersList = document.getElementById("ruleClustersList");
       const policySeverity = document.getElementById("policySeverity");
       const policyAction = document.getElementById("policyAction");
       const policyEscalation = document.getElementById("policyEscalation");
+      const policyHumanAdvice = document.getElementById("policyHumanAdvice");
       const auditInsightPlaceholder = document.getElementById("auditInsightPlaceholder");
       const auditRulesVersion = document.getElementById("auditRulesVersion");
       const auditTriggeredCount = document.getElementById("auditTriggeredCount");
@@ -858,10 +950,10 @@
           });
         });
 
-        if (ruleClustersRow) {
-          const clusters = Array.isArray(result.ruleClusters) ? result.ruleClusters : [];
-          ruleClustersRow.innerHTML = clusters.length
-            ? clusters.map((cluster) => `<div class="pill-mini">${cluster}</div>`).join("")
+        if (ruleClustersList) {
+          const ruleClusters = result.ruleClusters || [];
+          ruleClustersList.innerHTML = ruleClusters.length
+            ? ruleClusters.map((cluster) => `<div class="pill-mini">${cluster}</div>`).join("")
             : '<div class="pill-mini">目前沒有額外 cluster。</div>';
         }
 
@@ -869,30 +961,7 @@
         if (policySeverity) policySeverity.textContent = policy.severity || result.risk || "SAFE";
         if (policyAction) policyAction.textContent = policy.recommendedAction || "observe";
         if (policyEscalation) policyEscalation.textContent = String(policy.escalationLevel ?? 0);
-
-        const auditInfo = result.audit || {};
-        const insight = result.insight || {};
-        if (auditInsightPlaceholder) {
-          auditInsightPlaceholder.textContent = auditInfo.auditHash ? "已產生 2.3 審計資料。" : "尚未產生 2.3 審計資料。";
-        }
-        if (auditRulesVersion) auditRulesVersion.textContent = auditInfo.rulesVersion || "3.3.0";
-        if (auditTriggeredCount) auditTriggeredCount.textContent = String(auditInfo.triggeredCount ?? 0);
-        if (auditLatency) auditLatency.textContent = `${auditInfo.latencyMs ?? 0} ms`;
-        if (auditHash) auditHash.textContent = auditInfo.auditHash || "-";
-        if (insightZh) insightZh.textContent = insight.summary_zh || "-";
-        if (insightEn) insightEn.textContent = insight.summary_en || "-";
-
-        if (ruleClustersRow) {
-          const clusters = Array.isArray(result.ruleClusters) ? result.ruleClusters : [];
-          ruleClustersRow.innerHTML = clusters.length
-            ? clusters.map((cluster) => `<div class="pill-mini">${cluster}</div>`).join("")
-            : '<div class="pill-mini">目前沒有額外 cluster。</div>';
-        }
-
-        const policy = result.policy || {};
-        if (policySeverity) policySeverity.textContent = policy.severity || result.risk || "SAFE";
-        if (policyAction) policyAction.textContent = policy.recommendedAction || "observe";
-        if (policyEscalation) policyEscalation.textContent = String(policy.escalationLevel ?? 0);
+        if (policyHumanAdvice) policyHumanAdvice.textContent = policy.humanAdviceZh || "-";
 
         const auditInfo = result.audit || {};
         const insight = result.insight || {};
@@ -962,10 +1031,11 @@
         llmEvidenceList.innerHTML = "";
         llmActionList.innerHTML = "";
         apiPacketJson.textContent = "";
-        if (ruleClustersRow) ruleClustersRow.innerHTML = '<div class="pill-mini">目前沒有額外 cluster。</div>';
+        if (ruleClustersList) ruleClustersList.innerHTML = '<div class="pill-mini">目前沒有額外 cluster。</div>';
         if (policySeverity) policySeverity.textContent = "SAFE";
         if (policyAction) policyAction.textContent = "observe";
         if (policyEscalation) policyEscalation.textContent = "0";
+        if (policyHumanAdvice) policyHumanAdvice.textContent = "-";
         if (auditInsightPlaceholder) auditInsightPlaceholder.textContent = "尚未產生 2.3 審計資料。";
         if (auditRulesVersion) auditRulesVersion.textContent = "-";
         if (auditTriggeredCount) auditTriggeredCount.textContent = "0";
