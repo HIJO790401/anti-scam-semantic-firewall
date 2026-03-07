@@ -26,6 +26,62 @@
     return "SAFE";
   }
 
+  function simpleDeterministicHash(raw) {
+    const str = String(raw || "");
+    let hash = 0;
+    for (let i = 0; i < str.length; i += 1) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return `h${(hash >>> 0).toString(16)}`;
+  }
+
+  function buildPolicyByRisk(riskLevel) {
+    const mapping = {
+      SAFE: { recommendedAction: "observe", escalationLevel: 0 },
+      RISK: { recommendedAction: "verify_official_channel", escalationLevel: 1 },
+      FATAL: { recommendedAction: "block_and_verify", escalationLevel: 3 },
+      "NON-CLOSABLE": { recommendedAction: "manual_review", escalationLevel: 2 },
+    };
+    const picked = mapping[riskLevel] || mapping.SAFE;
+    return {
+      severity: riskLevel || "SAFE",
+      recommendedAction: picked.recommendedAction,
+      escalationLevel: picked.escalationLevel,
+    };
+  }
+
+  function buildInsightByRiskAndClusters(riskLevel, clusters) {
+    const clusterList = Array.isArray(clusters) ? clusters : [];
+    const hasFamily = clusterList.includes("family_impersonation");
+    const hasUrgentMoney = clusterList.includes("urgent_money_pressure");
+    const hasAuthority = clusterList.includes("fake_authority");
+    const hasCredential = clusterList.includes("credential_theft");
+    const hasPhishing = clusterList.includes("link_phishing");
+
+    if (hasFamily && hasUrgentMoney) {
+      return {
+        summary_zh: "這段訊息同時出現親友冒充與急迫金流壓力，屬於高誤信風險組合。",
+        summary_en: "This message combines family impersonation with urgent money pressure, creating a high-trust exploitation pattern.",
+      };
+    }
+    if (hasAuthority && (hasCredential || hasPhishing)) {
+      return {
+        summary_zh: "這段訊息帶有官方權威偽裝，並要求敏感資訊或引導連結，需立即改走官方管道查證。",
+        summary_en: "This message shows authority impersonation with credential or link harvesting signals; verify through official channels immediately.",
+      };
+    }
+    if (riskLevel === "SAFE") {
+      return {
+        summary_zh: "目前未見明顯高風險語意簇群，建議持續保持官方驗證習慣。",
+        summary_en: "No strong high-risk semantic clusters are detected; keep verifying through official channels.",
+      };
+    }
+    return {
+      summary_zh: `此訊息呈現 ${riskLevel} 風險等級，建議依政策建議執行後續查證。`,
+      summary_en: `This message is classified as ${riskLevel}; follow policy guidance for next-step verification.`,
+    };
+  }
 
   // v3 apiPacket start
   function buildSafeApiPacket() {
@@ -48,7 +104,7 @@
     };
   }
 
-  function buildAntiScamApiPacket(resultObj, normalizedText, suspiciousKeywordCount) {
+  function buildAntiScamApiPacket(resultObj, normalizedText, suspiciousKeywordCount = 0) {
     const packet = buildSafeApiPacket();
     if (!resultObj || typeof resultObj !== "object") return packet;
 
@@ -83,6 +139,17 @@
       extraActions: [],
     };
 
+    packet.RuleClusters = resultObj.ruleClusters || [];
+    packet.Policy = resultObj.policy || null;
+    packet.Audit = {
+      ...(packet.Audit || {}),
+      rulesVersion: resultObj.audit?.rulesVersion || "3.3.0",
+      triggeredCount: resultObj.audit?.triggeredCount || 0,
+      latencyMs: resultObj.audit?.latencyMs || 0,
+      auditHash: resultObj.audit?.auditHash || ""
+    };
+    packet.Insight = resultObj.insight || { summary_zh: "", summary_en: "" };
+
     return packet;
   }
   // v3 apiPacket end
@@ -101,11 +168,21 @@
         sub: "如有疑慮，請改走官方管道再次確認。",
         badgeClass: "safe",
       },
+      ruleClusters: [],
+      policy: buildPolicyByRisk("SAFE"),
+      audit: {
+        rulesVersion: "3.3.0",
+        triggeredCount: 0,
+        latencyMs: 0,
+        auditHash: simpleDeterministicHash(`${inputText || ""}|SAFE|{}`),
+      },
+      insight: buildInsightByRiskAndClusters("SAFE", []),
       apiPacket: buildSafeApiPacket(),
     };
   }
 
   function analyzeMessage(inputText) {
+    const startTs = (global.performance && typeof global.performance.now === "function") ? global.performance.now() : Date.now();
     const text = String(inputText || "").toLowerCase();
 
     const hasUrgent = hitAny(text, urgentKw);
@@ -118,6 +195,7 @@
 
     const hasAnyScamPattern = hasMoney || hasApp || hasLink || asksSecret || hasThreat;
     const suspiciousKeywordCount = [hasUrgent, hasMoney, hasApp, hasLink, asksSecret, hasThreat].filter(Boolean).length;
+    const hasFamilySignal = ["媽媽", "爸爸", "家人", "親友", "兄弟", "姊妹", "兒子", "女兒", "借錢", "先匯"].some((kw) => text.includes(kw));
 
     const hasReason = text.includes("因為") || text.includes("由於") || text.includes("通知") || text.includes("告知") || text.includes("提醒");
     const hasBoundary = text.includes("請在") || text.includes("請於") || text.includes("請點選") || text.includes("請點擊") || text.includes("請完成") || text.includes("請輸入") || text.includes("請提供");
@@ -178,6 +256,26 @@
       },
     };
 
+    const ruleClusters = [];
+    if (hasFamilySignal) ruleClusters.push("family_impersonation");
+    if (hasUrgent && hasMoney) ruleClusters.push("urgent_money_pressure");
+    if (hasOfficial && (hasThreat || hasUrgent || hasMoney)) ruleClusters.push("fake_authority");
+    if (asksSecret) ruleClusters.push("credential_theft");
+    if (hasLink || hasApp) ruleClusters.push("link_phishing");
+    const uniqueRuleClusters = Array.from(new Set(ruleClusters));
+
+    const endTs = (global.performance && typeof global.performance.now === "function") ? global.performance.now() : Date.now();
+    const latencyMs = Math.max(0, Number((endTs - startTs).toFixed(2)));
+    const triggeredCount = reasons.length;
+    const policy = buildPolicyByRisk(risk);
+    const audit = {
+      rulesVersion: "3.3.0",
+      triggeredCount,
+      latencyMs,
+      auditHash: simpleDeterministicHash(`${inputText || ""}|${risk}|${JSON.stringify(scbkr)}`),
+    };
+    const insight = buildInsightByRiskAndClusters(risk, uniqueRuleClusters);
+
     const resultObj = {
       inputText,
       risk,
@@ -186,10 +284,24 @@
       debug: { hasUrgent, hasMoney, hasApp, hasLink, asksSecret, hasThreat, hasAnyScamPattern },
       suspiciousKeywordCount,
       riskDisplay: riskDisplay[risk],
+      ruleClusters: uniqueRuleClusters,
+      policy,
+      audit,
+      insight,
     };
 
     // v3 apiPacket start
     resultObj.apiPacket = buildAntiScamApiPacket(resultObj, text, suspiciousKeywordCount);
+    resultObj.apiPacket.RuleClusters = resultObj.ruleClusters || [];
+    resultObj.apiPacket.Policy = resultObj.policy || null;
+    resultObj.apiPacket.Audit = {
+      ...(resultObj.apiPacket.Audit || {}),
+      rulesVersion: resultObj.audit?.rulesVersion || "3.3.0",
+      triggeredCount: resultObj.audit?.triggeredCount || 0,
+      latencyMs: resultObj.audit?.latencyMs || 0,
+      auditHash: resultObj.audit?.auditHash || ""
+    };
+    resultObj.apiPacket.Insight = resultObj.insight || { summary_zh: "", summary_en: "" };
     // v3 apiPacket end
     return resultObj;
   }
@@ -339,5 +451,71 @@
   };
   // v3 apiPacket end
 
-  global.SCBKREngine = { analyzeMessage, analyzeMessageWithAwsLlm, analyzeWithOptionalLLM, callLLMExplain, callAwsLlmExplain, calculateRisk };
+
+
+  // v3 aws llm hook start
+  async function analyzeWithOptionalLLM(inputText, useAws) {
+    const baseResult = analyzeMessage(inputText);
+
+    if (!baseResult.apiPacket) {
+      baseResult.apiPacket = buildAntiScamApiPacket(baseResult, inputText);
+    }
+
+    if (!baseResult.llm) {
+      baseResult.llm = {
+        enabled: false,
+        explanation: null,
+        extraEvidence: [],
+        extraActions: []
+      };
+    }
+
+    if (!useAws || !AWS_LLM_ENDPOINT) return baseResult;
+
+    try {
+      const res = await fetch(AWS_LLM_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          inputText,
+          apiPacket: baseResult.apiPacket
+        })
+      });
+
+      if (!res.ok) return baseResult;
+
+      const data = await res.json();
+
+      baseResult.llm = {
+        enabled: true,
+        explanation: data?.explanation || null,
+        extraEvidence: data?.extraEvidence || [],
+        extraActions: data?.extraActions || []
+      };
+      return baseResult;
+    } catch (err) {
+      console.error(err);
+      return baseResult;
+    }
+  }
+  // v3 aws llm hook end
+
+  // v3 apiPacket start
+  global.runScbkrApiPacket = function (inputText) {
+    try {
+      const result = analyzeMessage(inputText);
+      return result && result.apiPacket ? result.apiPacket : buildSafeAnalyzeResult(inputText).apiPacket;
+    } catch (err) {
+      console.error("runScbkrApiPacket failed", err);
+      return buildSafeAnalyzeResult(inputText).apiPacket;
+    }
+  };
+  // v3 apiPacket end
+
+  global.SCBKREngine = {
+    ...global.SCBKREngine,
+    analyzeMessage,
+    calculateRisk,
+    analyzeWithOptionalLLM
+  };
 })(window);

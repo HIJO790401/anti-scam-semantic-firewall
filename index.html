@@ -107,12 +107,45 @@
       flex-wrap: wrap;
     }
 
-    button {
-      border: 1px solid #64748b;
-      border-radius: 8px;
-      background: #0f172a;
-      color: var(--text);
-      padding: 8px 12px;
+    .toggle-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+      align-items: center;
+    }
+
+    .toggle-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-soft);
+      background: rgba(15, 23, 42, 0.86);
+      border: 1px solid rgba(75, 85, 99, 0.95);
+      border-radius: 999px;
+      padding: 4px 10px;
+    }
+
+    .llm-note {
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--text-faint);
+    }
+
+    .llm-box {
+      margin-top: 8px;
+      border: 1px dashed rgba(59, 130, 246, 0.6);
+      border-radius: 12px;
+      padding: 8px 10px;
+      background: rgba(30, 64, 175, 0.12);
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      padding: 6px 14px;
+      font-size: 12px;
       cursor: pointer;
       font-size: 13px;
     }
@@ -200,16 +233,39 @@
       overflow: auto;
     }
 
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
+    #apiPacketPanel {
+      display: none;
+      margin-top: 8px;
+      padding-top: 6px;
+      border-top: 1px dashed rgba(59, 130, 246, 0.6);
+    }
+
+    #apiPacketJson {
+      margin-top: 6px;
+      padding: 8px;
+      border-radius: 10px;
+      background: rgba(30, 64, 175, 0.18);
+      border: 1px solid rgba(96, 165, 250, 0.55);
+      font-size: 10px;
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .hint-senior-hero {
+      display: none;
+      font-size: 13px;
+      color: #e5e7eb;
+      margin-top: 4px;
+      padding: 6px 10px;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(55, 65, 81, 0.95);
+    }
+
+    .hint-senior-hero strong {
+      color: #fee2e2;
     }
 
     body.senior-mode {
@@ -247,6 +303,118 @@
           <button id="btnClear">清除內容</button>
           <button id="btnAnalyze">分析這則訊息</button>
         </div>
+        <h1 class="app-title">
+          反詐騙語意防火牆引擎
+          <span class="sub-en">Anti-Scam Semantic Firewall Engine</span>
+        </h1>
+        <div class="subtitle">
+          以 <strong>SCBKR 五軸責任鏈</strong>＋<strong>語意風險分級</strong>＋<strong>Ex(y)=π
+            角色治理</strong> 拆解每一則訊息的「誰在說、要你做什麼、風險在哪、出事誰扛」。
+        </div>
+        <div class="hint-senior-hero">
+          <strong>看不懂就先不要照做。</strong> 如果你覺得這段訊息怪怪的，貼上來讓系統幫你看，然後再打電話給
+          <strong>官方客服或家人</strong>，確認之後再決定要不要相信。
+        </div>
+      </div>
+      <div class="head-meta">
+        <div class="meta-line">
+          <span class="label" data-i18n="lang.switch">語言</span>
+          <select id="langSwitcher" style="background:#0f172a;color:#e5e7eb;border:1px solid #475569;border-radius:6px;padding:2px 6px;">
+            <option value="zh">中文</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+        <div class="meta-line">
+          <span class="label">AUTHOR</span>
+          <span>沈耀 888π / Wen-Yao Hsu · Taichung, Taiwan</span>
+        </div>
+        <div class="meta-line">
+          <span class="label">DEMO</span>
+          <a class="small-link" href="https://hijo790401.github.io/anti-scam-semantic-firewall/" target="_blank"
+            rel="noopener noreferrer">Live
+            Demo</a>
+          <span class="label">GITHUB</span>
+          <a class="small-link" href="https://github.com/HIJO790401/anti-scam-semantic-firewall" target="_blank"
+            rel="noopener noreferrer">Repository</a>
+        </div>
+      </div>
+    </header>
+
+    <section class="mode-switch" aria-label="模式切換 Mode Switch">
+      <div class="mode-tabs">
+        <button class="mode-btn" type="button" data-mode-btn data-mode="standard" aria-pressed="true">
+          <span>標準版</span>
+          <span class="badge">Standard</span>
+        </button>
+        <button class="mode-btn" type="button" data-mode-btn data-mode="pro" aria-pressed="false">
+          <span>專業版</span>
+          <span class="badge">Pro</span>
+        </button>
+        <button class="mode-btn" type="button" data-mode-btn data-mode="senior" aria-pressed="false">
+          <span>長輩安心版</span>
+          <span class="badge">Senior Safe</span>
+        </button>
+      </div>
+      <div class="mode-caption" id="modeLabel">
+        標準版 STANDARD – 一般使用者友善介面，中英文雙語提示。
+      </div>
+    </section>
+
+    <main class="app-main">
+      <section class="card" aria-label="可疑訊息輸入 Input">
+        <div class="card-header">
+          <div>
+            <div class="card-title">
+              可疑訊息輸入
+              <span class="en">｜ Suspicious Message Input</span>
+            </div>
+            <div class="card-caption">
+              把你收到的簡訊、Line、Email 或網頁文字貼在這裡。
+            </div>
+          </div>
+          <div class="pill-label">
+            <span class="pill-dot"></span>
+            <span>Step 1｜貼上完整訊息 Paste full text</span>
+          </div>
+        </div>
+        <textarea id="inputText" class="textarea" placeholder="例：『您的帳戶已被凍結，請在 10 分鐘內點選以下連結完成驗證，否則將永久停用。』"></textarea>
+        <div id="exampleContainer"></div>
+        <div class="input-footer">
+          <div class="char-counter" id="charCounter">0 字 / chars</div>
+          <div class="btn-row">
+            <button class="btn btn-secondary" id="clearBtn" type="button">
+              <span>清除內容</span>
+              <span class="en-label">Clear</span>
+            </button>
+            <button class="btn btn-primary" id="analyzeBtn" type="button">
+              <span>分析這則訊息</span>
+              <span class="en-label">Analyze</span>
+            </button>
+            <button class="btn btn-secondary" id="exportBtn" type="button" style="display:none;">
+              <span data-i18n="btn.export">匯出報告</span>
+            </button>
+          </div>
+        </div>
+        <div class="btn-row" id="seniorVoiceRow" style="display:none;margin-top:10px;">
+          <button class="btn btn-secondary" id="speakBtn" type="button" data-i18n="btn.speak">朗讀風險結果</button>
+          <button class="btn btn-secondary" id="stopSpeakBtn" type="button" data-i18n="btn.stopSpeak">停止朗讀</button>
+        </div>
+        <div class="toggle-row" aria-label="Analysis options">
+          <label class="toggle-item" for="seniorModeToggle">
+            <input type="checkbox" id="seniorModeToggle" />
+            <span>切換長輩模式（大字體 / 簡化顯示）</span>
+          </label>
+          <label class="toggle-item" for="voiceEnabledToggle">
+            <input type="checkbox" id="voiceEnabledToggle" checked />
+            <span>啟用語音朗讀（Web Speech API）</span>
+          </label>
+          <label class="toggle-item" for="useLLMToggle">
+            <input type="checkbox" id="useLLMToggle" />
+            <span>Use AWS LLM explanation (if available)</span>
+          </label>
+        </div>
+        <div class="llm-note">LLM 選項目前是介接預留（hook），預設仍是本地規則分析。</div>
+      </section>
 
         <div style="margin-top:10px;">
           <label>
@@ -254,53 +422,147 @@
             切換長輩模式（大字體 / 簡化）
           </label>
         </div>
-        <div style="margin-top:8px;">
-          <label>
-            <input type="checkbox" id="useAwsLlmCheckbox" />
-            Use AWS LLM explanation (if available)
-          </label>
-          <p class="hint">
-            LLM 選項目前只是介接預留（hook），預設仍是本地規則分析。就算遠端掛掉也不能讓整個頁面壞掉。
-          </p>
+
+        <div class="risk-main-line" id="riskMainLine">
+          請先貼上訊息，並點選「分析這則訊息」。
+        </div>
+        <div class="risk-sub-line" id="riskSubLine">
+          系統會依照語意特徵與責任鏈結構，給出 SAFE / RISK / FATAL / NON-CLOSABLE 分級。
+        </div>
+
+        <div class="pill-row">
+          <div class="pill-mini">SAFE：正常或可安心觀察</div>
+          <div class="pill-mini">RISK：需要提高警覺，建議改走官方管道</div>
+          <div class="pill-mini">FATAL：高風險，請立刻停止並改用官方管道</div>
+          <div class="pill-mini">NON-CLOSABLE：主體與責任不清楚，暫停所有高風險操作</div>
+        </div>
+
+        <div style="margin-top: 10px;">
+          <div class="section-title">
+            SCBKR 責任鏈拆解｜Responsibility Chain
+          </div>
+          <div class="section-subtitle">
+            S 主體 / C 理由 / B 邊界 / K 成本 / R 責任 ｜任何一軸講不清楚，這則訊息就不是單純「怪」，而是責任鏈斷裂。
+          </div>
+
+          <div class="scbkr-grid scbkr-detailed">
+            <div class="scbkr-cell" id="cellS">
+              <div class="scbkr-label">S</div>
+              <div class="scbkr-zh">Subject｜誰在說話</div>
+              <span class="scbkr-flag flag-warn" id="flagS">未知 / Unknown</span>
+            </div>
+            <div class="scbkr-cell" id="cellC">
+              <div class="scbkr-label">C</div>
+              <div class="scbkr-zh">Cause｜為何聯絡</div>
+              <span class="scbkr-flag flag-warn" id="flagC">模糊 / Vague</span>
+            </div>
+            <div class="scbkr-cell" id="cellB">
+              <div class="scbkr-label">B</div>
+              <div class="scbkr-zh">Boundary｜要做到哪裡</div>
+              <span class="scbkr-flag flag-warn" id="flagB">不明 / Unclear</span>
+            </div>
+            <div class="scbkr-cell" id="cellK">
+              <div class="scbkr-label">K</div>
+              <div class="scbkr-zh">Cost｜錯信代價</div>
+              <span class="scbkr-flag flag-warn" id="flagK">潛在風險 / Risk</span>
+            </div>
+            <div class="scbkr-cell" id="cellR">
+              <div class="scbkr-label">R</div>
+              <div class="scbkr-zh">Responsibility｜出事誰扛</div>
+              <span class="scbkr-flag flag-bad" id="flagR">無責任說明</span>
+            </div>
+          </div>
+
+          <div class="scbkr-senior" id="scbkrSenior">
+            <p>簡單講，這則訊息有沒有說清楚：</p>
+            <ul id="scbkrSeniorList">
+              <li>誰在跟你說話（是不是你熟悉的官方單位）。</li>
+              <li>為什麼要你做這件事。</li>
+              <li>要你做到哪一個步驟（例如：轉多少錢、點哪個連結）。</li>
+              <li>如果是假的，你會損失什麼。</li>
+              <li>如果出事，誰會負責。</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="margin-top: 10px;">
+          <div class="section-title">可疑語意特徵｜Evidence Patterns</div>
+          <div class="section-subtitle">
+            為什麼系統覺得這段話危險，用簡單條列列給你看。
+          </div>
+          <ul class="list" id="evidenceList">
+            <li class="list-item">
+              尚未分析。貼上訊息並點選「分析」後，這裡會顯示詐騙常見的語言套路。
+            </li>
+          </ul>
+        </div>
+
+        <div style="margin-top: 10px;">
+          <div class="section-title">風險簇群｜Rule Clusters</div>
+          <div class="section-subtitle">用簡單群組看這段訊息落在哪些高風險模式。</div>
+          <div class="pill-row" id="ruleClustersRow">
+            <div class="pill-mini">目前沒有額外 cluster。</div>
+          </div>
+        </div>
+
+        <div style="margin-top: 10px;">
+          <div class="section-title">行動建議｜Action Guidance</div>
+          <div class="section-subtitle">
+            不只說「小心」，而是告訴你下一步該怎麼做。
+          </div>
+          <ul class="list" id="actionList">
+            <li class="list-item">
+              目前沒有建議。分析後，這裡會告訴你：要不要立刻停止、要不要改走官方管道、需不需要請家人幫忙。
+            </li>
+          </ul>
         </div>
       </section>
 
-      <section class="card">
-        <section id="riskSection">
-          <div id="riskBadge" class="badge badge-neutral">未分析 | NOT ANALYZED</div>
-          <h3 id="riskTitle">請先貼上訊息，並點選「分析這則訊息」。</h3>
-          <p id="riskSubtitle" class="text-muted">系統會依照語意特徵與責任鏈結構給出 SAFE / RISK / FATAL / NON-CLOSABLE 分級。</p>
-        </section>
+        <div style="margin-top: 10px;">
+          <div class="section-title">政策建議｜Policy Recommendation</div>
+          <div class="section-subtitle">依風險等級轉換成可執行的治理建議。</div>
+          <div class="kv-row"><div class="kv-key">Severity</div><div class="kv-val" id="policySeverity">SAFE</div></div>
+          <div class="kv-row"><div class="kv-key">Recommended Action</div><div class="kv-val" id="policyAction">observe</div></div>
+          <div class="kv-row"><div class="kv-key">Escalation Level</div><div class="kv-val" id="policyEscalation">0</div></div>
+        </div>
 
-        <section id="scbkrSection">
-          <div class="scbkr-card" id="scbkrS">S 主體｜誰在說話</div>
-          <div class="scbkr-card" id="scbkrC">C 理由｜為何聯絡</div>
-          <div class="scbkr-card" id="scbkrB">B 邊界｜要做到哪裡</div>
-          <div class="scbkr-card" id="scbkrK">K 成本｜錯信代價</div>
-          <div class="scbkr-card" id="scbkrR">R 責任｜出事誰扛</div>
-        </section>
+        <div style="margin-top: 10px;" id="llmSection" hidden>
+          <div class="section-title">LLM 補充說明（選用）｜Optional LLM Explanation</div>
+          <div class="section-subtitle">當 LLM 回傳可用資料時，顯示額外白話摘要與補充建議。</div>
+          <div class="llm-box">
+            <div class="list-item" id="llmExplanation">尚無 LLM 補充內容。</div>
+            <ul class="list" id="llmEvidenceList"></ul>
+            <ul class="list" id="llmActionList"></ul>
+          </div>
+        </div>
 
-        <section>
-          <h3 style="margin-top:10px;">可疑語意特徵 | Evidence Patterns</h3>
-          <ul id="evidenceList"></ul>
-        </section>
-        <section>
-          <h3 style="margin-top:10px;">行動建議 | Action Guidance</h3>
-          <ul id="actionList"></ul>
-        </section>
+        <div style="margin-top: 10px;">
+          <div class="section-title">角色治理｜Role Governance Ex(y)=π</div>
+          <div class="role-note" id="roleNote">
+            在這個 Demo 裡，<strong>AI / 模型永遠只是輔助工具層</strong>，真正做決定的人是
+            <strong>你自己 + 官方管道（銀行 App / 官方網站 / 卡背電話 / 警政單位）</strong>。<br />
+            This engine is a <strong>tool layer</strong>, not a final judge. Final decisions should be made via
+            <strong>official channels and human review</strong>.
+          </div>
+          <div id="proDebug"></div>
 
-        <section id="llmSection" hidden>
-          <h3>AWS LLM Explanation (預留)</h3>
-          <p id="llmExplanationText"></p>
-          <ul id="llmExtraEvidence"></ul>
-          <ul id="llmExtraActions"></ul>
-        </section>
+          <div style="margin-top: 10px;" id="auditInsightBlock">
+            <div class="section-title">審計與洞察｜Audit & Insight</div>
+            <div class="section-subtitle" id="auditInsightPlaceholder">尚未產生 2.3 審計資料。</div>
+            <div class="kv-row"><div class="kv-key">Rules Version</div><div class="kv-val" id="auditRulesVersion">-</div></div>
+            <div class="kv-row"><div class="kv-key">Triggered Count</div><div class="kv-val" id="auditTriggeredCount">0</div></div>
+            <div class="kv-row"><div class="kv-key">Latency</div><div class="kv-val" id="auditLatency">0 ms</div></div>
+            <div class="kv-row"><div class="kv-key">Audit Hash</div><div class="kv-val" id="auditHash">-</div></div>
+            <div class="kv-row"><div class="kv-key">Insight (ZH)</div><div class="kv-val" id="insightZh">-</div></div>
+            <div class="kv-row"><div class="kv-key">Insight (EN)</div><div class="kv-val" id="insightEn">-</div></div>
+          </div>
 
-        <section id="apiPacketPanel" style="display:none;">
-          <h3>v3 SCBKR API 封包（JSON）</h3>
-          <button id="toggleApiPacketBtn" type="button">顯示 JSON</button>
-          <pre id="apiPacketJson" hidden></pre>
-        </section>
+          <div id="apiPacketPanel">
+            <div class="section-subtitle">v3 SCBKR API 封包（JSON）</div>
+            <button class="btn btn-secondary" type="button" id="toggleApiPacketBtn">顯示 JSON</button>
+            <pre id="apiPacketJson" hidden><code></code></pre>
+          </div>
+        </div>
       </section>
     </div>
   </div>
@@ -308,55 +570,106 @@
   <script src="js/scbkr-engine.js"></script>
   <script src="js/voice.js"></script>
   <script>
-    (function () {
-      try {
-        const inputEl = document.getElementById("inputText");
-        const btnAnalyze = document.getElementById("btnAnalyze");
-        const btnClear = document.getElementById("btnClear");
-        const btnStandard = document.getElementById("btnStandard");
-        const btnPro = document.getElementById("btnPro");
-        const btnSenior = document.getElementById("btnSenior");
-        const seniorModeCheckbox = document.getElementById("seniorModeCheckbox");
-        const useAwsLlmCheckbox = document.getElementById("useAwsLlmCheckbox");
+    (async function () {
+      const htmlEl = document.documentElement;
+      const inputEl = document.getElementById("inputText");
+      const charCounter = document.getElementById("charCounter");
+      const clearBtn = document.getElementById("clearBtn");
+      const analyzeBtn = document.getElementById("analyzeBtn");
+      const exportBtn = document.getElementById("exportBtn");
+      const speakBtn = document.getElementById("speakBtn");
+      const stopSpeakBtn = document.getElementById("stopSpeakBtn");
+      const seniorModeToggle = document.getElementById("seniorModeToggle");
+      const voiceEnabledToggle = document.getElementById("voiceEnabledToggle");
+      const useLLMToggle = document.getElementById("useLLMToggle");
+      const langSwitcher = document.getElementById("langSwitcher");
+      const modeButtons = document.querySelectorAll("[data-mode-btn]");
+      const modeLabel = document.getElementById("modeLabel");
 
-        const riskBadge = document.getElementById("riskBadge");
-        const riskTitle = document.getElementById("riskTitle");
-        const riskSubtitle = document.getElementById("riskSubtitle");
-        const evidenceList = document.getElementById("evidenceList");
-        const actionList = document.getElementById("actionList");
+      const riskBadge = document.getElementById("riskBadge");
+      const riskLabel = document.getElementById("riskLabel");
+      const riskMainLine = document.getElementById("riskMainLine");
+      const riskSubLine = document.getElementById("riskSubLine");
 
-        const llmSection = document.getElementById("llmSection");
-        const llmExplanationText = document.getElementById("llmExplanationText");
-        const llmExtraEvidence = document.getElementById("llmExtraEvidence");
-        const llmExtraActions = document.getElementById("llmExtraActions");
+      const flagS = document.getElementById("flagS");
+      const flagC = document.getElementById("flagC");
+      const flagB = document.getElementById("flagB");
+      const flagK = document.getElementById("flagK");
+      const flagR = document.getElementById("flagR");
 
-        const apiPacketPanel = document.getElementById("apiPacketPanel");
-        const toggleApiPacketBtn = document.getElementById("toggleApiPacketBtn");
-        const apiPacketJson = document.getElementById("apiPacketJson");
+      const scbkrSeniorList = document.getElementById("scbkrSeniorList");
+      const evidenceList = document.getElementById("evidenceList");
+      const actionList = document.getElementById("actionList");
+      const ruleClustersRow = document.getElementById("ruleClustersRow");
+      const policySeverity = document.getElementById("policySeverity");
+      const policyAction = document.getElementById("policyAction");
+      const policyEscalation = document.getElementById("policyEscalation");
+      const auditInsightPlaceholder = document.getElementById("auditInsightPlaceholder");
+      const auditRulesVersion = document.getElementById("auditRulesVersion");
+      const auditTriggeredCount = document.getElementById("auditTriggeredCount");
+      const auditLatency = document.getElementById("auditLatency");
+      const auditHash = document.getElementById("auditHash");
+      const insightZh = document.getElementById("insightZh");
+      const insightEn = document.getElementById("insightEn");
+      const roleNote = document.getElementById("roleNote");
+      const proDebug = document.getElementById("proDebug");
+      const llmSection = document.getElementById("llmSection");
+      const apiPacketPanel = document.getElementById("apiPacketPanel");
+      const toggleApiPacketBtn = document.getElementById("toggleApiPacketBtn");
+      const apiPacketJson = document.getElementById("apiPacketJson");
+      const llmExplanation = document.getElementById("llmExplanation");
+      const llmEvidenceList = document.getElementById("llmEvidenceList");
+      const llmActionList = document.getElementById("llmActionList");
 
-        if (!inputEl || !btnAnalyze || !btnClear || !riskBadge || !riskTitle || !riskSubtitle) {
-          console.warn("Essential DOM nodes not found, aborting init safely.");
-          return;
+      let currentMode = "standard";
+      let lastResult = null;
+      let apiPacketExpanded = false;
+
+      function actionGuidanceByRisk(risk) {
+        if (risk === "SAFE") return [
+          "如果你完全看得懂內容，且確認是你主動申請的服務，可以依照正常流程進行。",
+          "若你「看不懂」「沒印象申請」或心裡覺得怪，請改用官方 App 或卡片背面電話再次確認。",
+        ];
+        if (risk === "RISK") return [
+          "暫停所有操作，不要在這個訊息裡點任何連結或輸入資料。",
+          "請自行輸入銀行官方網址，或開啟已安裝的官方 App 重新登入確認。",
+          "如果你是長輩或覺得不放心，請先把訊息給家人看，一起判斷。",
+        ];
+        if (risk === "FATAL") return [
+          "立刻停止轉帳、不要提供任何密碼／驗證碼。",
+          "關閉這個訊息中的所有連結與視窗，改由官方 App 或卡片背面電話聯繫銀行。",
+          "如果你已經轉出款項或提供資料，請儘快撥打 165 反詐騙專線或報警。",
+        ];
+        return [
+          "在你確認對方真實身分之前，不要轉帳、不點連結、不提供任何驗證碼。",
+          "直接撥打官方客服專線或 165 反詐騙專線，轉述整段訊息請對方協助判斷。",
+        ];
+      }
+
+      function setMode(mode) {
+        currentMode = mode;
+        htmlEl.setAttribute("data-mode", mode);
+        modeButtons.forEach((btn) => {
+          const active = btn.getAttribute("data-mode") === mode;
+          btn.setAttribute("data-active", active ? "true" : "false");
+          btn.setAttribute("aria-pressed", active ? "true" : "false");
+        });
+        exportBtn.style.display = mode === "pro" ? "inline-flex" : "none";
+        seniorVoiceRow.style.display = mode === "senior" ? "inline-flex" : "none";
+        seniorModeToggle.checked = mode === "senior";
+        apiPacketPanel.style.display = mode === "pro" ? "block" : "none";
+        if (mode !== "pro") {
+          apiPacketExpanded = false;
+          toggleApiPacketBtn.textContent = "顯示 JSON";
+          apiPacketJson.hidden = true;
         }
 
-        let currentMode = "standard";
-
-        function setMode(mode) {
-          currentMode = mode;
-
-          [btnStandard, btnPro, btnSenior].forEach((btn) => {
-            if (!btn) return;
-            btn.classList.toggle("active", btn.getAttribute("data-mode") === mode);
-          });
-
-          document.body.classList.toggle("senior-mode", mode === "senior");
-          if (seniorModeCheckbox) seniorModeCheckbox.checked = mode === "senior";
-
-          if (apiPacketPanel) apiPacketPanel.style.display = mode === "pro" ? "block" : "none";
-          if (mode !== "pro" && apiPacketJson && toggleApiPacketBtn) {
-            apiPacketJson.hidden = true;
-            toggleApiPacketBtn.textContent = "顯示 JSON";
-          }
+        if (mode === "pro") {
+          modeLabel.textContent = "專業版 PRO – 顯示完整 SCBKR 責任鏈、風險線索與原始規則匹配資訊，方便風控與治理團隊檢閱。";
+        } else if (mode === "senior") {
+          modeLabel.textContent = "長輩安心版 SENIOR SAFE – 大字體、中文為主，用簡單句子提醒「看不懂就不要做，先問家人或官方」。";
+        } else {
+          modeLabel.textContent = "標準版 STANDARD – 一般使用者友善介面，中英文雙語提示。";
         }
 
         function setScbkrFlags(flags) {
@@ -473,30 +786,132 @@
           });
         });
 
-        if (seniorModeCheckbox) {
-          seniorModeCheckbox.addEventListener("change", function () {
-            setMode(seniorModeCheckbox.checked ? "senior" : "standard");
-          });
+        if (ruleClustersRow) {
+          const clusters = Array.isArray(result.ruleClusters) ? result.ruleClusters : [];
+          ruleClustersRow.innerHTML = clusters.length
+            ? clusters.map((cluster) => `<div class="pill-mini">${cluster}</div>`).join("")
+            : '<div class="pill-mini">目前沒有額外 cluster。</div>';
         }
 
-        btnAnalyze.addEventListener("click", function (e) {
-          e.preventDefault();
-          runAnalysis();
-        });
+        const policy = result.policy || {};
+        if (policySeverity) policySeverity.textContent = policy.severity || result.risk || "SAFE";
+        if (policyAction) policyAction.textContent = policy.recommendedAction || "observe";
+        if (policyEscalation) policyEscalation.textContent = String(policy.escalationLevel ?? 0);
+
+        const auditInfo = result.audit || {};
+        const insight = result.insight || {};
+        if (auditInsightPlaceholder) {
+          auditInsightPlaceholder.textContent = auditInfo.auditHash ? "已產生 2.3 審計資料。" : "尚未產生 2.3 審計資料。";
+        }
+        if (auditRulesVersion) auditRulesVersion.textContent = auditInfo.rulesVersion || "3.3.0";
+        if (auditTriggeredCount) auditTriggeredCount.textContent = String(auditInfo.triggeredCount ?? 0);
+        if (auditLatency) auditLatency.textContent = `${auditInfo.latencyMs ?? 0} ms`;
+        if (auditHash) auditHash.textContent = auditInfo.auditHash || "-";
+        if (insightZh) insightZh.textContent = insight.summary_zh || "-";
+        if (insightEn) insightEn.textContent = insight.summary_en || "-";
+
+        roleNote.innerHTML = '在這個 Demo 裡，<strong>AI / 模型永遠只是輔助工具層</strong>，真正做決定的人是 <strong>你自己 + 官方管道</strong>。<br />This engine helps you see the <strong>semantic risk structure</strong>, but <strong>final decisions</strong> must go through <strong>official apps, websites, call centers and human review</strong>.';
+
+        if (result.llm && typeof result.llm === "object") {
+          llmSection.hidden = false;
+          llmExplanation.textContent = result.llm.explanation || "LLM returned without explanation.";
+
+          llmEvidenceList.innerHTML = "";
+          (Array.isArray(result.llm.extraEvidence) ? result.llm.extraEvidence : []).forEach((text) => {
+            const li = document.createElement("li");
+            li.className = "list-item";
+            li.textContent = text;
+            llmEvidenceList.appendChild(li);
+          });
+
+          llmActionList.innerHTML = "";
+          (Array.isArray(result.llm.extraActions) ? result.llm.extraActions : []).forEach((text) => {
+            const li = document.createElement("li");
+            li.className = "list-item";
+            li.textContent = text;
+            llmActionList.appendChild(li);
+          });
+        } else {
+          llmSection.hidden = true;
+          llmExplanation.textContent = "尚無 LLM 補充內容。";
+          llmEvidenceList.innerHTML = "";
+          llmActionList.innerHTML = "";
+        }
+
+        if (result.apiPacket) {
+          apiPacketJson.textContent = JSON.stringify(result.apiPacket, null, 2);
+        } else {
+          apiPacketJson.textContent = JSON.stringify({
+            SCBKR: { S: false, C: false, B: false, K: false, R: false },
+            RiskLevel: "SAFE",
+            Evidence: [],
+            ActionAdvice: [],
+            Audit: { TokenAudit: 0, TokenGateway: "ANON", Source: "BrowserLocalEngine" },
+            LLM: { enabled: false, explanation: null, extraEvidence: [], extraActions: [] },
+          }, null, 2);
+        }
+
+        proDebug.textContent = currentMode === "pro" ? "DEBUG (規則匹配結果 / Rule Matches):\n" + JSON.stringify({ risk: result.risk, ...result.debug, scbkr: result.scbkr }, null, 2) : "";
+      }
 
         btnClear.addEventListener("click", function (e) {
           e.preventDefault();
           inputEl.value = "";
           renderResult(null);
         });
+        flagR.className = "scbkr-flag flag-bad";
+        flagR.textContent = "無責任說明";
+        llmSection.hidden = true;
+        llmExplanation.textContent = "尚無 LLM 補充內容。";
+        llmEvidenceList.innerHTML = "";
+        llmActionList.innerHTML = "";
+        apiPacketJson.textContent = "";
+        if (ruleClustersRow) ruleClustersRow.innerHTML = '<div class="pill-mini">目前沒有額外 cluster。</div>';
+        if (policySeverity) policySeverity.textContent = "SAFE";
+        if (policyAction) policyAction.textContent = "observe";
+        if (policyEscalation) policyEscalation.textContent = "0";
+        if (auditInsightPlaceholder) auditInsightPlaceholder.textContent = "尚未產生 2.3 審計資料。";
+        if (auditRulesVersion) auditRulesVersion.textContent = "-";
+        if (auditTriggeredCount) auditTriggeredCount.textContent = "0";
+        if (auditLatency) auditLatency.textContent = "0 ms";
+        if (auditHash) auditHash.textContent = "-";
+        if (insightZh) insightZh.textContent = "-";
+        if (insightEn) insightEn.textContent = "-";
+      }
 
-        if (toggleApiPacketBtn && apiPacketJson) {
-          toggleApiPacketBtn.textContent = "顯示 JSON";
-          toggleApiPacketBtn.addEventListener("click", function () {
-            const nextHidden = !apiPacketJson.hidden;
-            apiPacketJson.hidden = nextHidden;
-            toggleApiPacketBtn.textContent = nextHidden ? "顯示 JSON" : "隱藏 JSON";
-          });
+      modeButtons.forEach((btn) => btn.addEventListener("click", () => setMode(btn.getAttribute("data-mode"))));
+      seniorModeToggle.addEventListener("change", () => {
+        setMode(seniorModeToggle.checked ? "senior" : "standard");
+      });
+      toggleApiPacketBtn.addEventListener("click", () => {
+        apiPacketExpanded = !apiPacketExpanded;
+        apiPacketJson.hidden = !apiPacketExpanded;
+        toggleApiPacketBtn.textContent = apiPacketExpanded ? "隱藏 JSON" : "顯示 JSON";
+      });
+      inputEl.addEventListener("input", updateCharCounter);
+      clearBtn.addEventListener("click", () => {
+        inputEl.value = "";
+        updateCharCounter();
+        resetOutputs();
+        lastResult = null;
+      });
+      analyzeBtn.addEventListener("click", async () => {
+        if (useLLMToggle.checked && typeof SCBKREngine.analyzeWithOptionalLLM === "function") {
+          lastResult = await SCBKREngine.analyzeWithOptionalLLM(inputEl.value, useLLMToggle.checked);
+        } else {
+          lastResult = SCBKREngine.analyzeMessage(inputEl.value);
+        }
+        renderResult(lastResult);
+      });
+      exportBtn.addEventListener("click", () => {
+        if (!lastResult) return alert(AppI18n.t("msg.noAnalysis"));
+        ReportExport.exportReport(lastResult);
+      });
+      speakBtn.addEventListener("click", () => {
+        if (!lastResult) return alert(AppI18n.t("msg.noAnalysis"));
+        if (!voiceEnabledToggle.checked) return alert("語音朗讀目前已停用。請先勾選『啟用語音朗讀』。");
+        if (!VoiceModule.speakRiskResult(lastResult, AppI18n.getCurrentLang() === "en" ? "en-US" : "zh-TW")) {
+          alert(AppI18n.t("msg.noSpeech"));
         }
 
         // 若 js/scbkr-engine.js 尚未定義，才補一份安全 fallback，不重覆覆蓋。
