@@ -161,6 +161,30 @@ if (!scbkr.R) reasons.push("沒有說明一旦出事誰負責，責任鏈幾乎�
 
 ---
 
+
+### 5.3 v3 API 封包輸出（實作）
+```json
+{
+  "SCBKR": { "S": true, "C": false, "B": true, "K": false, "R": false },
+  "RiskLevel": "RISK",
+  "Evidence": ["..."],
+  "ActionAdvice": ["..."],
+  "Audit": {
+    "TokenAudit": 0.12,
+    "TokenGateway": "LocalRuleEngine",
+    "Source": "BrowserLocalEngine"
+  },
+  "LLM": {
+    "enabled": false,
+    "explanation": null,
+    "extraEvidence": [],
+    "extraActions": []
+  }
+}
+```
+
+> 目前仍為「完全前端本地分析」；此封包是給後續 AWS/後端串接的統一 JSON 介面。
+
 ## 6) UI 結構（Input → Parser → SCBKR → Risk → Output）
 
 ### 6.1 區塊
