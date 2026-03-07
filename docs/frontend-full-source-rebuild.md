@@ -1,3 +1,10 @@
+# Frontend Full Source Rebuild
+
+---
+
+## FILE: index.html
+
+```
 <!DOCTYPE html>
 <html lang="zh-Hant" data-mode="standard">
 <head>
@@ -368,40 +375,6 @@
       gap: 8px;
     }
 
-    .toggle-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
-      align-items: center;
-    }
-
-    .toggle-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      color: var(--text-soft);
-      background: rgba(15, 23, 42, 0.86);
-      border: 1px solid rgba(75, 85, 99, 0.95);
-      border-radius: 999px;
-      padding: 4px 10px;
-    }
-
-    .llm-note {
-      margin-top: 8px;
-      font-size: 11px;
-      color: var(--text-faint);
-    }
-
-    .llm-box {
-      margin-top: 8px;
-      border: 1px dashed rgba(59, 130, 246, 0.6);
-      border-radius: 12px;
-      padding: 8px 10px;
-      background: rgba(30, 64, 175, 0.12);
-    }
-
     .btn {
       border-radius: 999px;
       border: 1px solid rgba(148, 163, 184, 0.7);
@@ -732,26 +705,6 @@
       word-break: break-all;
     }
 
-    #apiPacketPanel {
-      display: none;
-      margin-top: 8px;
-      padding-top: 6px;
-      border-top: 1px dashed rgba(59, 130, 246, 0.6);
-    }
-
-    #apiPacketJson {
-      margin-top: 6px;
-      padding: 8px;
-      border-radius: 10px;
-      background: rgba(30, 64, 175, 0.18);
-      border: 1px solid rgba(96, 165, 250, 0.55);
-      font-size: 10px;
-      color: var(--text-main);
-      font-family: var(--font-mono);
-      white-space: pre-wrap;
-      word-break: break-all;
-    }
-
     .hint-senior-hero {
       display: none;
       font-size: 13px;
@@ -951,21 +904,6 @@
           <button class="btn btn-secondary" id="speakBtn" type="button" data-i18n="btn.speak">朗讀風險結果</button>
           <button class="btn btn-secondary" id="stopSpeakBtn" type="button" data-i18n="btn.stopSpeak">停止朗讀</button>
         </div>
-        <div class="toggle-row" aria-label="Analysis options">
-          <label class="toggle-item" for="seniorModeToggle">
-            <input type="checkbox" id="seniorModeToggle" />
-            <span>切換長輩模式（大字體 / 簡化顯示）</span>
-          </label>
-          <label class="toggle-item" for="voiceEnabledToggle">
-            <input type="checkbox" id="voiceEnabledToggle" checked />
-            <span>啟用語音朗讀（Web Speech API）</span>
-          </label>
-          <label class="toggle-item" for="useLLMToggle">
-            <input type="checkbox" id="useLLMToggle" />
-            <span>Use AWS LLM explanation (if available)</span>
-          </label>
-        </div>
-        <div class="llm-note">LLM 選項目前是介接預留（hook），預設仍是本地規則分析。</div>
       </section>
 
       <section class="card" aria-label="分析結果 Output">
@@ -1060,14 +998,6 @@
         </div>
 
         <div style="margin-top: 10px;">
-          <div class="section-title">風險簇群｜Rule Clusters</div>
-          <div class="section-subtitle">用簡單群組看這段訊息落在哪些高風險模式。</div>
-          <div class="pill-row" id="ruleClustersList">
-            <div class="pill-mini">目前沒有額外 cluster。</div>
-          </div>
-        </div>
-
-        <div style="margin-top: 10px;">
           <div class="section-title">行動建議｜Action Guidance</div>
           <div class="section-subtitle">
             不只說「小心」，而是告訴你下一步該怎麼做。
@@ -1080,25 +1010,6 @@
         </div>
 
         <div style="margin-top: 10px;">
-          <div class="section-title">政策建議｜Policy Recommendation</div>
-          <div class="section-subtitle">依風險等級轉換成可執行的治理建議。</div>
-          <div class="kv-row"><div class="kv-key">Severity</div><div class="kv-val" id="policySeverity">SAFE</div></div>
-          <div class="kv-row"><div class="kv-key">Recommended Action</div><div class="kv-val" id="policyAction">observe</div></div>
-          <div class="kv-row"><div class="kv-key">Escalation Level</div><div class="kv-val" id="policyEscalation">0</div></div>
-          <div class="kv-row"><div class="kv-key">Human Advice</div><div class="kv-val" id="policyHumanAdvice">-</div></div>
-        </div>
-
-        <div style="margin-top: 10px;" id="llmSection" hidden>
-          <div class="section-title">LLM 補充說明（選用）｜Optional LLM Explanation</div>
-          <div class="section-subtitle">當 LLM 回傳可用資料時，顯示額外白話摘要與補充建議。</div>
-          <div class="llm-box">
-            <div class="list-item" id="llmExplanation">尚無 LLM 補充內容。</div>
-            <ul class="list" id="llmEvidenceList"></ul>
-            <ul class="list" id="llmActionList"></ul>
-          </div>
-        </div>
-
-        <div style="margin-top: 10px;">
           <div class="section-title">角色治理｜Role Governance Ex(y)=π</div>
           <div class="role-note" id="roleNote">
             在這個 Demo 裡，<strong>AI / 模型永遠只是輔助工具層</strong>，真正做決定的人是
@@ -1107,23 +1018,6 @@
             <strong>official channels and human review</strong>.
           </div>
           <div id="proDebug"></div>
-
-          <div style="margin-top: 10px;" id="auditInsightBlock">
-            <div class="section-title">審計與洞察｜Audit & Insight</div>
-            <div class="section-subtitle" id="auditInsightPlaceholder">尚未產生 2.3 審計資料。</div>
-            <div class="kv-row"><div class="kv-key">Rules Version</div><div class="kv-val" id="auditRulesVersion">-</div></div>
-            <div class="kv-row"><div class="kv-key">Triggered Count</div><div class="kv-val" id="auditTriggeredCount">0</div></div>
-            <div class="kv-row"><div class="kv-key">Latency</div><div class="kv-val" id="auditLatency">0 ms</div></div>
-            <div class="kv-row"><div class="kv-key">Audit Hash</div><div class="kv-val" id="auditHash">-</div></div>
-            <div class="kv-row"><div class="kv-key">Insight (ZH)</div><div class="kv-val" id="insightZh">-</div></div>
-            <div class="kv-row"><div class="kv-key">Insight (EN)</div><div class="kv-val" id="insightEn">-</div></div>
-          </div>
-
-          <div id="apiPacketPanel">
-            <div class="section-subtitle">v3 SCBKR API 封包（JSON）</div>
-            <button class="btn btn-secondary" type="button" id="toggleApiPacketBtn">顯示 JSON</button>
-            <pre id="apiPacketJson" hidden><code></code></pre>
-          </div>
         </div>
       </section>
     </main>
@@ -1144,9 +1038,7 @@
       const exportBtn = document.getElementById("exportBtn");
       const speakBtn = document.getElementById("speakBtn");
       const stopSpeakBtn = document.getElementById("stopSpeakBtn");
-      const seniorModeToggle = document.getElementById("seniorModeToggle");
-      const voiceEnabledToggle = document.getElementById("voiceEnabledToggle");
-      const useLLMToggle = document.getElementById("useLLMToggle");
+      const seniorVoiceRow = document.getElementById("seniorVoiceRow");
       const langSwitcher = document.getElementById("langSwitcher");
       const modeButtons = document.querySelectorAll("[data-mode-btn]");
       const modeLabel = document.getElementById("modeLabel");
@@ -1165,31 +1057,11 @@
       const scbkrSeniorList = document.getElementById("scbkrSeniorList");
       const evidenceList = document.getElementById("evidenceList");
       const actionList = document.getElementById("actionList");
-      const ruleClustersList = document.getElementById("ruleClustersList");
-      const policySeverity = document.getElementById("policySeverity");
-      const policyAction = document.getElementById("policyAction");
-      const policyEscalation = document.getElementById("policyEscalation");
-      const policyHumanAdvice = document.getElementById("policyHumanAdvice");
-      const auditInsightPlaceholder = document.getElementById("auditInsightPlaceholder");
-      const auditRulesVersion = document.getElementById("auditRulesVersion");
-      const auditTriggeredCount = document.getElementById("auditTriggeredCount");
-      const auditLatency = document.getElementById("auditLatency");
-      const auditHash = document.getElementById("auditHash");
-      const insightZh = document.getElementById("insightZh");
-      const insightEn = document.getElementById("insightEn");
       const roleNote = document.getElementById("roleNote");
       const proDebug = document.getElementById("proDebug");
-      const llmSection = document.getElementById("llmSection");
-      const apiPacketPanel = document.getElementById("apiPacketPanel");
-      const toggleApiPacketBtn = document.getElementById("toggleApiPacketBtn");
-      const apiPacketJson = document.getElementById("apiPacketJson");
-      const llmExplanation = document.getElementById("llmExplanation");
-      const llmEvidenceList = document.getElementById("llmEvidenceList");
-      const llmActionList = document.getElementById("llmActionList");
 
       let currentMode = "standard";
       let lastResult = null;
-      let apiPacketExpanded = false;
 
       function actionGuidanceByRisk(risk) {
         if (risk === "SAFE") return [
@@ -1222,13 +1094,6 @@
         });
         exportBtn.style.display = mode === "pro" ? "inline-flex" : "none";
         seniorVoiceRow.style.display = mode === "senior" ? "inline-flex" : "none";
-        seniorModeToggle.checked = mode === "senior";
-        apiPacketPanel.style.display = mode === "pro" ? "block" : "none";
-        if (mode !== "pro") {
-          apiPacketExpanded = false;
-          toggleApiPacketBtn.textContent = "顯示 JSON";
-          apiPacketJson.hidden = true;
-        }
 
         if (mode === "pro") {
           modeLabel.textContent = "專業版 PRO – 顯示完整 SCBKR 責任鏈、風險線索與原始規則匹配資訊，方便風控與治理團隊檢閱。";
@@ -1286,71 +1151,7 @@
           actionList.appendChild(li);
         });
 
-        if (ruleClustersList) {
-          const ruleClusters = result.ruleClusters || [];
-          ruleClustersList.innerHTML = ruleClusters.length
-            ? ruleClusters.map((cluster) => `<div class="pill-mini">${cluster}</div>`).join("")
-            : '<div class="pill-mini">目前沒有額外 cluster。</div>';
-        }
-
-        const policy = result.policy || {};
-        if (policySeverity) policySeverity.textContent = policy.severity || result.risk || "SAFE";
-        if (policyAction) policyAction.textContent = policy.recommendedAction || "observe";
-        if (policyEscalation) policyEscalation.textContent = String(policy.escalationLevel ?? 0);
-        if (policyHumanAdvice) policyHumanAdvice.textContent = policy.humanAdviceZh || "-";
-
-        const auditInfo = result.audit || {};
-        const insight = result.insight || {};
-        if (auditInsightPlaceholder) {
-          auditInsightPlaceholder.textContent = auditInfo.auditHash ? "已產生 2.3 審計資料。" : "尚未產生 2.3 審計資料。";
-        }
-        if (auditRulesVersion) auditRulesVersion.textContent = auditInfo.rulesVersion || "3.3.0";
-        if (auditTriggeredCount) auditTriggeredCount.textContent = String(auditInfo.triggeredCount ?? 0);
-        if (auditLatency) auditLatency.textContent = `${auditInfo.latencyMs ?? 0} ms`;
-        if (auditHash) auditHash.textContent = auditInfo.auditHash || "-";
-        if (insightZh) insightZh.textContent = insight.summary_zh || "-";
-        if (insightEn) insightEn.textContent = insight.summary_en || "-";
-
         roleNote.innerHTML = '在這個 Demo 裡，<strong>AI / 模型永遠只是輔助工具層</strong>，真正做決定的人是 <strong>你自己 + 官方管道</strong>。<br />This engine helps you see the <strong>semantic risk structure</strong>, but <strong>final decisions</strong> must go through <strong>official apps, websites, call centers and human review</strong>.';
-
-        if (result.llm && typeof result.llm === "object") {
-          llmSection.hidden = false;
-          llmExplanation.textContent = result.llm.explanation || "LLM returned without explanation.";
-
-          llmEvidenceList.innerHTML = "";
-          (Array.isArray(result.llm.extraEvidence) ? result.llm.extraEvidence : []).forEach((text) => {
-            const li = document.createElement("li");
-            li.className = "list-item";
-            li.textContent = text;
-            llmEvidenceList.appendChild(li);
-          });
-
-          llmActionList.innerHTML = "";
-          (Array.isArray(result.llm.extraActions) ? result.llm.extraActions : []).forEach((text) => {
-            const li = document.createElement("li");
-            li.className = "list-item";
-            li.textContent = text;
-            llmActionList.appendChild(li);
-          });
-        } else {
-          llmSection.hidden = true;
-          llmExplanation.textContent = "尚無 LLM 補充內容。";
-          llmEvidenceList.innerHTML = "";
-          llmActionList.innerHTML = "";
-        }
-
-        if (result.apiPacket) {
-          apiPacketJson.textContent = JSON.stringify(result.apiPacket, null, 2);
-        } else {
-          apiPacketJson.textContent = JSON.stringify({
-            SCBKR: { S: false, C: false, B: false, K: false, R: false },
-            RiskLevel: "SAFE",
-            Evidence: [],
-            ActionAdvice: [],
-            Audit: { TokenAudit: 0, TokenGateway: "ANON", Source: "BrowserLocalEngine" },
-            LLM: { enabled: false, explanation: null, extraEvidence: [], extraActions: [] },
-          }, null, 2);
-        }
 
         proDebug.textContent = currentMode === "pro" ? "DEBUG (規則匹配結果 / Rule Matches):\n" + JSON.stringify({ risk: result.risk, ...result.debug, scbkr: result.scbkr }, null, 2) : "";
       }
@@ -1366,34 +1167,9 @@
         });
         flagR.className = "scbkr-flag flag-bad";
         flagR.textContent = "無責任說明";
-        llmSection.hidden = true;
-        llmExplanation.textContent = "尚無 LLM 補充內容。";
-        llmEvidenceList.innerHTML = "";
-        llmActionList.innerHTML = "";
-        apiPacketJson.textContent = "";
-        if (ruleClustersList) ruleClustersList.innerHTML = '<div class="pill-mini">目前沒有額外 cluster。</div>';
-        if (policySeverity) policySeverity.textContent = "SAFE";
-        if (policyAction) policyAction.textContent = "observe";
-        if (policyEscalation) policyEscalation.textContent = "0";
-        if (policyHumanAdvice) policyHumanAdvice.textContent = "-";
-        if (auditInsightPlaceholder) auditInsightPlaceholder.textContent = "尚未產生 2.3 審計資料。";
-        if (auditRulesVersion) auditRulesVersion.textContent = "-";
-        if (auditTriggeredCount) auditTriggeredCount.textContent = "0";
-        if (auditLatency) auditLatency.textContent = "0 ms";
-        if (auditHash) auditHash.textContent = "-";
-        if (insightZh) insightZh.textContent = "-";
-        if (insightEn) insightEn.textContent = "-";
       }
 
       modeButtons.forEach((btn) => btn.addEventListener("click", () => setMode(btn.getAttribute("data-mode"))));
-      seniorModeToggle.addEventListener("change", () => {
-        setMode(seniorModeToggle.checked ? "senior" : "standard");
-      });
-      toggleApiPacketBtn.addEventListener("click", () => {
-        apiPacketExpanded = !apiPacketExpanded;
-        apiPacketJson.hidden = !apiPacketExpanded;
-        toggleApiPacketBtn.textContent = apiPacketExpanded ? "隱藏 JSON" : "顯示 JSON";
-      });
       inputEl.addEventListener("input", updateCharCounter);
       clearBtn.addEventListener("click", () => {
         inputEl.value = "";
@@ -1401,12 +1177,8 @@
         resetOutputs();
         lastResult = null;
       });
-      analyzeBtn.addEventListener("click", async () => {
-        if (useLLMToggle.checked && typeof SCBKREngine.analyzeWithOptionalLLM === "function") {
-          lastResult = await SCBKREngine.analyzeWithOptionalLLM(inputEl.value, useLLMToggle.checked);
-        } else {
-          lastResult = SCBKREngine.analyzeMessage(inputEl.value);
-        }
+      analyzeBtn.addEventListener("click", () => {
+        lastResult = SCBKREngine.analyzeMessage(inputEl.value);
         renderResult(lastResult);
       });
       exportBtn.addEventListener("click", () => {
@@ -1415,7 +1187,6 @@
       });
       speakBtn.addEventListener("click", () => {
         if (!lastResult) return alert(AppI18n.t("msg.noAnalysis"));
-        if (!voiceEnabledToggle.checked) return alert("語音朗讀目前已停用。請先勾選『啟用語音朗讀』。");
         if (!VoiceModule.speakRiskResult(lastResult, AppI18n.getCurrentLang() === "en" ? "en-US" : "zh-TW")) {
           alert(AppI18n.t("msg.noSpeech"));
         }
@@ -1441,3 +1212,409 @@
   </script>
 </body>
 </html>
+```
+
+---
+
+## FILE: js/scbkr-engine.js
+
+```
+(function (global) {
+  const urgentKw = ["立即", "馬上", "立刻", "緊急", "限時", "最後通知", "within", "urgent", "asap", "24小時", "10分鐘", "幾分鐘內"];
+  const moneyKw = ["轉帳", "匯款", "款項", "金額", "帳戶", "收款", "付款", "繳費", "投資", "獲利", "保證獲利", "驗證碼", "one-time password", "otp", "銀行卡", "信用卡"];
+  const appKw = ["下載 app", "安裝 app", "安裝應用程式", "遠端協助", "teamviewer"];
+  const linkKw = ["http://", "https://", "網址", "link", "點選連結", "點擊連結"];
+  const officialKw = ["銀行", "郵局", "警察局", "法院", "檢察署", "國稅局", "官方", "客服"];
+  const askSecretKw = ["密碼", "驗證碼", "簡訊碼", "簡訊認證", "卡號", "背面三碼", "cvv"];
+  const threatKw = ["凍結", "停用", "停權", "鎖定", "罰款", "罰金", "沒收", "追討"];
+
+  function hitAny(text, arr) {
+    return arr.some((kw) => text.includes(kw.toLowerCase()));
+  }
+
+  function calculateRisk(scbkrFlags, patterns) {
+    const flagCount = Object.values(scbkrFlags).filter(Boolean).length;
+    if ((patterns.hasMoney || patterns.asksSecret) && (patterns.hasLink || patterns.hasApp) && patterns.hasUrgent) {
+      return "FATAL";
+    }
+    if (patterns.hasAnyScamPattern && flagCount <= 2) {
+      return "NON-CLOSABLE";
+    }
+    if (patterns.hasAnyScamPattern) {
+      return "RISK";
+    }
+    return "SAFE";
+  }
+
+  function analyzeMessage(inputText) {
+    const text = String(inputText || "").toLowerCase();
+
+    const hasUrgent = hitAny(text, urgentKw);
+    const hasMoney = hitAny(text, moneyKw);
+    const hasApp = hitAny(text, appKw);
+    const hasLink = hitAny(text, linkKw);
+    const hasOfficial = hitAny(text, officialKw);
+    const asksSecret = hitAny(text, askSecretKw);
+    const hasThreat = hitAny(text, threatKw);
+
+    const hasAnyScamPattern = hasMoney || hasApp || hasLink || asksSecret || hasThreat;
+
+    const hasReason = text.includes("因為") || text.includes("由於") || text.includes("通知") || text.includes("告知") || text.includes("提醒");
+    const hasBoundary = text.includes("請在") || text.includes("請於") || text.includes("請點選") || text.includes("請點擊") || text.includes("請完成") || text.includes("請輸入") || text.includes("請提供");
+    const mentionsCost = hasThreat || text.includes("損失") || text.includes("風險") || text.includes("金額") || text.includes("款項");
+    const mentionsResp = text.includes("客服") || text.includes("服務專員") || text.includes("專線") || text.includes("如有疑問") || text.includes("如有任何問題");
+
+    const scbkr = {
+      S: hasOfficial,
+      C: hasReason,
+      B: hasBoundary,
+      K: mentionsCost,
+      R: mentionsResp,
+    };
+
+    const reasons = [];
+    if (hasMoney) reasons.push("訊息內容涉及轉帳／匯款／帳戶等金流行為。");
+    if (hasUrgent) reasons.push("使用「立即」「限時」「幾分鐘內」等急迫語氣。");
+    if (hasLink) reasons.push("包含連結或要求你點選網址，可能導向偽造網站。");
+    if (hasApp) reasons.push("要求下載或安裝 App，可能導致裝置被遠端控制。");
+    if (asksSecret) reasons.push("要求提供密碼／驗證碼或卡片資訊，這在正常流程中極少見。");
+    if (!scbkr.S) reasons.push("沒有清楚可驗證的主體（例如：官方銀行 App 名稱）。");
+    if (!scbkr.R) reasons.push("沒有說明一旦出事誰負責，責任鏈幾乎是空的。");
+
+    const risk = calculateRisk(scbkr, {
+      hasUrgent,
+      hasMoney,
+      hasApp,
+      hasLink,
+      asksSecret,
+      hasThreat,
+      hasAnyScamPattern,
+    });
+
+    const riskDisplay = {
+      SAFE: {
+        label: "SAFE｜目前未偵測到明顯詐騙語意",
+        main: "這則訊息目前看起來比較像一般通知，不包含明顯詐騙關鍵語意。",
+        sub: "即便是 SAFE，若你本人「看不懂內容」或覺得不安，仍建議優先改走官方管道確認。",
+        badgeClass: "safe",
+      },
+      RISK: {
+        label: "RISK｜中度風險，建議提高警覺",
+        main: "這則訊息包含多個可疑語意特徵，建議不要直接依照指示操作，優先改走官方管道。",
+        sub: "請不要在這則訊息中點連結或輸入任何密碼／驗證碼，改由銀行 App、官方網站或卡片背面電話重新確認。",
+        badgeClass: "risk",
+      },
+      FATAL: {
+        label: "FATAL｜高度風險，建議立刻停止",
+        main: "這則訊息同時具備「急迫感＋金流操作＋非官方管道」等強烈詐騙特徵，非常危險。",
+        sub: "請立刻停止所有轉帳與輸入資料的動作，不要點任何連結，直接聯繫官方客服或警政機關。",
+        badgeClass: "fatal",
+      },
+      "NON-CLOSABLE": {
+        label: "NON-CLOSABLE｜主體與責任不清，暫停所有高風險操作",
+        main: "這則訊息沒有說清楚誰在跟你說話、為什麼、出事誰負責，責任鏈幾乎是斷裂的。",
+        sub: "在你確認對方真實身分與官方管道之前，請不要轉帳、不提供密碼或任何驗證碼。",
+        badgeClass: "non-closable",
+      },
+    };
+
+    return {
+      inputText,
+      risk,
+      reasons,
+      scbkr,
+      debug: { hasUrgent, hasMoney, hasApp, hasLink, asksSecret, hasThreat, hasAnyScamPattern },
+      riskDisplay: riskDisplay[risk],
+    };
+  }
+
+  global.SCBKREngine = { analyzeMessage, calculateRisk };
+})(window);
+```
+
+---
+
+## FILE: js/report-export.js
+
+```
+(function (global) {
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function exportReport(resultObj) {
+    if (!resultObj) return;
+    const win = window.open("", "_blank", "noopener,noreferrer");
+    if (!win) return;
+
+    const evidences = (resultObj.reasons || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+    const actions = (resultObj.actions || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+    const scbkrEntries = Object.entries(resultObj.scbkr || {}).map(([k, v]) => `<li><strong>${k}</strong>: ${v ? "✅" : "⚠️"}</li>`).join("");
+
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Anti-Scam Report</title>
+      <style>body{font-family:system-ui;padding:24px;line-height:1.5;}h1{margin:0 0 12px;}h2{margin:18px 0 6px;}ul{margin-top:4px;}</style>
+      </head><body>
+      <h1>Anti-Scam Analysis Report</h1>
+      <p><strong>Risk Level:</strong> ${escapeHtml(resultObj.risk)}</p>
+      <h2>SCBKR</h2><ul>${scbkrEntries}</ul>
+      <h2>Evidence</h2><ul>${evidences || "<li>None</li>"}</ul>
+      <h2>Action Guidance</h2><ul>${actions || "<li>None</li>"}</ul>
+      </body></html>`);
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 250);
+  }
+
+  global.ReportExport = { exportReport };
+})(window);
+```
+
+---
+
+## FILE: js/i18n.js
+
+```
+(function (global) {
+  let currentLang = "zh";
+  const bundles = {};
+  const listeners = [];
+
+  async function loadLang(lang) {
+    if (!bundles[lang]) {
+      const res = await fetch(`i18n/${lang}.json`);
+      bundles[lang] = await res.json();
+    }
+    return bundles[lang];
+  }
+
+  function t(key) {
+    return (bundles[currentLang] && bundles[currentLang][key]) || key;
+  }
+
+  function applyI18nToDom() {
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      el.textContent = t(el.getAttribute("data-i18n"));
+    });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+      el.setAttribute("placeholder", t(el.getAttribute("data-i18n-placeholder")));
+    });
+  }
+
+  async function setLanguage(lang) {
+    currentLang = lang;
+    await loadLang(lang);
+    applyI18nToDom();
+    listeners.forEach((cb) => cb(lang));
+  }
+
+  function onChange(cb) {
+    listeners.push(cb);
+  }
+
+  async function init(defaultLang) {
+    await loadLang(defaultLang || currentLang);
+    currentLang = defaultLang || currentLang;
+    applyI18nToDom();
+  }
+
+  global.AppI18n = { init, setLanguage, t, onChange, getCurrentLang: () => currentLang };
+})(window);
+```
+
+---
+
+## FILE: js/examples-loader.js
+
+```
+(function (global) {
+  let examples = [];
+
+  async function init(options) {
+    const { containerId, inputId, getLang, t } = options;
+    const container = document.getElementById(containerId);
+    const inputEl = document.getElementById(inputId);
+    if (!container || !inputEl) return;
+
+    const res = await fetch("data/examples.json");
+    examples = await res.json();
+
+    const label = document.createElement("label");
+    label.setAttribute("for", "exampleSelect");
+    label.className = "card-caption";
+    label.style.display = "block";
+    label.style.marginTop = "10px";
+    label.setAttribute("data-example-label", "1");
+
+    const select = document.createElement("select");
+    select.id = "exampleSelect";
+    select.className = "textarea";
+    select.style.minHeight = "unset";
+    select.style.height = "40px";
+    select.style.padding = "8px 10px";
+
+    container.appendChild(label);
+    container.appendChild(select);
+
+    function renderSelect() {
+      const lang = getLang();
+      label.textContent = t("examples.label");
+      select.innerHTML = "";
+      const placeholder = document.createElement("option");
+      placeholder.value = "";
+      placeholder.textContent = t("examples.placeholder");
+      select.appendChild(placeholder);
+
+      examples.forEach((example) => {
+        const opt = document.createElement("option");
+        opt.value = example.id;
+        opt.textContent = lang === "en" ? example.label_en : example.label_zh;
+        select.appendChild(opt);
+      });
+    }
+
+    select.addEventListener("change", () => {
+      const selected = examples.find((example) => example.id === select.value);
+      if (!selected) return;
+      const lang = getLang();
+      inputEl.value = lang === "en" ? selected.text_en : selected.text_zh;
+      inputEl.dispatchEvent(new Event("input"));
+    });
+
+    renderSelect();
+    return { rerender: renderSelect };
+  }
+
+  global.ExamplesLoader = { init };
+})(window);
+```
+
+---
+
+## FILE: js/voice.js
+
+```
+(function (global) {
+  function isSupported() {
+    return "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+  }
+
+  function stopSpeaking() {
+    if (isSupported()) {
+      window.speechSynthesis.cancel();
+    }
+  }
+
+  function speakRiskResult(resultObj, lang) {
+    if (!isSupported() || !resultObj) return false;
+    stopSpeaking();
+    const advice = (resultObj.actions || []).slice(0, 3).join("。") || "請改用官方管道再次確認";
+    const text = `風險等級：${resultObj.risk}。重點建議：${advice}。`;
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = lang || "zh-TW";
+    utter.rate = 0.95;
+    utter.pitch = 1;
+    window.speechSynthesis.speak(utter);
+    return true;
+  }
+
+  global.VoiceModule = { speakRiskResult, stopSpeaking, isSupported };
+})(window);
+```
+
+---
+
+## FILE: i18n/zh.json
+
+```
+{
+  "lang.current": "中文",
+  "lang.switch": "語言",
+  "examples.label": "快速載入範例",
+  "examples.placeholder": "請選擇範例訊息",
+  "btn.export": "匯出報告",
+  "btn.speak": "朗讀風險結果",
+  "btn.stopSpeak": "停止朗讀",
+  "msg.noAnalysis": "請先完成分析，再使用這個功能。",
+  "msg.noSpeech": "目前瀏覽器不支援語音朗讀。"
+}
+```
+
+---
+
+## FILE: i18n/en.json
+
+```
+{
+  "lang.current": "English",
+  "lang.switch": "Language",
+  "examples.label": "Quick Examples",
+  "examples.placeholder": "Choose an example message",
+  "btn.export": "Export Report",
+  "btn.speak": "Read Risk Result",
+  "btn.stopSpeak": "Stop Reading",
+  "msg.noAnalysis": "Please run analysis first.",
+  "msg.noSpeech": "Speech synthesis is not supported in this browser."
+}
+```
+
+---
+
+## FILE: data/examples.json
+
+```
+[
+  {
+    "id": "fake-bank-freeze",
+    "category": "bank",
+    "label_zh": "假銀行：帳戶凍結通知",
+    "label_en": "Fake bank: account frozen notice",
+    "text_zh": "【銀行通知】您的帳戶異常，將於10分鐘內凍結，請立即點選 https://safe-bank-check.com 完成驗證。",
+    "text_en": "[Bank Alert] Your account is abnormal and will be frozen in 10 minutes. Click https://safe-bank-check.com now to verify."
+  },
+  {
+    "id": "fake-investment-guaranteed",
+    "category": "investment",
+    "label_zh": "假投資：保證獲利群組",
+    "label_en": "Fake investment: guaranteed profit group",
+    "text_zh": "加入老師投資群，保證每週獲利20%，今天最後一天，先匯款5萬元啟用VIP帳戶。",
+    "text_en": "Join our VIP investment group for guaranteed 20% weekly return. Last day today, transfer USD 1,500 to activate."
+  },
+  {
+    "id": "fake-relative-money",
+    "category": "friend",
+    "label_zh": "假親友：急借錢",
+    "label_en": "Fake family/friend urgent loan",
+    "text_zh": "我是你表哥，手機壞掉用新號碼，現在急用錢，先轉3萬到這個帳戶，晚點再跟你說。",
+    "text_en": "Hey, this is your cousin from a new number. I need money urgently, please transfer 900 now and I will explain later."
+  },
+  {
+    "id": "fake-customs-package",
+    "category": "customs",
+    "label_zh": "假關務局：包裹卡關",
+    "label_en": "Fake customs: parcel held",
+    "text_zh": "關務局通知：您的國際包裹因資料不符被扣留，請立即繳交保證金並提供身分證與卡號完成通關。",
+    "text_en": "Customs notice: your parcel is held due to mismatched documents. Pay a deposit and provide ID/card details now to clear it."
+  },
+  {
+    "id": "phishing-login-link",
+    "category": "phishing",
+    "label_zh": "釣魚網站：登入驗證",
+    "label_en": "Phishing site: login verification",
+    "text_zh": "您的信箱即將停用，請於24小時內登入下列網址更新密碼：http://mail-security-check.net",
+    "text_en": "Your mailbox will be deactivated. Sign in within 24 hours at http://mail-security-check.net to update your password."
+  },
+  {
+    "id": "fake-government-fine",
+    "category": "government",
+    "label_zh": "假政府：違規罰款",
+    "label_en": "Fake authority: violation fine",
+    "text_zh": "您有未繳交通罰單，若今日未付款將移送法辦，請點連結輸入信用卡資料完成繳納。",
+    "text_en": "You have an unpaid traffic fine. If not paid today, legal action will begin. Open the link and enter your credit card details now."
+  }
+]
+```
