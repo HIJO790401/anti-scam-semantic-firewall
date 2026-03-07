@@ -1141,9 +1141,6 @@
       const roleNote = document.getElementById("roleNote");
       const proDebug = document.getElementById("proDebug");
       const llmSection = document.getElementById("llmSection");
-      const apiPacketPanel = document.getElementById("apiPacketPanel");
-      const toggleApiPacketBtn = document.getElementById("toggleApiPacketBtn");
-      const apiPacketJson = document.getElementById("apiPacketJson");
       const llmExplanation = document.getElementById("llmExplanation");
       const llmEvidenceList = document.getElementById("llmEvidenceList");
       const llmActionList = document.getElementById("llmActionList");
@@ -1184,12 +1181,6 @@
         exportBtn.style.display = mode === "pro" ? "inline-flex" : "none";
         seniorVoiceRow.style.display = mode === "senior" ? "inline-flex" : "none";
         seniorModeToggle.checked = mode === "senior";
-        apiPacketPanel.style.display = mode === "pro" ? "block" : "none";
-        if (mode !== "pro") {
-          apiPacketExpanded = false;
-          toggleApiPacketBtn.textContent = "顯示 JSON";
-          apiPacketJson.hidden = true;
-        }
 
         if (mode === "pro") {
           modeLabel.textContent = "專業版 PRO – 顯示完整 SCBKR 責任鏈、風險線索與原始規則匹配資訊，方便風控與治理團隊檢閱。";
@@ -1275,19 +1266,6 @@
           llmActionList.innerHTML = "";
         }
 
-        if (result.apiPacket) {
-          apiPacketJson.textContent = JSON.stringify(result.apiPacket, null, 2);
-        } else {
-          apiPacketJson.textContent = JSON.stringify({
-            SCBKR: { S: false, C: false, B: false, K: false, R: false },
-            RiskLevel: "SAFE",
-            Evidence: [],
-            ActionAdvice: [],
-            Audit: { TokenAudit: 0, TokenGateway: "ANON", Source: "BrowserLocalEngine" },
-            LLM: { enabled: false, explanation: null, extraEvidence: [], extraActions: [] },
-          }, null, 2);
-        }
-
         proDebug.textContent = currentMode === "pro" ? "DEBUG (規則匹配結果 / Rule Matches):\n" + JSON.stringify({ risk: result.risk, ...result.debug, scbkr: result.scbkr }, null, 2) : "";
       }
 
@@ -1306,17 +1284,11 @@
         llmExplanation.textContent = "尚無 LLM 補充內容。";
         llmEvidenceList.innerHTML = "";
         llmActionList.innerHTML = "";
-        apiPacketJson.textContent = "";
       }
 
       modeButtons.forEach((btn) => btn.addEventListener("click", () => setMode(btn.getAttribute("data-mode"))));
       seniorModeToggle.addEventListener("change", () => {
         setMode(seniorModeToggle.checked ? "senior" : "standard");
-      });
-      toggleApiPacketBtn.addEventListener("click", () => {
-        apiPacketExpanded = !apiPacketExpanded;
-        apiPacketJson.hidden = !apiPacketExpanded;
-        toggleApiPacketBtn.textContent = apiPacketExpanded ? "隱藏 JSON" : "顯示 JSON";
       });
       inputEl.addEventListener("input", updateCharCounter);
       clearBtn.addEventListener("click", () => {

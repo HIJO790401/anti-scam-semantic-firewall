@@ -201,13 +201,7 @@
   }
 
   async function analyzeWithOptionalLLM(inputText, options = { useLLM: false }) {
-    let baseResult;
-    try {
-      baseResult = analyzeMessage(inputText);
-    } catch (err) {
-      console.error("analyzeMessage failed", err);
-      baseResult = buildSafeAnalyzeResult(inputText);
-    }
+    const baseResult = analyzeMessage(inputText);
     if (!options || !options.useLLM) return baseResult;
 
     try {
@@ -226,18 +220,6 @@
     }
     return baseResult;
   }
-
-  // v3 apiPacket start
-  global.runScbkrApiPacket = function (inputText) {
-    try {
-      const result = analyzeMessage(inputText);
-      return result && result.apiPacket ? result.apiPacket : buildSafeAnalyzeResult(inputText).apiPacket;
-    } catch (err) {
-      console.error("runScbkrApiPacket failed", err);
-      return buildSafeAnalyzeResult(inputText).apiPacket;
-    }
-  };
-  // v3 apiPacket end
 
   global.SCBKREngine = { analyzeMessage, analyzeWithOptionalLLM, callLLMExplain, calculateRisk };
 })(window);
