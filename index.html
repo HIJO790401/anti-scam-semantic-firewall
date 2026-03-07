@@ -1096,24 +1096,6 @@
             <button class="btn btn-secondary" type="button" id="toggleApiPacketBtn">顯示 JSON</button>
             <pre id="apiPacketJson" hidden><code></code></pre>
           </div>
-
-          <div id="awsLlmSettings" style="display:none; margin-top:8px; border-top:1px dashed rgba(55,65,81,0.9); padding-top:8px;">
-            <div class="section-subtitle">AWS LLM 語意解釋（可選）</div>
-            <label style="display:block; margin-bottom:4px; font-size:11px; color:#9ca3af;">
-              <input type="checkbox" id="useAwsLlmCheckbox" />
-              啟用 AWS LLM 解釋層（如果已在後端設定好）
-            </label>
-            <input
-              type="text"
-              id="awsLlmEndpointInput"
-              class="form-control"
-              placeholder="例如：/api/anti-scam/llm-explain 或 https://xxx.execute-api.../llm"
-              style="max-width: 100%; margin-bottom: 8px;"
-            />
-            <small class="text-muted" style="font-size:11px; color:#6b7280;">
-              不會在前端留下任何金鑰，只會把本地 v3 封包送到你設定的 AWS API Gateway / Lambda / Bedrock 端點。
-            </small>
-          </div>
         </div>
       </section>
     </main>
@@ -1159,12 +1141,6 @@
       const roleNote = document.getElementById("roleNote");
       const proDebug = document.getElementById("proDebug");
       const llmSection = document.getElementById("llmSection");
-      const apiPacketPanel = document.getElementById("apiPacketPanel");
-      const toggleApiPacketBtn = document.getElementById("toggleApiPacketBtn");
-      const apiPacketJson = document.getElementById("apiPacketJson");
-      const awsLlmSettings = document.getElementById("awsLlmSettings");
-      const useAwsLlmCheckbox = document.getElementById("useAwsLlmCheckbox");
-      const awsLlmEndpointInput = document.getElementById("awsLlmEndpointInput");
       const llmExplanation = document.getElementById("llmExplanation");
       const llmEvidenceList = document.getElementById("llmEvidenceList");
       const llmActionList = document.getElementById("llmActionList");
@@ -1205,13 +1181,6 @@
         exportBtn.style.display = mode === "pro" ? "inline-flex" : "none";
         seniorVoiceRow.style.display = mode === "senior" ? "inline-flex" : "none";
         seniorModeToggle.checked = mode === "senior";
-        if (apiPacketPanel) apiPacketPanel.style.display = mode === "pro" ? "block" : "none";
-        if (awsLlmSettings) awsLlmSettings.style.display = mode === "pro" ? "block" : "none";
-        if (mode !== "pro") {
-          apiPacketExpanded = false;
-          if (toggleApiPacketBtn) toggleApiPacketBtn.textContent = "顯示 JSON";
-          if (apiPacketJson) apiPacketJson.hidden = true;
-        }
 
         if (mode === "pro") {
           modeLabel.textContent = "專業版 PRO – 顯示完整 SCBKR 責任鏈、風險線索與原始規則匹配資訊，方便風控與治理團隊檢閱。";
@@ -1297,19 +1266,6 @@
           llmActionList.innerHTML = "";
         }
 
-        if (result.apiPacket) {
-          apiPacketJson.textContent = JSON.stringify(result.apiPacket, null, 2);
-        } else {
-          apiPacketJson.textContent = JSON.stringify({
-            SCBKR: { S: false, C: false, B: false, K: false, R: false },
-            RiskLevel: "SAFE",
-            Evidence: [],
-            ActionAdvice: [],
-            Audit: { TokenAudit: 0, TokenGateway: "ANON", Source: "BrowserLocalEngine" },
-            LLM: { enabled: false, explanation: null, extraEvidence: [], extraActions: [] },
-          }, null, 2);
-        }
-
         proDebug.textContent = currentMode === "pro" ? "DEBUG (規則匹配結果 / Rule Matches):\n" + JSON.stringify({ risk: result.risk, ...result.debug, scbkr: result.scbkr }, null, 2) : "";
       }
 
@@ -1328,20 +1284,12 @@
         llmExplanation.textContent = "尚無 LLM 補充內容。";
         llmEvidenceList.innerHTML = "";
         llmActionList.innerHTML = "";
-        if (apiPacketJson) apiPacketJson.textContent = "";
       }
 
       modeButtons.forEach((btn) => btn.addEventListener("click", () => setMode(btn.getAttribute("data-mode"))));
       seniorModeToggle.addEventListener("change", () => {
         setMode(seniorModeToggle.checked ? "senior" : "standard");
       });
-      if (toggleApiPacketBtn && apiPacketJson) {
-        toggleApiPacketBtn.addEventListener("click", () => {
-          apiPacketExpanded = !apiPacketExpanded;
-          apiPacketJson.hidden = !apiPacketExpanded;
-          toggleApiPacketBtn.textContent = apiPacketExpanded ? "隱藏 JSON" : "顯示 JSON";
-        });
-      }
       inputEl.addEventListener("input", updateCharCounter);
       clearBtn.addEventListener("click", () => {
         inputEl.value = "";
@@ -1349,33 +1297,12 @@
         resetOutputs();
         lastResult = null;
       });
-      async function runAnalysis() {
-        const text = inputEl.value || "";
-        try {
-          const wantAwsLlm = currentMode === "pro"
-            && useAwsLlmCheckbox
-            && useAwsLlmCheckbox.checked
-            && typeof window.analyzeMessageWithAwsLlm === "function";
-
-          if (wantAwsLlm) {
-            const endpoint = (awsLlmEndpointInput && awsLlmEndpointInput.value || "").trim();
-            window.USE_AWS_LLM = true;
-            if (endpoint) window.AWS_LLM_ENDPOINT = endpoint;
-
-            lastResult = await window.analyzeMessageWithAwsLlm(text, {
-              useLlm: true,
-              endpoint,
-            });
-          } else if (useLLMToggle.checked && typeof SCBKREngine.analyzeWithOptionalLLM === "function") {
-            lastResult = await SCBKREngine.analyzeWithOptionalLLM(text, { useLLM: true });
-          } else {
-            lastResult = SCBKREngine.analyzeMessage(text);
-          }
-        } catch (err) {
-          console.error("runAnalysis failed, fallback to local analyzeMessage", err);
-          lastResult = SCBKREngine.analyzeMessage(text);
+      analyzeBtn.addEventListener("click", async () => {
+        if (useLLMToggle.checked && typeof SCBKREngine.analyzeWithOptionalLLM === "function") {
+          lastResult = await SCBKREngine.analyzeWithOptionalLLM(inputEl.value, { useLLM: true });
+        } else {
+          lastResult = SCBKREngine.analyzeMessage(inputEl.value);
         }
-
         renderResult(lastResult);
         if (lastResult && lastResult.apiPacket && apiPacketJson) {
           apiPacketJson.textContent = JSON.stringify(lastResult.apiPacket, null, 2);
@@ -1384,15 +1311,7 @@
 
       analyzeBtn.addEventListener("click", function (e) {
         e.preventDefault();
-        runAnalysis().catch((err) => {
-          console.error("runAnalysis unhandled failure", err);
-          try {
-            lastResult = SCBKREngine.analyzeMessage(inputEl.value || "");
-            renderResult(lastResult);
-          } catch (fallbackErr) {
-            console.error("local fallback analyze failed", fallbackErr);
-          }
-        });
+        runAnalysis();
       });
       exportBtn.addEventListener("click", () => {
         if (!lastResult) return alert(AppI18n.t("msg.noAnalysis"));
