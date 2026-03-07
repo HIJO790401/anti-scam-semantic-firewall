@@ -29,51 +29,6 @@ Local rule engine remains the primary classifier.
 
 ---
 
-
-## 2.2 AWS LLM 解釋層整合（前端實作）
-
-前端不直接存放任何 AWS 金鑰，只負責把本地 v3 封包送到既有的後端端點。
-
-- 呼叫方式：`POST {AWS_LLM_ENDPOINT}`
-- 由前端送出的內容：
-
-```json
-{
-  "inputText": "使用者原始可疑訊息文本",
-  "apiPacket": {
-    "SCBKR": { "S": true, "C": false, "B": true, "K": true, "R": false },
-    "RiskLevel": "RISK",
-    "Evidence": ["..."],
-    "ActionAdvice": ["..."],
-    "Audit": {
-      "TokenAudit": 0.12,
-      "TokenGateway": "LocalRuleEngine",
-      "Source": "BrowserLocalEngine"
-    },
-    "LLM": {
-      "enabled": false,
-      "explanation": null,
-      "extraEvidence": [],
-      "extraActions": []
-    }
-  }
-}
-```
-
-後端預期回傳結構：
-
-```json
-{
-  "explanation": "用自然語言解釋為什麼這則訊息有風險／沒有風險",
-  "extraEvidence": ["模型額外補充的語意線索（一律視為建議）"],
-  "extraActions": ["模型額外建議的下一步行動，例如：建議改走官方 App 驗證"]
-}
-```
-
-前端會把回傳值填入 `apiPacket.LLM` 欄位，並在 Pro 模式中一併顯示在 JSON 面板與除錯資訊中。
-
----
-
 ## 3) JSON contract for front-end hook
 Expected response to match UI hook:
 
