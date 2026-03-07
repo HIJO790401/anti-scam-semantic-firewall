@@ -111,6 +111,232 @@
     return { isImpersonatingOfficial, notesZh };
   }
 
+  function simpleHash(str) {
+    let hash = 0;
+    const s = String(str || "");
+    for (let i = 0; i < s.length; i++) {
+      hash = (hash << 5) - hash + s.charCodeAt(i);
+      hash |= 0;
+    }
+    return "h" + Math.abs(hash).toString(16);
+  }
+
+  function hasAnyToken(haystack, tokens) {
+    return tokens.some((token) => haystack.includes(String(token).toLowerCase()));
+  }
+
+  function buildRuleClusters(resultObj, inputText) {
+    const mergedText = [
+      inputText,
+      JSON.stringify(resultObj && resultObj.triggeredRules ? resultObj.triggeredRules : []),
+      JSON.stringify(resultObj && resultObj.coreReasonsZh ? resultObj.coreReasonsZh : []),
+      JSON.stringify(resultObj && resultObj.meta ? resultObj.meta : {}),
+    ].join(" ").toLowerCase();
+    const clusters = new Set();
+
+    if (hasAnyToken(mergedText, ["family", "親友", "表哥", "家人", "親戚"])) {
+      clusters.add("family_impersonation");
+    }
+    if (hasAnyToken(mergedText, ["urgent", "馬上", "立即", "限時", "緊急", "匯款", "轉帳"])) {
+      clusters.add("urgent_money_pressure");
+    }
+    if (hasAnyToken(mergedText, ["銀行", "官方", "政府", "法院", "警察", "國稅局"])) {
+      clusters.add("fake_authority");
+    }
+    if (hasAnyToken(mergedText, ["otp", "驗證碼", "密碼", "卡號", "簡訊碼"])) {
+      clusters.add("credential_theft");
+    }
+    if (hasAnyToken(mergedText, ["http", "https", "連結", "點擊", "下載 app", "安裝 app"])) {
+      clusters.add("link_phishing");
+    }
+
+    return Array.from(clusters);
+  }
+
+  function buildPolicy(riskLevel) {
+    switch (riskLevel) {
+      case "SAFE":
+        return {
+          severity: "SAFE",
+          recommendedAction: "observe",
+          escalationLevel: 0,
+          humanAdviceZh: "可先觀察，但若你本人看不懂或沒印象，仍應改走官方管道確認。",
+        };
+      case "RISK":
+        return {
+          severity: "RISK",
+          recommendedAction: "verify_official_channel",
+          escalationLevel: 1,
+          humanAdviceZh: "請不要直接照訊息操作，改走官方 App／官網／卡背電話查證。",
+        };
+      case "FATAL":
+        return {
+          severity: "FATAL",
+          recommendedAction: "block_and_verify",
+          escalationLevel: 3,
+          humanAdviceZh: "請立刻停止轉帳或輸入資料，直接改聯絡官方或撥 165。",
+        };
+      default:
+        return {
+          severity: "NON-CLOSABLE",
+          recommendedAction: "manual_review",
+          escalationLevel: 2,
+          humanAdviceZh: "主體與責任鏈不清楚，先不要做任何高風險操作，請人工覆核。",
+        };
+    }
+  }
+
+  function buildInsight(riskLevel, ruleClusters) {
+    const clusters = Array.isArray(ruleClusters) ? ruleClusters : [];
+    const has = (value) => clusters.includes(value);
+
+    if (has("family_impersonation") && has("urgent_money_pressure")) {
+      return {
+        summary_zh: "這段訊息同時出現親友冒充與急迫金流壓力，屬於高誤信風險組合。",
+        summary_en: "This message combines family impersonation with urgent money pressure, creating a high-trust exploitation pattern.",
+      };
+    }
+    if (has("fake_authority") && has("credential_theft")) {
+      return {
+        summary_zh: "這段訊息利用權威偽裝與驗證碼要求，屬於典型帳戶接管風險。",
+        summary_en: "This message combines fake authority with credential capture, a typical account-takeover pattern.",
+      };
+    }
+    if (clusters.length === 1 && has("link_phishing")) {
+      return {
+        summary_zh: "這段訊息包含可疑連結導向特徵，建議改走官方網站或官方 App。",
+        summary_en: "This message contains suspicious link-phishing characteristics. Use the official website or app instead.",
+      };
+    }
+
+    return {
+      summary_zh: `這段訊息被判定為 ${riskLevel}，系統建議優先依官方管道進行查證。`,
+      summary_en: `This message is classified as ${riskLevel}. The system recommends verification through official channels.`,
+    };
+  }
+
+
+  function buildSubjectValidity(resultObj, inputText) {
+    const text = normalizeText(inputText);
+    const clusters = Array.isArray(resultObj && resultObj.ruleClusters) ? resultObj.ruleClusters : [];
+    const triggeredRules = Array.isArray(resultObj && resultObj.triggeredRules) ? resultObj.triggeredRules : [];
+    const scbkr = resultObj && resultObj.scbkr ? resultObj.scbkr : {};
+
+    if (Number(scbkr.S || 0) <= 1) return false;
+
+    const hasImpersonationCluster = clusters.includes("family_impersonation") || clusters.includes("fake_authority");
+    const hasImpersonationRule = triggeredRules.some((item) => {
+      const category = String(item && item.category ? item.category : "").toLowerCase();
+      return category.includes("impersonation") || category.includes("official") || category.includes("authority") || category.includes("family");
+    });
+    if (hasImpersonationCluster || hasImpersonationRule) return false;
+
+    const hasUnverifiedCue = hasAnyToken(text, ["未知", "不明", "陌生", "無法驗證", "來路不明", "unknown"]);
+    const hasTrustedSource = hasAnyToken(text, ["官方", "官網", "official", "卡背", "客服", "165", "分行", "銀行app", "官方app"]);
+    if (hasUnverifiedCue || !hasTrustedSource) return false;
+
+    return true;
+  }
+
+  function buildResponsibilityValidity(resultObj) {
+    const scbkr = resultObj && resultObj.scbkr ? resultObj.scbkr : {};
+    const text = normalizeText(resultObj && resultObj.text ? resultObj.text : "");
+
+    if (Number(scbkr.R || 0) <= 1) return false;
+
+    const hasResponsibilityParty = hasAnyToken(text, ["客服", "官方", "回查", "專線", "負責", "窗口", "165", "service", "support"]);
+    if (!hasResponsibilityParty) return false;
+
+    const userOnlyAction = hasAnyToken(text, ["請自行", "自己處理", "自行操作", "你自己負責", "自行承擔"]);
+    if (userOnlyAction) return false;
+
+    return true;
+  }
+
+  function buildBoundaryValidity(resultObj) {
+    const scbkr = resultObj && resultObj.scbkr ? resultObj.scbkr : {};
+    const text = normalizeText(resultObj && resultObj.text ? resultObj.text : "");
+
+    if (Number(scbkr.B || 0) <= 1) return false;
+
+    const vaguePressure = hasAnyToken(text, ["趕快處理", "先做再說", "照做就好", "配合一下", "快點"]) &&
+      !hasAnyToken(text, ["匯款", "轉帳", "點擊", "輸入", "下載", "安裝", "聯絡"]);
+    if (vaguePressure) return false;
+
+    return true;
+  }
+
+  function buildSubjectResponsibilityMath(resultObj, inputText) {
+    const subjectValidity = buildSubjectValidity(resultObj, inputText);
+    const responsibilityValidity = buildResponsibilityValidity(resultObj);
+    const boundaryValidity = buildBoundaryValidity(resultObj);
+
+    let subjectDecision = subjectValidity ? "VALID" : "VOID";
+    let responsibilityDecision = responsibilityValidity ? "VALID" : "VOID";
+
+    if (subjectValidity && Array.isArray(resultObj.ruleClusters) && (resultObj.ruleClusters.includes("fake_authority") || resultObj.ruleClusters.includes("family_impersonation"))) {
+      subjectDecision = "REVIEW";
+    }
+
+    if (responsibilityValidity && resultObj.scbkr && Number(resultObj.scbkr.R || 0) === 2) {
+      responsibilityDecision = "REVIEW";
+    }
+
+    let finalValidity = "VALID";
+    let voidReason = "";
+
+    if (subjectDecision === "VOID") {
+      finalValidity = "VOID";
+      voidReason = "主體不可驗證或疑似偽裝，該請求不成立。";
+    } else if (responsibilityDecision === "VOID") {
+      finalValidity = "VOID";
+      voidReason = "責任承接方不存在或不明確，該請求不成立。";
+    } else if (!boundaryValidity) {
+      finalValidity = "VOID";
+      voidReason = "行動邊界不明確，禁止將此訊息視為有效要求。";
+    } else if (subjectDecision === "REVIEW" || responsibilityDecision === "REVIEW") {
+      finalValidity = "REVIEW";
+    }
+
+    return {
+      subjectValidity,
+      responsibilityValidity,
+      boundaryValidity,
+      subjectDecision,
+      responsibilityDecision,
+      finalValidity,
+      voidReason,
+    };
+  }
+
+  function buildSafeApiPacket(resultObj) {
+    const safe = resultObj || {};
+    return {
+      schemaVersion: "2.3",
+      RiskLevel: safe.riskLevel || "SAFE",
+      RiskScore: Number(safe.riskScore || 0),
+      SCBKR: safe.scbkr || { ...BASELINE },
+      TriggeredRules: safe.triggeredRules || [],
+      CoreReasonsZh: safe.coreReasonsZh || [],
+      Meta: safe.meta || {},
+    };
+  }
+
+  function buildAntiScamApiPacket(resultObj) {
+    const packet = buildSafeApiPacket(resultObj);
+    packet.RoleGovernance = (resultObj && resultObj.roleGovernance) || {};
+    packet.Audit = {
+      rulesVersion: resultObj && resultObj.meta ? resultObj.meta.rulesVersion : "unknown",
+      triggeredCount: resultObj && resultObj.meta ? resultObj.meta.triggeredCount : 0,
+      rulesLoadError: resultObj && resultObj.meta ? resultObj.meta.rulesLoadError : null,
+    };
+    return packet;
+  }
+
+  async function analyzeWithOptionalLLM(inputText) {
+    return analyzeMessage(inputText);
+  }
+
   async function loadRules() {
     if (motherCoreRuleset) {
       return motherCoreRuleset;
@@ -138,6 +364,7 @@
   }
 
   function analyzeMessage(inputText) {
+    const analysisStart = performance.now();
     const text = normalizeText(inputText);
     const rules = (motherCoreRuleset && Array.isArray(motherCoreRuleset.rules) ? motherCoreRuleset.rules : []);
 
@@ -176,8 +403,9 @@
       coreReasonsZh.push("主體軸（S）偏低：發話主體真實性不足或不可驗證。");
     }
 
-    return {
+    const resultObj = {
       text: String(inputText || ""),
+      risk: riskLevel,
       riskLevel,
       riskScore,
       scbkr,
@@ -192,6 +420,59 @@
         rulesLoadError,
       },
     };
+
+    const analysisEnd = performance.now();
+    const latencyMs = Math.round(analysisEnd - analysisStart);
+
+    resultObj.ruleClusters = buildRuleClusters(resultObj, inputText);
+    resultObj.srMath = buildSubjectResponsibilityMath(resultObj, inputText);
+    resultObj.policy = buildPolicy(resultObj.risk);
+    resultObj.audit = {
+      ...(resultObj.audit || {}),
+      rulesVersion: "3.3.0",
+      triggeredCount: Array.isArray(resultObj.triggeredRules)
+        ? resultObj.triggeredRules.length
+        : (Array.isArray(resultObj.reasons) ? resultObj.reasons.length : 0),
+      latencyMs,
+      auditHash: simpleHash(
+        String(inputText || "") +
+        "|" + String(resultObj.risk || "") +
+        "|" + JSON.stringify(resultObj.scbkr || {})
+      ),
+    };
+    resultObj.insight = buildInsight(resultObj.risk, resultObj.ruleClusters);
+    if (resultObj.srMath && resultObj.srMath.finalValidity === "VOID") {
+      resultObj.insight = {
+        summary_zh: "此訊息在主體責任數學層不成立，不應視為有效請求。",
+        summary_en: "This message fails subject-responsibility validation and should not be treated as a valid request.",
+      };
+    }
+
+    resultObj.apiPacket = buildAntiScamApiPacket(resultObj);
+    resultObj.apiPacket.RuleClusters = resultObj.ruleClusters || [];
+    resultObj.apiPacket.Policy = resultObj.policy || null;
+    resultObj.apiPacket.Audit = {
+      ...(resultObj.apiPacket.Audit || {}),
+      rulesVersion: resultObj.audit && resultObj.audit.rulesVersion ? resultObj.audit.rulesVersion : "3.3.0",
+      triggeredCount: resultObj.audit && resultObj.audit.triggeredCount ? resultObj.audit.triggeredCount : 0,
+      latencyMs: resultObj.audit && resultObj.audit.latencyMs ? resultObj.audit.latencyMs : 0,
+      auditHash: resultObj.audit && resultObj.audit.auditHash ? resultObj.audit.auditHash : "",
+    };
+    resultObj.apiPacket.Insight = resultObj.insight || {
+      summary_zh: "",
+      summary_en: "",
+    };
+    resultObj.apiPacket.SubjectResponsibilityMath = {
+      subjectValidity: resultObj.srMath ? resultObj.srMath.subjectValidity : false,
+      responsibilityValidity: resultObj.srMath ? resultObj.srMath.responsibilityValidity : false,
+      boundaryValidity: resultObj.srMath ? resultObj.srMath.boundaryValidity : false,
+      subjectDecision: resultObj.srMath ? resultObj.srMath.subjectDecision : "VOID",
+      responsibilityDecision: resultObj.srMath ? resultObj.srMath.responsibilityDecision : "VOID",
+      finalValidity: resultObj.srMath ? resultObj.srMath.finalValidity : "VOID",
+      voidReason: resultObj.srMath ? resultObj.srMath.voidReason : "",
+    };
+
+    return resultObj;
   }
 
   function getRulesStatus() {
@@ -206,7 +487,15 @@
   global.SCBKREngine = {
     loadRules,
     analyzeMessage,
+    analyzeWithOptionalLLM,
+    buildSafeApiPacket,
+    buildAntiScamApiPacket,
     getRulesStatus,
     scoreToRiskLevel,
+  };
+
+  global.runScbkrApiPacket = async function runScbkrApiPacket(inputText) {
+    const result = await analyzeWithOptionalLLM(inputText);
+    return result && result.apiPacket ? result.apiPacket : buildAntiScamApiPacket(result);
   };
 })(window);
