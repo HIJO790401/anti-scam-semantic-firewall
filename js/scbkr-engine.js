@@ -6,6 +6,7 @@
   const officialKw = ["銀行", "郵局", "警察局", "法院", "檢察署", "國稅局", "官方", "客服"];
   const askSecretKw = ["密碼", "驗證碼", "簡訊碼", "簡訊認證", "卡號", "背面三碼", "cvv"];
   const threatKw = ["凍結", "停用", "停權", "鎖定", "罰款", "罰金", "沒收", "追討"];
+  const AWS_LLM_ENDPOINT = ""; // 之後使用者自己填，預設留空就代表關閉遠端
 
   function hitAny(text, arr) {
     return arr.some((kw) => text.includes(kw.toLowerCase()));
@@ -183,6 +184,7 @@
       reasons,
       scbkr,
       debug: { hasUrgent, hasMoney, hasApp, hasLink, asksSecret, hasThreat, hasAnyScamPattern },
+      suspiciousKeywordCount,
       riskDisplay: riskDisplay[risk],
     };
 
