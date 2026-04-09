@@ -207,6 +207,32 @@
       border-bottom-color: rgba(229, 231, 235, 0.85);
     }
 
+    .official-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(249, 115, 22, 0.65);
+      background: linear-gradient(135deg, rgba(249, 115, 22, 0.28), rgba(249, 115, 22, 0.12));
+      color: #ffedd5;
+      text-decoration: none;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+    }
+
+    .official-link-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(251, 146, 60, 0.95);
+      box-shadow: var(--shadow-strong);
+    }
+
+    .official-link-btn .en {
+      color: #fed7aa;
+      opacity: 0.95;
+    }
+
     .mode-switch {
       display: flex;
       flex-direction: column;
@@ -834,6 +860,13 @@
           <span class="label">GITHUB</span>
           <a class="small-link" href="https://github.com/HIJO790401/anti-scam-semantic-firewall" target="_blank"
             rel="noopener noreferrer">Repository</a>
+        </div>
+        <div class="meta-line">
+          <a class="official-link-btn" href="https://hijo790401.github.io/shen-yao-portal/index.html" target="_blank"
+            rel="noopener noreferrer">
+            <span>請洽官網</span>
+            <span class="en">Official Site</span>
+          </a>
         </div>
       </div>
     </header>
